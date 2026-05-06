@@ -423,10 +423,11 @@ function buildTimeline(regAge, pctKey) {
     const startAge = Math.max(cursor, sku.entryAge);
     if (startAge >= cutoff) { results.push({ sku, skipped: true, reason: '前商品結束後已超過' + pctKey }); return; }
     const remaining = cutoff - startAge;
-    const count = remaining >= 2 ? 8 : 4;
-    const duration = remaining >= 2 ? 2 : 1;
-    const step = duration / (count - 1);
-    const msgs = Array.from({length: count}, (_, i) => +(startAge + step * i).toFixed(2));
+    const interval = 0.5; // 隔週 = 0.5ヶ月
+    const maxCount = 4;
+    const count = Math.min(maxCount, Math.max(1, Math.floor(remaining / interval) + 1));
+    const duration = Math.min(2, remaining); // 最大2ヶ月の配信ウィンドウ
+    const msgs = Array.from({length: count}, (_, i) => +(startAge + interval * i).toFixed(2));
     results.push({ sku, skipped: false, startAge, endAge: startAge + duration, msgs, count });
     cursor = startAge + duration;
   });
@@ -484,7 +485,8 @@ function render(regAge) {
     <strong>配信順序ロジック</strong>
     ① 發展主題順（語彙啟蒙 → 生活習慣 → 語彙知育 → 情緒人際 → 英語啟蒙 → 英語進階 → 邏輯集中 → 數感邏輯 → 就學準備）<br>
     ② 切入月齡 ＝ 商品適用年齡下限（非WEB中位數）<br>
-    ③ 終止基準 ＝ 選擇的百分位數 &nbsp;④ 超過終止基準的商品略過
+    ③ 配信節奏 ＝ 每商品最多2個月・隔週1次・最多4次<br>
+    ④ 終止基準 ＝ 選擇的百分位數 &nbsp;⑤ 超過終止基準的商品略過
   </div>`;
 
   document.getElementById('chartInner').innerHTML = html;
@@ -513,7 +515,7 @@ document.getElementById('ageSlider').addEventListener('input', function() {
 render(10);
 </script>
 
-<div class="footer">LC8T 配信設計 v1.0 ｜ Benesse Taiwan ｜ 2026-05-06</div>
+<div class="footer">LC8T 配信設計 v1.1（隔週・最多4次・2個月）｜ Benesse Taiwan ｜ 2026-05-06</div>
 
 </body>
 </html>
