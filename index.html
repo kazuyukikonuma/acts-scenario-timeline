@@ -21,6 +21,7 @@
     --manual: #2F7DD1;
     --border: #D5D1C8;
     --card: #FFFFFF;
+    --highlight: #FFF8DC;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,13 +35,11 @@
   }
 
   .container {
-    max-width: 1080px;
+    max-width: 1180px;
     margin: 0 auto;
   }
 
-  .header {
-    margin-bottom: 32px;
-  }
+  .header { margin-bottom: 24px; }
 
   .header h1 {
     font-size: 20px;
@@ -99,13 +98,13 @@
     text-align: center;
   }
 
-  .pct-btns {
+  .btn-group {
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
   }
 
-  .pct-btn {
+  .seg-btn {
     font-size: 12px;
     padding: 5px 14px;
     border-radius: 6px;
@@ -117,13 +116,18 @@
     font-weight: 500;
   }
 
-  .pct-btn:hover { background: var(--bg3); color: var(--text); }
+  .seg-btn:hover { background: var(--bg3); color: var(--text); }
 
-  .pct-btn.active {
+  .seg-btn.active {
     background: var(--text);
     color: var(--bg);
     border-color: var(--text);
   }
+
+  .seg-btn.ch-WEB.active { background: #2F7DD1; border-color: #2F7DD1; }
+  .seg-btn.ch-TM.active { background: #E24B4A; border-color: #E24B4A; }
+  .seg-btn.ch-KOL.active { background: #D4537E; border-color: #D4537E; }
+  .seg-btn.ch-ALL.active { background: #1A1814; border-color: #1A1814; }
 
   .pct-note {
     font-size: 11px;
@@ -151,8 +155,32 @@
   }
 
   .action-btn:hover { background: var(--bg2); color: var(--text); }
-
   .action-btn.danger:hover { color: var(--accent); border-color: var(--accent); }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab {
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+  }
+
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: var(--text);
+    border-bottom-color: var(--text);
+    font-weight: 600;
+  }
 
   .summary-cards {
     display: flex;
@@ -201,9 +229,7 @@
     position: relative;
   }
 
-  .chart-inner {
-    min-width: 560px;
-  }
+  .chart-inner { min-width: 560px; }
 
   .row {
     display: flex;
@@ -269,10 +295,7 @@
   }
 
   .bar-wrap.skipped .bar-wrap-inner { opacity: 0.25; }
-
-  .bar-wrap.manual .bar-wrap-inner {
-    box-shadow: inset 0 0 0 1.5px var(--manual);
-  }
+  .bar-wrap.manual .bar-wrap-inner { box-shadow: inset 0 0 0 1.5px var(--manual); }
 
   .bar-bg {
     position: absolute;
@@ -282,13 +305,8 @@
     pointer-events: none;
   }
 
-  .bar-bg.msg-span {
-    opacity: 0.30;
-  }
-
-  .bar-bg.rest-span {
-    opacity: 0.10;
-  }
+  .bar-bg.msg-span { opacity: 0.30; }
+  .bar-bg.rest-span { opacity: 0.10; }
 
   .dot {
     position: absolute;
@@ -407,17 +425,8 @@
     color: var(--text2);
   }
 
-  .legend-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-  }
-
-  .legend-line {
-    width: 14px;
-    height: 2px;
-    border-radius: 1px;
-  }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+  .legend-line { width: 14px; height: 2px; border-radius: 1px; }
 
   .legend-badge {
     font-size: 9px;
@@ -470,11 +479,7 @@
     color: var(--text);
   }
 
-  .editor-popover .ep-mode {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 10px;
-  }
+  .editor-popover .ep-mode { display: flex; gap: 4px; margin-bottom: 10px; }
 
   .editor-popover .ep-mode-btn {
     flex: 1;
@@ -600,6 +605,7 @@
     display: none;
     padding: 0 20px 16px;
     border-top: 1px solid var(--border);
+    overflow-x: auto;
   }
 
   .batch-panel.open .batch-body { display: block; }
@@ -635,20 +641,9 @@
     font-family: inherit;
   }
 
-  .batch-table .auto-value {
-    color: var(--text3);
-    font-size: 10px;
-  }
-
-  .batch-table .sku-cell {
-    font-weight: 500;
-    color: var(--text);
-  }
-
-  .batch-table .theme-cell {
-    color: var(--text3);
-    font-size: 10px;
-  }
+  .batch-table .auto-value { color: var(--text3); font-size: 10px; }
+  .batch-table .sku-cell { font-weight: 500; color: var(--text); }
+  .batch-table .theme-cell { color: var(--text3); font-size: 10px; }
 
   .batch-table .row-reset {
     color: var(--accent);
@@ -662,6 +657,91 @@
     content: '●';
     color: var(--manual);
     margin-right: 4px;
+  }
+
+  .stats-table-wrap {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 20px 24px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+  }
+
+  .stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    min-width: 920px;
+  }
+
+  .stats-table thead th {
+    background: var(--bg2);
+    text-align: right;
+    color: var(--text2);
+    font-weight: 500;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+  }
+
+  .stats-table thead th.text-left { text-align: left; }
+  .stats-table thead th.pct-col { color: var(--text3); }
+  .stats-table thead th.pct-active {
+    background: var(--text);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .stats-table tbody td {
+    text-align: right;
+    padding: 8px;
+    border-bottom: 1px solid var(--bg2);
+    white-space: nowrap;
+  }
+
+  .stats-table tbody td.text-left { text-align: left; }
+  .stats-table tbody td.pct-cell { color: var(--text2); }
+
+  .stats-table tbody td.pct-active {
+    background: var(--highlight);
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .stats-table tbody tr.skipped td { opacity: 0.4; }
+  .stats-table tbody tr.manual td.sku-cell::before {
+    content: '●';
+    color: var(--manual);
+    margin-right: 4px;
+  }
+
+  .stats-table .sku-color-bar {
+    display: inline-block;
+    width: 3px;
+    height: 22px;
+    border-radius: 2px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  .stats-table .name-cell { font-weight: 500; color: var(--text); }
+  .stats-table .theme-sub { font-size: 10px; color: var(--text3); display: block; }
+  .stats-table .actual-cell { font-size: 11px; color: var(--text); }
+  .stats-table .actual-skip { color: var(--text3); font-size: 10px; }
+
+  .stats-table .n-cell { color: var(--text2); font-variant-numeric: tabular-nums; }
+
+  .ch-meta {
+    font-size: 11px;
+    color: var(--text2);
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--bg2);
+    border-radius: 8px;
+    line-height: 1.7;
   }
 
   .toast {
@@ -688,7 +768,7 @@
 
 <div class="header">
   <h1>ACTS｜LC8T 登錄月齡別配信情境時間軸</h1>
-  <p>依發展主題順序配信。切入月齡以商品適用年齡下限為基準。調整登錄月齡與配信終止基準，確認各商品的配信情境。各商品的配信起終月齡を手動で上書き可能（手動値は後続の自動計算にカスケード反映）。</p>
+  <p>依發展主題順序配信。切入月齡以商品適用年齡下限為基準。チャネル別の購買月齢分布（再集計データ・2025年以降）から配信終止基準を切替可能。各商品の配信ウィンドウは手動で上書きできます。</p>
 </div>
 
 <div class="controls">
@@ -698,13 +778,23 @@
     <span class="age-display" id="ageLabel">10M</span>
   </div>
   <div class="control-row">
+    <span class="control-label">算定チャネル</span>
+    <div class="btn-group" id="chBtns">
+      <button class="seg-btn ch-WEB active" data-ch="WEB" onclick="setChannel('WEB')">WEB</button>
+      <button class="seg-btn ch-TM" data-ch="TM" onclick="setChannel('TM')">TM（電話）</button>
+      <button class="seg-btn ch-KOL" data-ch="KOL" onclick="setChannel('KOL')">KOL</button>
+      <button class="seg-btn ch-ALL" data-ch="ALL" onclick="setChannel('ALL')">ALL</button>
+    </div>
+    <span class="pct-note" id="chNote"></span>
+  </div>
+  <div class="control-row">
     <span class="control-label">配信終止基準</span>
-    <div class="pct-btns">
-      <button class="pct-btn" id="btn-P50" onclick="setPct('P50')">P50</button>
-      <button class="pct-btn" id="btn-P60" onclick="setPct('P60')">P60</button>
-      <button class="pct-btn active" id="btn-P70" onclick="setPct('P70')">P70</button>
-      <button class="pct-btn" id="btn-P75" onclick="setPct('P75')">P75</button>
-      <button class="pct-btn" id="btn-P90" onclick="setPct('P90')">P90</button>
+    <div class="btn-group">
+      <button class="seg-btn" id="btn-P50" onclick="setPct('P50')">P50</button>
+      <button class="seg-btn" id="btn-P60" onclick="setPct('P60')">P60</button>
+      <button class="seg-btn active" id="btn-P70" onclick="setPct('P70')">P70</button>
+      <button class="seg-btn" id="btn-P75" onclick="setPct('P75')">P75</button>
+      <button class="seg-btn" id="btn-P90" onclick="setPct('P90')">P90</button>
     </div>
     <span class="pct-note" id="pctNote">→ 涵蓋70%的購買者</span>
     <div class="action-row">
@@ -716,8 +806,19 @@
 
 <div class="summary-cards" id="summaryCards"></div>
 
-<div class="chart-wrap">
-  <div class="chart-inner" id="chartInner"></div>
+<div class="tabs">
+  <div class="tab active" data-view="chart" onclick="setView('chart')">グラフ</div>
+  <div class="tab" data-view="table" onclick="setView('table')">表</div>
+</div>
+
+<div id="chartView">
+  <div class="chart-wrap">
+    <div class="chart-inner" id="chartInner"></div>
+  </div>
+</div>
+
+<div id="tableView" style="display:none;">
+  <div class="stats-table-wrap" id="statsTableWrap"></div>
 </div>
 
 <div class="batch-panel" id="batchPanel">
@@ -734,44 +835,100 @@
 <div id="editorPopover" class="editor-popover" style="display:none;"></div>
 <div id="toast" class="toast"></div>
 
-<div class="footer">ACTS｜LC8T 配信設計 v1.2（隔週・最多4次・2個月｜手動上書き対応）｜ Benesse Taiwan ｜ 2026-05-12</div>
+<div class="footer">ACTS｜LC8T 配信設計 v1.3（チャネル切替・表表示・隔週最多4次・2個月｜手動上書き対応）｜ Benesse Taiwan ｜ 2026-05-12</div>
 
 </div>
 
 <script>
+// 再集計データ（訂單日期 >= 2025-01-01）
 const skus = [
-  { name: '點讀圖鑑',    theme: '語彙啟蒙', entryAge: 6,  median: 17, P50: 17, P60: 19, P70: 23, P75: 26, P90: 45, price: 2399, color: '#1D9E75' },
-  { name: '好習慣套組',  theme: '生活習慣', entryAge: 12, median: 18, P50: 18, P60: 21, P70: 23, P75: 25, P90: 46, price: 4299, color: '#3266AD' },
-  { name: '語彙智育套組',theme: '語彙知育', entryAge: 12, median: 23, P50: 23, P60: 28, P70: 32, P75: 35, P90: 59, price: 4900, color: '#7F77DD' },
-  { name: '好情緒EQ套組',theme: '情緒人際', entryAge: 30, median: 33, P50: 33, P60: 36, P70: 39, P75: 41, P90: 55, price: 2199, color: '#EF9F27' },
-  { name: '英語Plus初階',theme: '英語啟蒙', entryAge: 12, median: 27, P50: 27, P60: 30, P70: 34, P75: 36, P90: 47, price: 4800, color: '#D4537E' },
-  { name: '英語進階版',  theme: '英語進階', entryAge: 36, median: 35, P50: 35, P60: 38, P70: 44, P75: 47, P90: 60, price: 4500, color: '#639922' },
-  { name: '點讀大冒險',  theme: '邏輯集中', entryAge: 36, median: 40, P50: 40, P60: 43, P70: 45, P75: 46, P90: 57, price: 2999, color: '#0F6E56' },
-  { name: '數學套組',    theme: '數感邏輯', entryAge: 42, median: 45, P50: 45, P60: 49, P70: 52, P75: 54, P90: 64, price: 3200, color: '#854F0B' },
-  { name: '注音拼音套組',theme: '就學準備', entryAge: 54, median: 50, P50: 50, P60: 53, P70: 57, P75: 59, P90: 68, price: 3200, color: '#993556' },
+  { sku:'20250FE00', name:'點讀圖鑑',     theme:'語彙啟蒙', entryAge:6,  price:2399, color:'#1D9E75',
+    channels:{
+      WEB:{n:324,  median:17, P25:13, P50:17, P60:19, P70:23, P75:25, P90:45},
+      TM: {n:307,  median:17, P25:13, P50:17, P60:19, P70:22, P75:25, P90:40},
+      KOL:{n:315,  median:19, P25:15, P50:19, P60:22, P70:26, P75:30, P90:49},
+      ALL:{n:946,  median:18, P25:14, P50:18, P60:20, P70:24, P75:26, P90:45}}},
+  { sku:'20240FA00', name:'好習慣套組',   theme:'生活習慣', entryAge:12, price:4299, color:'#3266AD',
+    channels:{
+      WEB:{n:258,  median:19, P25:14, P50:19, P60:22, P70:24, P75:27, P90:55},
+      TM: {n:590,  median:16, P25:12, P50:16, P60:18, P70:20, P75:22, P90:29},
+      KOL:{n:287,  median:18, P25:13, P50:18, P60:19, P70:21, P75:24, P90:28},
+      ALL:{n:1135, median:17, P25:12, P50:17, P60:19, P70:22, P75:23, P90:33}}},
+  { sku:'20250FD00', name:'語彙智育套組', theme:'語彙知育', entryAge:12, price:4900, color:'#7F77DD',
+    channels:{
+      WEB:{n:270,  median:23, P25:17, P50:23, P60:27, P70:31, P75:35, P90:59},
+      TM: {n:464,  median:23, P25:15, P50:23, P60:25, P70:28, P75:30, P90:39},
+      KOL:{n:245,  median:22, P25:16, P50:22, P60:25, P70:28, P75:30, P90:47},
+      ALL:{n:979,  median:23, P25:16, P50:23, P60:25, P70:29, P75:31, P90:47}}},
+  { sku:'20250FA00', name:'好情緒EQ套組', theme:'情緒人際', entryAge:30, price:2199, color:'#EF9F27',
+    channels:{
+      WEB:{n:832,  median:33, P25:25, P50:33, P60:36, P70:39, P75:41, P90:55},
+      TM: {n:1608, median:36, P25:28, P50:36, P60:36, P70:39, P75:42, P90:49},
+      KOL:{n:576,  median:30, P25:21, P50:30, P60:32, P70:35, P75:36, P90:43},
+      ALL:{n:3016, median:34, P25:25, P50:34, P60:36, P70:38, P75:40, P90:49}}},
+  { sku:'20230MY00', name:'英語Plus初階', theme:'英語啟蒙', entryAge:12, price:4800, color:'#D4537E',
+    channels:{
+      WEB:{n:332,  median:30, P25:22, P50:30, P60:35, P70:38, P75:40, P90:55},
+      TM: {n:893,  median:31, P25:22, P50:31, P60:35, P70:36, P75:38, P90:49},
+      KOL:{n:272,  median:23, P25:17, P50:23, P60:27, P70:30, P75:31, P90:46},
+      ALL:{n:1497, median:29, P25:20, P50:29, P60:33, P70:36, P75:38, P90:49}}},
+  { sku:'20220MY00', name:'英語進階版',   theme:'英語進階', entryAge:36, price:4500, color:'#639922',
+    channels:{
+      WEB:{n:117,  median:40, P25:32, P50:40, P60:46, P70:50, P75:51, P90:62},
+      TM: {n:584,  median:38, P25:29, P50:38, P60:43, P70:48, P75:48, P90:60},
+      KOL:{n:99,   median:33, P25:21, P50:33, P60:36, P70:41, P75:44, P90:54},
+      ALL:{n:800,  median:38, P25:29, P50:38, P60:43, P70:48, P75:48, P90:60}}},
+  { sku:'20250FF00', name:'點讀大冒險',   theme:'邏輯集中', entryAge:36, price:2999, color:'#0F6E56',
+    channels:{
+      WEB:{n:210,  median:40, P25:33, P50:40, P60:43, P70:45, P75:46, P90:57},
+      TM: {n:213,  median:42, P25:33, P50:42, P60:44, P70:47, P75:48, P90:56},
+      KOL:{n:159,  median:36, P25:28, P50:36, P60:39, P70:42, P75:43, P90:51},
+      ALL:{n:582,  median:40, P25:32, P50:40, P60:42, P70:45, P75:47, P90:55}}},
+  { sku:'20250FG00', name:'數學套組',     theme:'數感邏輯', entryAge:42, price:3200, color:'#854F0B',
+    channels:{
+      WEB:{n:243,  median:45, P25:38, P50:45, P60:49, P70:52, P75:54, P90:64},
+      TM: {n:266,  median:45, P25:36, P50:45, P60:48, P70:53, P75:55, P90:60},
+      KOL:{n:345,  median:42, P25:33, P50:42, P60:46, P70:48, P75:50, P90:55},
+      ALL:{n:854,  median:44, P25:35, P50:44, P60:47, P70:50, P75:52, P90:59}}},
+  { sku:'20240FM00', name:'注音拼音套組', theme:'就學準備', entryAge:54, price:3200, color:'#993556',
+    channels:{
+      WEB:{n:374,  median:51, P25:40, P50:51, P60:55, P70:58, P75:61, P90:70},
+      TM: {n:1154, median:48, P25:36, P50:48, P60:48, P70:53, P75:55, P90:60},
+      KOL:{n:178,  median:41, P25:26, P50:41, P60:46, P70:49, P75:52, P90:62},
+      ALL:{n:1706, median:48, P25:35, P50:48, P60:49, P70:54, P75:57, P90:64}}},
 ];
 
-const INTERVAL = 0.5;        // 隔週 = 0.5ヶ月
-const MAX_COUNT = 4;         // 1商品あたり最大配信回数
-const CAMPAIGN_WINDOW = 2;   // 標準キャンペーン枠（ヶ月）
-const EPS = 1e-9;            // 浮動小数点境界対策
+const INTERVAL = 0.5;
+const MAX_COUNT = 4;
+const CAMPAIGN_WINDOW = 2;
+const EPS = 1e-9;
 const PCT_KEYS = ['P50','P60','P70','P75','P90'];
+const PCT_ALL = ['P25','P50','P60','P70','P75','P90'];
+const CHANNELS = ['WEB','TM','KOL','ALL'];
 
 const pctNotes = {
-  P50: '涵蓋50%的購買者',
-  P60: '涵蓋60%的購買者',
-  P70: '涵蓋70%的購買者',
-  P75: '涵蓋75%的購買者',
-  P90: '涵蓋90%的購買者'
+  P50:'涵蓋50%的購買者', P60:'涵蓋60%的購買者', P70:'涵蓋70%的購買者',
+  P75:'涵蓋75%的購買者', P90:'涵蓋90%的購買者'
+};
+const chNotes = {
+  WEB:'公式EC自主購買者（n合計の中央値ベース）',
+  TM:'電話営業による購買者（n合計の中央値ベース）',
+  KOL:'KOL團購経由購買者（早期購買が多い傾向）',
+  ALL:'全チャネル合算',
 };
 
 let currentPct = 'P70';
 let currentAge = 10;
-let overrides = {};   // { [idx]: { startAge, endAge } }
+let currentChannel = 'WEB';
+let currentView = 'chart';
+let overrides = {};
 
 function round2(v) { return Math.round(v * 100) / 100; }
-
 function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+
+function getStats(sku, channel) {
+  return sku.channels[channel] || sku.channels.ALL;
+}
 
 function computeMessageCount(remaining) {
   if (remaining <= EPS) return 0;
@@ -779,11 +936,12 @@ function computeMessageCount(remaining) {
   return clamp(slots, 1, MAX_COUNT);
 }
 
-function buildTimeline(regAge, pctKey, overridesMap) {
+function buildTimeline(regAge, pctKey, channel, overridesMap) {
   const results = [];
   let cursor = regAge;
   skus.forEach((sku, idx) => {
-    const cutoff = sku[pctKey];
+    const stats = getStats(sku, channel);
+    const cutoff = stats[pctKey];
     const override = overridesMap[idx];
 
     if (override) {
@@ -794,22 +952,21 @@ function buildTimeline(regAge, pctKey, overridesMap) {
       const msgs = Array.from({length: count}, (_, i) => round2(startAge + INTERVAL * i));
       const overCutoff = startAge >= cutoff - EPS;
       results.push({
-        sku, idx, skipped: false, manual: true,
+        sku, idx, stats, cutoff, skipped:false, manual:true,
         startAge, endAge, msgs, count,
-        warning: count < MAX_COUNT,
-        overCutoff
+        warning: count < MAX_COUNT, overCutoff
       });
       cursor = Math.max(cursor, endAge);
       return;
     }
 
     if (regAge >= cutoff - EPS) {
-      results.push({ sku, idx, skipped: true, manual: false, reason: '登錄時已超過' + pctKey });
+      results.push({ sku, idx, stats, cutoff, skipped:true, manual:false, reason:'登錄時已超過'+pctKey });
       return;
     }
     const startAge = round2(Math.max(cursor, sku.entryAge));
     if (startAge >= cutoff - EPS) {
-      results.push({ sku, idx, skipped: true, manual: false, reason: '前商品結束後已超過' + pctKey });
+      results.push({ sku, idx, stats, cutoff, skipped:true, manual:false, reason:'前商品結束後已超過'+pctKey });
       return;
     }
     const remaining = cutoff - startAge;
@@ -818,7 +975,7 @@ function buildTimeline(regAge, pctKey, overridesMap) {
     const msgs = Array.from({length: count}, (_, i) => round2(startAge + INTERVAL * i));
     const endAge = round2(startAge + duration);
     results.push({
-      sku, idx, skipped: false, manual: false,
+      sku, idx, stats, cutoff, skipped:false, manual:false,
       startAge, endAge, msgs, count,
       warning: count < MAX_COUNT
     });
@@ -831,7 +988,7 @@ function setPct(p) {
   currentPct = p;
   PCT_KEYS.forEach(k => {
     const btn = document.getElementById('btn-' + k);
-    btn.classList.toggle('active', k === p);
+    if (btn) btn.classList.toggle('active', k === p);
   });
   document.getElementById('pctNote').textContent = '→ ' + pctNotes[p];
   closeEditor();
@@ -839,15 +996,35 @@ function setPct(p) {
   syncUrl();
 }
 
+function setChannel(ch) {
+  currentChannel = ch;
+  document.querySelectorAll('#chBtns .seg-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.ch === ch);
+  });
+  document.getElementById('chNote').textContent = '→ ' + chNotes[ch];
+  closeEditor();
+  render();
+  syncUrl();
+}
+
+function setView(v) {
+  currentView = v;
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.view === v);
+  });
+  document.getElementById('chartView').style.display = v === 'chart' ? 'block' : 'none';
+  document.getElementById('tableView').style.display = v === 'table' ? 'block' : 'none';
+  closeEditor();
+  syncUrl();
+}
+
 function setOverride(idx, startAge, endAge) {
   const s = clamp(round2(startAge), 0, 72);
   const e = clamp(round2(endAge), s + INTERVAL, 84);
-  overrides[idx] = { startAge: s, endAge: e };
+  overrides[idx] = { startAge:s, endAge:e };
 }
 
-function clearOverride(idx) {
-  delete overrides[idx];
-}
+function clearOverride(idx) { delete overrides[idx]; }
 
 function resetAllOverrides() {
   if (Object.keys(overrides).length === 0) return;
@@ -860,7 +1037,35 @@ function resetAllOverrides() {
 }
 
 function render() {
-  const timeline = buildTimeline(currentAge, currentPct, overrides);
+  const timeline = buildTimeline(currentAge, currentPct, currentChannel, overrides);
+  renderSummary(timeline);
+  renderChart(timeline);
+  renderStatsTable(timeline);
+  renderBatchPanel(timeline);
+}
+
+function renderSummary(timeline) {
+  const active = timeline.filter(t => !t.skipped);
+  const totalMsgs = active.reduce((s, t) => s + t.count, 0);
+  const lastEnd = active.length > 0 ? active[active.length - 1].endAge : currentAge;
+  const duration = (lastEnd - currentAge).toFixed(1);
+  const skipCount = timeline.filter(t => t.skipped).length;
+  const warnCount = active.filter(t => t.warning).length;
+  const totalLTV = active.reduce((s, t) => s + t.sku.price, 0);
+  const totalN = skus.reduce((s, sku) => s + getStats(sku, currentChannel).n, 0);
+
+  document.getElementById('summaryCards').innerHTML = `
+    <div class="card"><div class="card-label">CH ${currentChannel} の n 合計</div><div class="card-value">${totalN.toLocaleString()}</div></div>
+    <div class="card"><div class="card-label">總訊息次數</div><div class="card-value">${totalMsgs}次</div></div>
+    <div class="card"><div class="card-label">配信期間</div><div class="card-value">${duration}個月</div></div>
+    <div class="card"><div class="card-label">完成月齡</div><div class="card-value">${Math.round(lastEnd)}M</div></div>
+    <div class="card"><div class="card-label">略過商品</div><div class="card-value">${skipCount}件</div></div>
+    <div class="card"><div class="card-label">回數不足</div><div class="card-value">${warnCount}件</div></div>
+    <div class="card highlight"><div class="card-label">最大LTV（配信対象）</div><div class="card-value">NT$${totalLTV.toLocaleString()}</div></div>
+  `;
+}
+
+function renderChart(timeline) {
   const active = timeline.filter(t => !t.skipped);
   const maxAge = active.length > 0
     ? Math.max(72, Math.ceil(active[active.length - 1].endAge) + 4)
@@ -870,7 +1075,7 @@ function render() {
 
   let html = '';
 
-  timeline.forEach(({ sku, idx, skipped, manual, startAge, endAge, msgs, count, reason, warning, overCutoff }) => {
+  timeline.forEach(({ sku, idx, stats, skipped, manual, startAge, endAge, msgs, count, reason, warning, overCutoff }) => {
     const labelClass = skipped ? 'row-label skipped' : 'row-label';
     const barClass = 'bar-wrap' + (skipped ? ' skipped' : '') + (manual ? ' manual' : '');
     const editActive = !!overrides[idx];
@@ -881,7 +1086,7 @@ function render() {
       warnTag = `<span class="warn-icon" title="残り${remainingTxt}ヶ月では${count}回のみ配信可能（標準${MAX_COUNT}回）">⚠</span>`;
     }
     if (manual && overCutoff) {
-      warnTag += `<span class="warn-icon" title="手動開始月齡が${currentPct}（${sku[currentPct]}M）を超えています">⚑</span>`;
+      warnTag += `<span class="warn-icon" title="手動開始月齡が${currentPct}（${stats[currentPct]}M）を超えています">⚑</span>`;
     }
 
     html += `<div class="row" data-idx="${idx}">
@@ -906,7 +1111,7 @@ function render() {
       msgs.forEach((m, i) => {
         html += `<div class="dot" style="left:${p(m)}%;background:${sku.color};" title="${m.toFixed(1)}M（第${i+1}次）NT$${sku.price.toLocaleString()}"></div>`;
       });
-      html += `<div class="median-line" style="left:${p(sku.median)}%;" title="WEB中位數 ${sku.median}M"></div>`;
+      html += `<div class="median-line" style="left:${p(stats.median)}%;" title="${currentChannel}中位數 ${stats.median}M"></div>`;
       const labelTxt = `${startAge}M起 ${count}次 NT$${sku.price.toLocaleString()}`;
       html += `<div class="bar-label" style="left:${bl}%;color:${sku.color};">${labelTxt}</div>`;
       if (warning) {
@@ -930,7 +1135,7 @@ function render() {
 
   html += `<div class="legend">
     <div class="legend-item"><span class="legend-dot" style="background:#E24B4A;"></span>登錄月齡</div>
-    <div class="legend-item"><span class="legend-line" style="background:#85B7EB;"></span>WEB購買中位數</div>
+    <div class="legend-item"><span class="legend-line" style="background:#85B7EB;"></span>${currentChannel}購買中位數</div>
     <div class="legend-item">● 每個點＝1次訊息</div>
     <div class="legend-item"><span class="warn-icon">⚠</span>配信回数不足（&lt;${MAX_COUNT}回）</div>
     <div class="legend-item"><span class="legend-badge" style="background:var(--manual);">手動</span>手動上書き</div>
@@ -941,29 +1146,77 @@ function render() {
     ① 發展主題順（語彙啟蒙 → 生活習慣 → 語彙知育 → 情緒人際 → 英語啟蒙 → 英語進階 → 邏輯集中 → 數感邏輯 → 就學準備）<br>
     ② 切入月齢 ＝ 商品適用年齢下限（非WEB中位數）<br>
     ③ 配信節奏 ＝ 每商品 隔週1次・最多${MAX_COUNT}次・キャンペーン枠最大${CAMPAIGN_WINDOW}ヶ月<br>
-    ④ 終止基準 ＝ 選擇的百分位數 &nbsp;⑤ 超過終止基準的商品略過<br>
+    ④ 終止基準 ＝ 選擇的百分位數（現在: ${currentChannel} の ${currentPct}）&nbsp;⑤ 超過終止基準的商品略過<br>
     ⑥ 手動上書き ＝ 任意商品の起終月齢を手動指定可能。手動値の終了月齢は後続商品の自動計算にカスケード反映。
   </div>`;
 
   document.getElementById('chartInner').innerHTML = html;
+}
 
-  const totalMsgs = active.reduce((s, t) => s + t.count, 0);
-  const lastEnd = active.length > 0 ? active[active.length - 1].endAge : currentAge;
-  const duration = (lastEnd - currentAge).toFixed(1);
-  const skipCount = timeline.filter(t => t.skipped).length;
-  const warnCount = active.filter(t => t.warning).length;
-  const totalLTV = active.reduce((s, t) => s + t.sku.price, 0);
+function renderStatsTable(timeline) {
+  const headerCols = PCT_ALL.map(k => {
+    const active = (k === currentPct) ? ' pct-active' : '';
+    return `<th class="pct-col${active}">${k}</th>`;
+  }).join('');
 
-  document.getElementById('summaryCards').innerHTML = `
-    <div class="card"><div class="card-label">總訊息次數</div><div class="card-value">${totalMsgs}次</div></div>
-    <div class="card"><div class="card-label">配信期間</div><div class="card-value">${duration}個月</div></div>
-    <div class="card"><div class="card-label">完成月齡</div><div class="card-value">${Math.round(lastEnd)}M</div></div>
-    <div class="card"><div class="card-label">略過商品</div><div class="card-value">${skipCount}件</div></div>
-    <div class="card"><div class="card-label">回數不足</div><div class="card-value">${warnCount}件</div></div>
-    <div class="card highlight"><div class="card-label">最大LTV（配信対象）</div><div class="card-value">NT$${totalLTV.toLocaleString()}</div></div>
-  `;
+  let html = `<table class="stats-table">
+    <thead>
+      <tr>
+        <th class="text-left" style="min-width:140px;">商品 / テーマ</th>
+        <th>適用下限</th>
+        <th>n</th>
+        <th>中位</th>
+        ${headerCols}
+        <th>配信開始</th>
+        <th>配信終了</th>
+        <th>回数</th>
+        <th>価格</th>
+        <th>状態</th>
+      </tr>
+    </thead>
+    <tbody>`;
 
-  renderBatchPanel(timeline);
+  timeline.forEach(t => {
+    const { sku, idx, stats, skipped, manual, startAge, endAge, count, warning, reason } = t;
+
+    const pctCells = PCT_ALL.map(k => {
+      const active = (k === currentPct) ? ' pct-active' : '';
+      return `<td class="pct-cell${active}">${stats[k]}</td>`;
+    }).join('');
+
+    const rowClass = (skipped ? 'skipped' : '') + (manual ? ' manual' : '');
+    const startTxt = skipped ? '—' : startAge + 'M';
+    const endTxt = skipped ? '—' : endAge + 'M';
+    const countTxt = skipped ? '0' : (count + '次' + (warning ? ' ⚠' : ''));
+    const status = skipped
+      ? `<span class="actual-skip">略過 (${reason})</span>`
+      : (manual ? '手動' : '自動');
+
+    html += `<tr class="${rowClass}">
+      <td class="text-left name-cell sku-cell">
+        <span class="sku-color-bar" style="background:${sku.color};"></span>${sku.name}
+        <span class="theme-sub">${sku.theme} ・ ${sku.sku}</span>
+      </td>
+      <td>${sku.entryAge}M</td>
+      <td class="n-cell">${stats.n.toLocaleString()}</td>
+      <td>${stats.median}</td>
+      ${pctCells}
+      <td>${startTxt}</td>
+      <td>${endTxt}</td>
+      <td>${countTxt}</td>
+      <td>NT$${sku.price.toLocaleString()}</td>
+      <td>${status}</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>
+    <div class="ch-meta">
+      <strong>表示中のチャネル: ${currentChannel}</strong> ｜ ${chNotes[currentChannel]}<br>
+      ハイライト列（黄色）が現在の配信終止基準 <strong>${currentPct}</strong>。チャネル/百分位ボタンで切替できます。<br>
+      P値は再集計データ（訂單日期 ≥ 2025-01-01）。「中位」は median＝P50 と同じ実測値（参考表示）。
+    </div>`;
+
+  document.getElementById('statsTableWrap').innerHTML = html;
 }
 
 function renderBatchPanel(timeline) {
@@ -975,20 +1228,21 @@ function renderBatchPanel(timeline) {
   let html = `<table class="batch-table">
     <thead>
       <tr>
-        <th style="width:24%;">商品</th>
-        <th style="width:18%;">自動算出</th>
-        <th style="width:14%;">上書き 開始(M)</th>
-        <th style="width:14%;">上書き 終了(M)</th>
-        <th style="width:18%;">実際の配信</th>
-        <th style="width:12%;">操作</th>
+        <th style="width:22%;">商品</th>
+        <th style="width:14%;">適用下限 / ${currentPct}</th>
+        <th style="width:16%;">自動算出</th>
+        <th style="width:12%;">上書き 開始(M)</th>
+        <th style="width:12%;">上書き 終了(M)</th>
+        <th style="width:14%;">実際の配信</th>
+        <th style="width:10%;">操作</th>
       </tr>
     </thead>
     <tbody>`;
 
   timeline.forEach(t => {
-    const { sku, idx, skipped, manual, startAge, endAge, count, reason } = t;
+    const { sku, idx, stats, skipped, manual, startAge, endAge, count, reason } = t;
     const ov = overrides[idx];
-    const autoTl = manual ? buildTimeline(currentAge, currentPct, {}) : null;
+    const autoTl = manual ? buildTimeline(currentAge, currentPct, currentChannel, {}) : null;
     const autoEntry = autoTl ? autoTl[idx] : t;
     const autoTxt = autoEntry.skipped
       ? `<span class="auto-value">略過</span>`
@@ -1000,6 +1254,7 @@ function renderBatchPanel(timeline) {
 
     html += `<tr class="${manual ? 'manual' : ''}">
       <td class="sku-cell">${sku.name}<div class="theme-cell">${sku.theme} ・ ${sku.entryAge}M~</div></td>
+      <td><span class="auto-value">${sku.entryAge}M / ${stats[currentPct]}M</span></td>
       <td>${autoTxt}</td>
       <td><input type="number" step="0.5" min="0" max="72" value="${ov ? ov.startAge : ''}" placeholder="${autoEntry.startAge ?? ''}" data-idx="${idx}" data-field="startAge" onchange="onBatchInput(this)"></td>
       <td><input type="number" step="0.5" min="0" max="84" value="${ov ? ov.endAge : ''}" placeholder="${autoEntry.endAge ?? ''}" data-idx="${idx}" data-field="endAge" onchange="onBatchInput(this)"></td>
@@ -1053,8 +1308,9 @@ function openEditor(idx, event) {
   const scrollX = window.scrollX;
 
   const sku = skus[idx];
+  const stats = getStats(sku, currentChannel);
   const ov = overrides[idx];
-  const autoTl = buildTimeline(currentAge, currentPct, {});
+  const autoTl = buildTimeline(currentAge, currentPct, currentChannel, {});
   const auto = autoTl[idx];
 
   const startVal = ov ? ov.startAge : (auto.skipped ? sku.entryAge : auto.startAge);
@@ -1077,7 +1333,7 @@ function openEditor(idx, event) {
       <input type="number" id="epEnd" step="0.5" min="0" max="84" value="${endVal}">
     </div>
     <div class="ep-hint">
-      参考：適用下限 ${sku.entryAge}M ／ ${currentPct} ${sku[currentPct]}M ／ WEB中位 ${sku.median}M<br>
+      参考：適用下限 ${sku.entryAge}M ／ ${currentChannel} ${currentPct} ${stats[currentPct]}M ／ ${currentChannel} 中位 ${stats.median}M（n=${stats.n.toLocaleString()}）<br>
       自動算出：${auto.skipped ? '略過 (' + auto.reason + ')' : auto.startAge + 'M ~ ' + auto.endAge + 'M'}
     </div>
     <div class="ep-actions">
@@ -1164,7 +1420,7 @@ function decodeOverrides(str) {
     const s = parseFloat(m[2]);
     const e = parseFloat(m[3]);
     if (idx >= 0 && idx < skus.length && !isNaN(s) && !isNaN(e) && e > s) {
-      result[idx] = { startAge: round2(s), endAge: round2(e) };
+      result[idx] = { startAge:round2(s), endAge:round2(e) };
     }
   });
   return result;
@@ -1174,9 +1430,13 @@ function readUrl() {
   const params = new URLSearchParams(location.search);
   const age = parseInt(params.get('age'));
   const pct = params.get('pct');
+  const ch = params.get('ch');
+  const v = params.get('v');
   const o = params.get('o');
   if (!isNaN(age) && age >= 0 && age <= 72) currentAge = age;
   if (pct && PCT_KEYS.includes(pct)) currentPct = pct;
+  if (ch && CHANNELS.includes(ch)) currentChannel = ch;
+  if (v === 'chart' || v === 'table') currentView = v;
   if (o) overrides = decodeOverrides(o);
 }
 
@@ -1184,6 +1444,8 @@ function syncUrl() {
   const params = new URLSearchParams();
   params.set('age', currentAge);
   params.set('pct', currentPct);
+  params.set('ch', currentChannel);
+  params.set('v', currentView);
   const oStr = encodeOverrides();
   if (oStr) params.set('o', oStr);
   history.replaceState(null, '', location.pathname + '?' + params.toString());
@@ -1228,9 +1490,14 @@ document.getElementById('ageSlider').value = currentAge;
 document.getElementById('ageLabel').textContent = currentAge + 'M';
 PCT_KEYS.forEach(k => {
   const btn = document.getElementById('btn-' + k);
-  btn.classList.toggle('active', k === currentPct);
+  if (btn) btn.classList.toggle('active', k === currentPct);
 });
 document.getElementById('pctNote').textContent = '→ ' + pctNotes[currentPct];
+document.querySelectorAll('#chBtns .seg-btn').forEach(b => {
+  b.classList.toggle('active', b.dataset.ch === currentChannel);
+});
+document.getElementById('chNote').textContent = '→ ' + chNotes[currentChannel];
+setView(currentView);
 render();
 </script>
 
