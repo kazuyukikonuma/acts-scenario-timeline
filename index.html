@@ -1207,19 +1207,49 @@ function resetDefault(idx) {
 
 function onRowInputChange(input) {
   const idx = parseInt(input.dataset.idx);
+  const field = input.dataset.field;
   const row = input.closest('.row');
   const startInput = row.querySelector('input[data-field="startAge"]');
   const endInput = row.querySelector('input[data-field="endAge"]');
-  const s = Math.round(parseFloat(startInput.value));
-  const e = Math.round(parseFloat(endInput.value));
   startInput.classList.remove('invalid');
   endInput.classList.remove('invalid');
-  if (isNaN(s) || isNaN(e) || e <= s) {
+
+  const newValue = Math.round(parseFloat(input.value));
+  if (isNaN(newValue)) {
     input.classList.add('invalid');
-    showToast('開始 < 結束（整數），請重新輸入');
+    showToast('請輸入整數');
     return;
   }
-  setDefaults(idx, s, e);
+
+  // Linked-move：寬度（duration）を保ったまま、起点/終点を動かすと窓全体がスライド
+  const before = getDefaults(idx);
+  const duration = before.endAge - before.startAge;
+  let newStart, newEnd;
+  if (field === 'startAge') {
+    newStart = newValue;
+    newEnd = newValue + duration;
+  } else {
+    newEnd = newValue;
+    newStart = newValue - duration;
+  }
+
+  // 範囲外に出たら、duration を保ったまま反対側もシフト
+  if (newStart < MIN_AGE) {
+    const shift = MIN_AGE - newStart;
+    newStart += shift; newEnd += shift;
+  }
+  if (newEnd > 84) {
+    const shift = newEnd - 84;
+    newStart -= shift; newEnd -= shift;
+  }
+
+  if (newEnd <= newStart) {
+    input.classList.add('invalid');
+    showToast('範圍異常，請重新輸入');
+    return;
+  }
+
+  setDefaults(idx, newStart, newEnd);
   render();
   syncUrl();
 }
