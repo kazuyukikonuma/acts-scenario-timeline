@@ -621,7 +621,7 @@
   .reset-btn:not(:disabled):hover { background: var(--bg2); color: var(--accent); border-color: var(--accent); }
   .reset-btn:disabled { opacity: 0.25; cursor: not-allowed; }
 
-  .bar-wrap.customized .bar-wrap-inner { box-shadow: inset 0 0 0 1.5px var(--manual); }
+  /* customized state is shown only on the right-side input/stepper to avoid visual noise */
 
   .axis {
     position: relative;
@@ -1232,7 +1232,7 @@
 
 <div id="toast" class="toast"></div>
 
-<div class="footer">LC8T｜ACTS 配信設計 v2.3 ｜ Benesse Taiwan ｜ 最後更新：2026-05-12 19:00 UTC</div>
+<div class="footer">LC8T｜ACTS 配信設計 v2.4 ｜ Benesse Taiwan ｜ 最後更新：2026-05-12 19:20 UTC</div>
 
 </div>
 
@@ -1599,7 +1599,7 @@ function renderChart(timeline) {
 
   timeline.forEach(({ sku, idx, displayIdx, stats, skipped, customized, shifted, stretched, desiredStart, desiredEnd, startAge, endAge, msgs, blocked, count, warning, reason, startPastCutoff, endPastCutoff }) => {
     const labelClass = skipped ? 'row-label skipped' : 'row-label';
-    const barClass = 'bar-wrap' + (skipped ? ' skipped' : '') + (customized ? ' customized' : '') + (!skipped && startPastCutoff ? ' past-cutoff' : '');
+    const barClass = 'bar-wrap' + (skipped ? ' skipped' : '') + (!skipped && startPastCutoff ? ' past-cutoff' : '');
 
     let warnTag = '';
     if (!skipped && warning) {
@@ -1626,7 +1626,7 @@ function renderChart(timeline) {
         <button class="move-btn" onclick="moveProduct(${displayIdx}, 1)" ${downDisabled} title="向下移動">▼</button>
       </div>
       <div class="${labelClass}">
-        <div class="row-label-name">${warnTag}${customized ? '<span class="manual-tag">客製</span>' : ''}${sku.name}</div>
+        <div class="row-label-name">${warnTag}${sku.name}</div>
         <div class="row-label-theme">${sku.theme}</div>
       </div>
       <div class="${barClass}">
@@ -1744,7 +1744,7 @@ function renderChart(timeline) {
     <div class="legend-item"><span class="warn-icon" style="color:var(--manual);">↪</span>因重疊或生日月自動延後</div>
     <div class="legend-item"><span class="warn-icon" style="color:#7C5DC0;">⤴</span>跨生日月延伸</div>
     <div class="legend-item"><span class="warn-icon" style="color:var(--accent);">⚑</span>已超過 WEB P70</div>
-    <div class="legend-item"><span class="legend-badge" style="background:var(--manual);">客製</span>客製化預設</div>
+    <div class="legend-item"><span class="legend-line" style="background:var(--manual);"></span>右側欄位藍色＝客製化預設</div>
   </div>`;
 
   // Logic box (Traditional Chinese)
