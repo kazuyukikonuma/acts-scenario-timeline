@@ -186,6 +186,34 @@
 
   .action-btn:hover { background: var(--bg2); color: var(--text); }
   .action-btn.danger:hover { color: var(--accent); border-color: var(--accent); }
+  .action-btn.primary {
+    background: var(--manual);
+    color: #fff;
+    border-color: var(--manual);
+  }
+  .action-btn.primary:hover { background: #2766B4; color: #fff; }
+
+  .move-ctrl {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex-shrink: 0;
+  }
+  .move-btn {
+    width: 18px;
+    height: 14px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text2);
+    cursor: pointer;
+    font-size: 7px;
+    padding: 0;
+    line-height: 1;
+    border-radius: 2px;
+    transition: all 0.1s;
+  }
+  .move-btn:not(:disabled):hover { background: var(--manual); color: #fff; border-color: var(--manual); }
+  .move-btn:disabled { opacity: 0.2; cursor: not-allowed; }
 
   .tabs {
     display: flex;
@@ -1022,6 +1050,7 @@
   </div>
   <div class="control-row">
     <div class="action-row">
+      <button class="action-btn primary" onclick="autoOptimize()" title="依目前登錄月齡，自動為各商品挑選不撞生日月的最早起始月齡（順序保持不變）">⚙ 自動最佳化</button>
       <button class="action-btn" onclick="copyShareUrl()">複製網址</button>
       <button class="action-btn danger" onclick="resetAllOverrides()">全部重設</button>
     </div>
@@ -1075,7 +1104,7 @@
 
 <div id="toast" class="toast"></div>
 
-<div class="footer">LC8T｜ACTS 配信設計 v1.5 ｜ Benesse Taiwan ｜ 最後更新：2026-05-12 15:26 UTC</div>
+<div class="footer">LC8T｜ACTS 配信設計 v1.6 ｜ Benesse Taiwan ｜ 最後更新：2026-05-12 16:10 UTC</div>
 
 </div>
 
@@ -1170,6 +1199,7 @@ const currentChannel = 'WEB';
 let currentAge = 10;
 let currentView = 'chart';
 let overrides = {};
+let order = skus.map((_, i) => i);  // display order (permutation of indices)
 
 function round2(v) { return Math.round(v * 100) / 100; }
 function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
@@ -1208,7 +1238,9 @@ function isCustomized(idx) {
 function buildTimeline(regAge, pctKey, channel, overridesMap) {
   const results = [];
   let cursor = regAge;
-  skus.forEach((sku, idx) => {
+  order.forEach((skuIdx, displayIdx) => {
+    const sku = skus[skuIdx];
+    const idx = skuIdx;
     const stats = getStats(sku, channel);
     const cutoff = stats[pctKey];
     const def = overridesMap[idx] || initialDefaults(idx);
@@ -1225,7 +1257,7 @@ function buildTimeline(regAge, pctKey, channel, overridesMap) {
 
     const { msgs, blocked } = buildSlots(actualStart, actualEnd);
     results.push({
-      sku, idx, stats, cutoff, skipped: false,
+      sku, idx, displayIdx, stats, cutoff, skipped: false,
       customized, shifted,
       desiredStart, desiredEnd,
       startAge: actualStart, endAge: actualEnd,
@@ -1339,12 +1371,60 @@ function onRowInputChange(input) {
 }
 
 function resetAllOverrides() {
-  if (Object.keys(overrides).length === 0) return;
-  if (!confirm('將全部商品的配信視窗重設為預設值？')) return;
+  const noOverrides = Object.keys(overrides).length === 0;
+  const defaultOrder = order.every((v, i) => v === i);
+  if (noOverrides && defaultOrder) return;
+  if (!confirm('將全部商品的配信視窗、排序重設為預設？')) return;
   overrides = {};
+  order = skus.map((_, i) => i);
   render();
   syncUrl();
   showToast('已重設為預設值');
+}
+
+function moveProduct(displayIdx, delta) {
+  const target = displayIdx + delta;
+  if (target < 0 || target >= order.length) return;
+  [order[displayIdx], order[target]] = [order[target], order[displayIdx]];
+  render();
+  syncUrl();
+}
+
+// Birthday-aware "clean" start:
+// dots at S, S+0.5, S+1, S+1.5 → months floor(S) and floor(S+1)
+// Tainted integer starts = {b-1, b | b ∈ BIRTHDAY_MONTHS}
+const TAINTED_STARTS = new Set(BIRTHDAY_MONTHS.flatMap(b => [b - 1, b]));
+
+function isCleanStart(S) {
+  return !TAINTED_STARTS.has(S);
+}
+
+function nextCleanStart(minS) {
+  let s = Math.ceil(minS);
+  while (!isCleanStart(s)) s++;
+  return s;
+}
+
+function autoOptimize() {
+  let cursor = currentAge;
+  const newOverrides = {};
+  order.forEach((skuIdx) => {
+    const sku = skus[skuIdx];
+    const current = overrides[skuIdx] || initialDefaults(skuIdx);
+    const duration = current.endAge - current.startAge;
+    const minStart = Math.max(cursor, sku.entryAge);
+    const cleanStart = nextCleanStart(minStart);
+    const cleanEnd = cleanStart + duration;
+    const init = initialDefaults(skuIdx);
+    if (cleanStart !== init.startAge || cleanEnd !== init.endAge) {
+      newOverrides[skuIdx] = { startAge: cleanStart, endAge: cleanEnd };
+    }
+    cursor = cleanEnd;
+  });
+  overrides = newOverrides;
+  render();
+  syncUrl();
+  showToast('已自動最佳化（避開生日月、4次完整配信）');
 }
 
 function render() {
@@ -1389,7 +1469,7 @@ function renderChart(timeline) {
 
   let html = '';
 
-  timeline.forEach(({ sku, idx, stats, customized, shifted, desiredStart, desiredEnd, startAge, endAge, msgs, blocked, count, warning, startPastCutoff, endPastCutoff }) => {
+  timeline.forEach(({ sku, idx, displayIdx, stats, customized, shifted, desiredStart, desiredEnd, startAge, endAge, msgs, blocked, count, warning, startPastCutoff, endPastCutoff }) => {
     const barClass = 'bar-wrap' + (customized ? ' customized' : '') + (startPastCutoff ? ' past-cutoff' : '');
 
     let warnTag = '';
@@ -1405,8 +1485,14 @@ function renderChart(timeline) {
       warnTag += `<span class="warn-icon" title="結束 ${endAge}M 超過 ${currentPct}（${stats[currentPct]}M）：部分訊息超過購買主峰">⚑</span>`;
     }
 
-    // Row label
+    // Row label + move controls
+    const upDisabled = displayIdx === 0 ? 'disabled' : '';
+    const downDisabled = displayIdx === order.length - 1 ? 'disabled' : '';
     html += `<div class="row" data-idx="${idx}">
+      <div class="move-ctrl">
+        <button class="move-btn" onclick="moveProduct(${displayIdx}, -1)" ${upDisabled} title="向上移動">▲</button>
+        <button class="move-btn" onclick="moveProduct(${displayIdx}, 1)" ${downDisabled} title="向下移動">▼</button>
+      </div>
       <div class="row-label">
         <div class="row-label-name">${warnTag}${customized ? '<span class="manual-tag">客製</span>' : ''}${sku.name}</div>
         <div class="row-label-theme">${sku.theme}</div>
@@ -1628,7 +1714,7 @@ function renderLookupPanel() {
     <thead>
       <tr>
         <th class="age-col">登錄月齡</th>
-        ${skus.map(s => `<th title="${s.theme} ・ ${s.sku}" style="border-bottom:2px solid ${s.color};">${s.name}<span class="theme-sub">${s.theme}</span></th>`).join('')}
+        ${order.map(i => { const s = skus[i]; return `<th title="${s.theme} ・ ${s.sku}" style="border-bottom:2px solid ${s.color};">${s.name}<span class="theme-sub">${s.theme}</span></th>`; }).join('')}
       </tr>
     </thead>
     <tbody>`;
@@ -1709,6 +1795,11 @@ function summariseOverrides() {
   }).join('、');
 }
 
+function summariseOrder() {
+  if (order.every((v, i) => v === i)) return '預設順序';
+  return order.map(i => skus[i].name).join(' → ');
+}
+
 function downloadLookupMarkdown() {
   const groups = buildLookupGroups();
   const now = new Date().toLocaleString('zh-TW');
@@ -1719,10 +1810,11 @@ function downloadLookupMarkdown() {
   md += `- 終止基準：WEB P70（70% 購買者已下單）\n`;
   md += `- 配信節奏：每商品 隔週1次、最多 ${MAX_COUNT} 次、預設視窗 ${CAMPAIGN_WINDOW} 個月\n`;
   md += `- 生日月（${BIRTHDAY_MONTHS.join('M / ')}M）自動跳過\n`;
+  md += `- 排序：${summariseOrder()}\n`;
   md += `- 客製化設定：${summariseOverrides()}\n\n`;
 
-  md += '| 登錄月齡 | ' + skus.map(s => s.name).join(' | ') + ' |\n';
-  md += '|---|' + skus.map(() => ':---:').join('|') + '|\n';
+  md += '| 登錄月齡 | ' + order.map(i => skus[i].name).join(' | ') + ' |\n';
+  md += '|---|' + order.map(() => ':---:').join('|') + '|\n';
 
   groups.forEach(g => {
     const ageLabel = g.ageStart === g.ageEnd
@@ -1753,11 +1845,12 @@ function downloadLookupCsv() {
     `# 產出時間: ${new Date().toLocaleString('zh-TW')}`,
     `# 通路: WEB / 終止基準: WEB P70 / 配信節奏: 隔週1次 最多${MAX_COUNT}次 預設${CAMPAIGN_WINDOW}M`,
     `# 生日月自動跳過: ${BIRTHDAY_MONTHS.join('M, ')}M`,
+    `# 排序: ${summariseOrder()}`,
     `# 客製化: ${summariseOverrides()}`,
     ''
   ];
 
-  const header = ['登錄月齡', ...skus.map(s => s.name)];
+  const header = ['登錄月齡', ...order.map(i => skus[i].name)];
 
   const rows = groups.map(g => {
     const ageLabel = g.ageStart === g.ageEnd
@@ -1806,7 +1899,8 @@ function renderMedianPanel() {
     </thead>
     <tbody>`;
 
-  skus.forEach((sku) => {
+  order.forEach((skuIdx) => {
+    const sku = skus[skuIdx];
     const w = sku.channels.WEB, t = sku.channels.TM, k = sku.channels.KOL, a = sku.channels.ALL;
     const diff = k.median - w.median;
     const diffClass = diff < 0 ? 'diff-neg' : (diff > 0 ? 'diff-pos' : 'diff-zero');
@@ -1883,14 +1977,32 @@ function decodeOverrides(str) {
   return result;
 }
 
+function encodeOrder() {
+  if (order.every((v, i) => v === i)) return '';
+  return order.join(',');
+}
+
+function decodeOrder(str) {
+  if (!str) return null;
+  const parts = str.split(',').map(Number);
+  if (parts.length !== skus.length) return null;
+  if (parts.some(isNaN)) return null;
+  if (new Set(parts).size !== parts.length) return null;
+  if (parts.some(p => p < 0 || p >= skus.length)) return null;
+  return parts;
+}
+
 function readUrl() {
   const params = new URLSearchParams(location.search);
   const age = parseInt(params.get('age'));
   const v = params.get('v');
   const o = params.get('o');
+  const ord = params.get('order');
   if (!isNaN(age) && age >= MIN_AGE && age <= MAX_AGE_SLIDER) currentAge = age;
   if (v === 'chart' || v === 'table') currentView = v;
   if (o) overrides = decodeOverrides(o);
+  const decodedOrder = decodeOrder(ord);
+  if (decodedOrder) order = decodedOrder;
 }
 
 function syncUrl() {
@@ -1899,6 +2011,8 @@ function syncUrl() {
   params.set('v', currentView);
   const oStr = encodeOverrides();
   if (oStr) params.set('o', oStr);
+  const ordStr = encodeOrder();
+  if (ordStr) params.set('order', ordStr);
   history.replaceState(null, '', location.pathname + '?' + params.toString());
 }
 
