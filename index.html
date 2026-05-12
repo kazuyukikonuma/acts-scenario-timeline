@@ -1065,7 +1065,7 @@
 
 <div class="header">
   <h1>LC8T｜ACTS 登錄月齡別配信情境時間軸</h1>
-  <p>ACTS 配信情境模擬器：以 BCL 登錄月齡為起點，依發展主題順序排程 9 商品的訊息配信，目標是促進 <strong>WEB 自主購買</strong>。預設配信視窗從 9M 起每 6M 一組的 2M 視窗（9-11、15-17、21-23、…、57-59），所有 4 次訊息都在生日月的手前完成。各商品視窗可調整，系統自動延後重疊。終止基準為 <strong>WEB P70</strong>（70% 購買者已下單）。其他通路（TM / KOL）的購買月齡分佈僅作為參考資料置於頁面最下方。生日月（11M / 23M / 35M / 47M / 59M）的祝賀訊息由別軌道配送，ACTS 不在此期間配信。妊娠期（-10M ~ -1M）為登錄後等待出生期間。</p>
+  <p>ACTS 配信情境模擬器：以 BCL 登錄月齡為起點，依發展主題順序排程 9 商品的訊息配信，目標是促進 <strong>WEB 自主購買</strong>。預設配置 ＝ 9M 起每 3M 一組的 2M 視窗（9-11、12-14、15-17、…、33-35），生日月間隔自然形成緩衝。<strong>右側右欄＝配信上限月齡</strong>，超過該月齡的會員則此商品不配信（避免 5 歲還在賣初級商品）。如配信中段遇到生日月，dot 自動跳過並推到下一隔週枠（campaign 跨月延伸）。其他通路（TM / KOL）的購買月齡分佈僅作為參考資料置於頁面最下方。妊娠期（-10M ~ -1M）為登錄後等待出生期間。</p>
 </div>
 
 <div class="controls">
@@ -1080,7 +1080,7 @@
   </div>
   <div class="control-row">
     <div class="action-row">
-      <button class="action-btn primary" onclick="autoOptimize()" title="自動為每個商品挑選『不撞生日月的最早起始月齡』。&#10;・各商品的視窗寬度（持續月數）保持不變&#10;・順序維持不變、cursor 順序傳遞&#10;・結果：所有 4 次訊息都不會在 11M/23M/35M/47M/59M 失效&#10;・按下後可在右側欄位看到自動填入的數字，反白「客製」標記，可再手動微調">⚙ 排程最佳化</button>
+      <button class="action-btn primary" onclick="autoOptimize()" title="清除全部客製化、回到預設 3M 週期排程（9-11、12-14、…、33-35）。">⚙ 重設為預設排程</button>
       <button class="action-btn" onclick="copyShareUrl()">複製網址</button>
       <button class="action-btn danger" onclick="resetAllOverrides()">全部重設</button>
     </div>
@@ -1096,13 +1096,13 @@
 
 <div id="chartView">
   <div class="chart-notice">
-    <span class="nb-icon">🎂</span><strong>生日月（11M / 23M / 35M / 47M / 59M）</strong>：此月份會配送生日祝賀訊息，ACTS 不在此月份配送商品訊息（自動跳過）。
+    <span class="nb-icon">🎂</span><strong>生日月（11 / 23 / 35 / 47 / 59M）</strong>：祝賀訊息軌道使用此月份。ACTS 的 dot 若落在生日月會自動推到下一隔週枠 ⇒ campaign 自動跨月延伸（如 10M 開始時，10-11(BM)-12 跨三月）。
     <span class="sep">｜</span>
-    <span class="nb-icon">👶</span><strong>妊娠期（-10M ~ -1M）</strong>：寶寶尚未出生的等待期，登錄後待出生後依商品預設視窗啟動配信。
+    <span class="nb-icon">👶</span><strong>妊娠期（-10M ~ -1M）</strong>：寶寶尚未出生的等待期。
     <br>
-    <span class="nb-icon">📐</span><strong>右側欄位 ＝ 預設配信視窗</strong>：◀▶ 鈕點 1M 平移、開始與結束連動（寬度保持）。系統會自動依順序檢查重疊並延後，避免兩商品同時配信。
+    <span class="nb-icon">📐</span><strong>右側兩欄</strong>：左 ＝ 配信希望開始月齡（系統會延後避免重疊）｜右 ＝ <strong>配信上限月齡</strong>（超過此月齡則此商品略過，避免 5 歲還在賣初級商品）。◀▶ 各獨立 ±1M。
     <span class="sep">｜</span>
-    <span class="nb-icon">⚙</span><strong>排程最佳化</strong>：上方按鈕，會依目前登錄月齡<u>一次設定全部 9 商品的起始月齡</u>，讓 4 次訊息都不撞生日月。視窗寬度與順序保持不變，按下後可再個別微調。
+    <span class="nb-icon">⚙</span><strong>排程最佳化</strong>：清除所有客製化、回到預設 3M 週期排程（9-11、12-14、15-17、…、33-35）。
   </div>
   <div class="chart-wrap">
     <div class="chart-inner" id="chartInner"></div>
@@ -1136,7 +1136,7 @@
 
 <div id="toast" class="toast"></div>
 
-<div class="footer">LC8T｜ACTS 配信設計 v1.9 ｜ Benesse Taiwan ｜ 最後更新：2026-05-12 17:20 UTC</div>
+<div class="footer">LC8T｜ACTS 配信設計 v2.0 ｜ Benesse Taiwan ｜ 最後更新：2026-05-12 17:50 UTC</div>
 
 </div>
 
@@ -1240,34 +1240,39 @@ function getStats(sku, channel) {
   return sku.channels[channel] || sku.channels.ALL;
 }
 
-function buildSlots(startAge, endAge) {
-  const remaining = endAge - startAge;
-  if (remaining <= EPS) return { msgs: [], blocked: [] };
-  const maxSlots = clamp(Math.floor(remaining / INTERVAL + EPS) + 1, 1, MAX_COUNT);
-  const raw = Array.from({length: maxSlots}, (_, i) => round2(startAge + INTERVAL * i));
+// dots を隔週生成。生日月の枠は配信せず、次の隔週枠に押し出す（campaign 自動伸長）。
+function buildSlots(startAge) {
   const msgs = [];
-  const blocked = [];
-  raw.forEach(m => {
-    if (isBirthdayMonth(m)) blocked.push(m);
-    else msgs.push(m);
-  });
-  return { msgs, blocked };
+  const stretched = [];   // 生日月で押し出された月齢（視覚化用）
+  let t = round2(startAge);
+  let iter = 0;
+  while (msgs.length < MAX_COUNT && iter < 30) {
+    iter++;
+    if (isBirthdayMonth(t)) {
+      stretched.push(round2(t));
+    } else {
+      msgs.push(round2(t));
+    }
+    t = round2(t + INTERVAL);
+  }
+  return { msgs, blocked: stretched };
 }
 
-// 初期デフォルト配信視窗：開始 9M から 6M 間隔の 2M 視窗。
-// 各窓の終了月齢がちょうど生日月（11/23/35/47/59M）の手前 1M に揃い、
-// dots（隔週4回・S, S+0.5, S+1, S+1.5）はすべて生日月の手前で完結する
-// 「鏡反転」配置。全 9 商品が 4 次フル配信できる、最もコンパクトな並び。
+// 初期デフォルト：3M サイクル（9M起点、各商品 2M 配信窓 + 1M 隙間）
+//   ・「開始月齡」 ＝ 配信希望開始月齡（システムが前商品終了後に必要なら自動延後）
+//   ・「結束月齡」 ＝ 配信上限（actualStart > 上限 なら略過 ＝ この月齢を超えた子には売らない）
+// 生日月（11/23/35/47/59M）は各商品の終了月齡に等しく、dots は窓の前半で完結。
+// 万一 dot が生日月に落ちる場合、その枠は次の隔週枠に押し出される（campaign は自動伸長）。
 const INITIAL_WINDOWS = [
   [9, 11],   // 點讀圖鑑
-  [15, 17],  // 好習慣套組
-  [21, 23],  // 語彙智育套組
-  [27, 29],  // 好情緒EQ套組
-  [33, 35],  // 英語Plus初階
-  [39, 41],  // 英語進階版
-  [45, 47],  // 點讀大冒險
-  [51, 53],  // 數學套組
-  [57, 59],  // 注音拼音套組
+  [12, 14],  // 好習慣套組
+  [15, 17],  // 語彙智育套組
+  [18, 20],  // 好情緒EQ套組
+  [21, 23],  // 英語Plus初階
+  [24, 26],  // 英語進階版
+  [27, 29],  // 點讀大冒險
+  [30, 32],  // 數學套組
+  [33, 35],  // 注音拼音套組
 ];
 
 function initialDefaults(idx) {
@@ -1294,27 +1299,41 @@ function buildTimeline(regAge, pctKey, channel, overridesMap) {
     const def = overridesMap[idx] || initialDefaults(idx);
     const customized = !!overridesMap[idx];
     const desiredStart = def.startAge;
-    const desiredEnd = def.endAge;
-    const duration = desiredEnd - desiredStart;
-    const actualStart = Math.max(cursor, desiredStart);
-    const actualEnd = actualStart + duration;
-    const shifted = actualStart > desiredStart + EPS;
+    const maxAge = def.endAge;  // 配信終了月齡（上限）
+    const requestedStart = Math.max(cursor, desiredStart);
 
-    const startPastCutoff = actualStart >= cutoff - EPS;
-    const endPastCutoff = actualEnd > cutoff + EPS;
+    // 上限ゲート：実配信開始 が 上限 を超えていれば略過
+    if (requestedStart > maxAge + EPS) {
+      results.push({
+        sku, idx, displayIdx, stats, cutoff,
+        skipped: true, customized,
+        desiredStart, desiredEnd: maxAge,
+        reason: '已超過配信上限 ' + maxAge + 'M'
+      });
+      return;
+    }
 
-    const { msgs, blocked } = buildSlots(actualStart, actualEnd);
+    const { msgs, blocked } = buildSlots(requestedStart);
+    const firstMsg = msgs.length > 0 ? msgs[0] : requestedStart;
+    const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : requestedStart;
+    const barEnd = round2(lastMsg + INTERVAL);
+    const shifted = firstMsg > desiredStart + EPS;
+    const stretched = msgs.length >= 2 && (lastMsg - firstMsg) > (INTERVAL * 3) + EPS;
+
+    const startPastCutoff = firstMsg >= cutoff - EPS;
+    const endPastCutoff = barEnd > cutoff + EPS;
+
     results.push({
-      sku, idx, displayIdx, stats, cutoff, skipped: false,
-      customized, shifted,
-      desiredStart, desiredEnd,
-      startAge: actualStart, endAge: actualEnd,
+      sku, idx, displayIdx, stats, cutoff,
+      skipped: false, customized, shifted, stretched,
+      desiredStart, desiredEnd: maxAge,
+      startAge: firstMsg, endAge: barEnd,
       msgs, blocked, count: msgs.length,
       warning: msgs.length < MAX_COUNT,
       startPastCutoff, endPastCutoff,
       overCutoff: endPastCutoff
     });
-    cursor = actualEnd;
+    cursor = barEnd;
   });
   return results;
 }
@@ -1369,25 +1388,16 @@ function resetDefault(idx) {
   syncUrl();
 }
 
+// 開始（配信希望開始）と 上限（配信終了月齡）は独立して編集する
 function stepInput(idx, field, delta) {
   const before = getDefaults(idx);
-  const duration = before.endAge - before.startAge;
-  let newStart, newEnd;
-  if (field === 'startAge') {
-    newStart = before.startAge + delta;
-    newEnd = newStart + duration;
-  } else {
-    newEnd = before.endAge + delta;
-    newStart = newEnd - duration;
-  }
-  if (newStart < MIN_AGE) {
-    const shift = MIN_AGE - newStart;
-    newStart += shift; newEnd += shift;
-  }
-  if (newEnd > 84) {
-    const shift = newEnd - 84;
-    newStart -= shift; newEnd -= shift;
-  }
+  let newStart = before.startAge;
+  let newEnd = before.endAge;
+  if (field === 'startAge') newStart += delta;
+  else newEnd += delta;
+  if (newStart < MIN_AGE) newStart = MIN_AGE;
+  if (newEnd > 84) newEnd = 84;
+  if (newEnd <= newStart) return;  // 不変
   setDefaults(idx, newStart, newEnd);
   render();
   syncUrl();
@@ -1395,48 +1405,24 @@ function stepInput(idx, field, delta) {
 
 function onRowInputChange(input) {
   const idx = parseInt(input.dataset.idx);
-  const field = input.dataset.field;
   const row = input.closest('.row');
   const startInput = row.querySelector('input[data-field="startAge"]');
   const endInput = row.querySelector('input[data-field="endAge"]');
   startInput.classList.remove('invalid');
   endInput.classList.remove('invalid');
 
-  const newValue = Math.round(parseFloat(input.value));
-  if (isNaN(newValue)) {
+  const newStart = Math.round(parseFloat(startInput.value));
+  const newEnd = Math.round(parseFloat(endInput.value));
+  if (isNaN(newStart) || isNaN(newEnd)) {
     input.classList.add('invalid');
     showToast('請輸入整數');
     return;
   }
-
-  // Linked-move：寬度（duration）を保ったまま、起点/終点を動かすと窓全体がスライド
-  const before = getDefaults(idx);
-  const duration = before.endAge - before.startAge;
-  let newStart, newEnd;
-  if (field === 'startAge') {
-    newStart = newValue;
-    newEnd = newValue + duration;
-  } else {
-    newEnd = newValue;
-    newStart = newValue - duration;
-  }
-
-  // 範囲外に出たら、duration を保ったまま反対側もシフト
-  if (newStart < MIN_AGE) {
-    const shift = MIN_AGE - newStart;
-    newStart += shift; newEnd += shift;
-  }
-  if (newEnd > 84) {
-    const shift = newEnd - 84;
-    newStart -= shift; newEnd -= shift;
-  }
-
   if (newEnd <= newStart) {
     input.classList.add('invalid');
-    showToast('範圍異常，請重新輸入');
+    showToast('上限（右）必須大於開始（左）');
     return;
   }
-
   setDefaults(idx, newStart, newEnd);
   render();
   syncUrl();
@@ -1478,32 +1464,15 @@ function nextCleanStart(minS) {
 }
 
 function autoOptimize() {
-  let cursor = currentAge;
-  const newOverrides = {};
-  let changedCount = 0;
-  order.forEach((skuIdx) => {
-    const sku = skus[skuIdx];
-    const current = overrides[skuIdx] || initialDefaults(skuIdx);
-    const duration = current.endAge - current.startAge;
-    const minStart = Math.max(cursor, sku.entryAge);
-    const cleanStart = nextCleanStart(minStart);
-    const cleanEnd = cleanStart + duration;
-    const init = initialDefaults(skuIdx);
-    if (cleanStart !== init.startAge || cleanEnd !== init.endAge) {
-      newOverrides[skuIdx] = { startAge: cleanStart, endAge: cleanEnd };
-    }
-    if (current.startAge !== cleanStart || current.endAge !== cleanEnd) {
-      changedCount++;
-    }
-    cursor = cleanEnd;
-  });
-  overrides = newOverrides;
+  // 客製化を全クリア → 初期 3M サイクル配置に戻す
+  const changedCount = Object.keys(overrides).length;
+  overrides = {};
   render();
   syncUrl();
   if (changedCount === 0) {
-    showToast('目前排程已是最佳，無需調整');
+    showToast('目前已是預設排程，無客製化');
   } else {
-    showToast(`已最佳化 ${changedCount} 個商品的起始月齡（避開生日月）`);
+    showToast(`已清除 ${changedCount} 個客製化，回到 3M 週期預設排程`);
   }
 }
 
@@ -1549,20 +1518,24 @@ function renderChart(timeline) {
 
   let html = '';
 
-  timeline.forEach(({ sku, idx, displayIdx, stats, customized, shifted, desiredStart, desiredEnd, startAge, endAge, msgs, blocked, count, warning, startPastCutoff, endPastCutoff }) => {
-    const barClass = 'bar-wrap' + (customized ? ' customized' : '') + (startPastCutoff ? ' past-cutoff' : '');
+  timeline.forEach(({ sku, idx, displayIdx, stats, skipped, customized, shifted, stretched, desiredStart, desiredEnd, startAge, endAge, msgs, blocked, count, warning, reason, startPastCutoff, endPastCutoff }) => {
+    const labelClass = skipped ? 'row-label skipped' : 'row-label';
+    const barClass = 'bar-wrap' + (skipped ? ' skipped' : '') + (customized ? ' customized' : '') + (!skipped && startPastCutoff ? ' past-cutoff' : '');
 
     let warnTag = '';
-    if (warning) {
-      warnTag += `<span class="warn-icon" title="可配信僅 ${count} 次（標準 ${MAX_COUNT} 次｜生日月跳過 ${blocked ? blocked.length : 0} 次）">⚠</span>`;
+    if (!skipped && warning) {
+      warnTag += `<span class="warn-icon" title="僅 ${count} 次（標準 ${MAX_COUNT} 次）">⚠</span>`;
     }
-    if (shifted) {
-      warnTag += `<span class="warn-icon" title="預設起點 ${desiredStart}M 與前商品重疊，已自動延後至 ${startAge}M" style="color:var(--manual);">↪</span>`;
+    if (!skipped && shifted) {
+      warnTag += `<span class="warn-icon" title="預設開始 ${desiredStart}M 與前商品重疊（或落在生日月），已自動延後至 ${startAge}M" style="color:var(--manual);">↪</span>`;
     }
-    if (startPastCutoff) {
-      warnTag += `<span class="warn-icon" title="開始 ${startAge}M 已超過 ${currentPct}（${stats[currentPct]}M）：大半購買者已下單，配信意義較弱" style="color:var(--accent);">⚑</span>`;
-    } else if (endPastCutoff) {
-      warnTag += `<span class="warn-icon" title="結束 ${endAge}M 超過 ${currentPct}（${stats[currentPct]}M）：部分訊息超過購買主峰">⚑</span>`;
+    if (!skipped && stretched) {
+      warnTag += `<span class="warn-icon" title="配信中段含生日月，campaign 自動跨月延伸（${endAge - startAge}M 跨度）" style="color:#7C5DC0;">⤴</span>`;
+    }
+    if (!skipped && startPastCutoff) {
+      warnTag += `<span class="warn-icon" title="開始 ${startAge}M 已超過 WEB ${currentPct}（${stats[currentPct]}M）：大半購買者已下單" style="color:var(--accent);">⚑</span>`;
+    } else if (!skipped && endPastCutoff) {
+      warnTag += `<span class="warn-icon" title="結束 ${endAge}M 超過 WEB ${currentPct}（${stats[currentPct]}M）">⚑</span>`;
     }
 
     // Row label + move controls
@@ -1573,7 +1546,7 @@ function renderChart(timeline) {
         <button class="move-btn" onclick="moveProduct(${displayIdx}, -1)" ${upDisabled} title="向上移動">▲</button>
         <button class="move-btn" onclick="moveProduct(${displayIdx}, 1)" ${downDisabled} title="向下移動">▼</button>
       </div>
-      <div class="row-label">
+      <div class="${labelClass}">
         <div class="row-label-name">${warnTag}${customized ? '<span class="manual-tag">客製</span>' : ''}${sku.name}</div>
         <div class="row-label-theme">${sku.theme}</div>
       </div>
@@ -1594,7 +1567,9 @@ function renderChart(timeline) {
       }
     });
 
-    {
+    if (skipped) {
+      html += `<div class="skip-label" title="${reason}">略過（${reason}）</div>`;
+    } else {
       const bl = p(startAge), br = p(endAge);
       const msgAll = (msgs.length > 0 || (blocked && blocked.length > 0))
         ? [...msgs, ...(blocked || [])]
@@ -1632,22 +1607,22 @@ function renderChart(timeline) {
     // Row controls (inline) — inputs = default delivery window (system shifts to avoid overlap)
     const inputClass = 'ctrl-input' + (customized ? ' customized' : '');
     const stepperClass = 'input-stepper' + (customized ? ' customized' : '');
-    html += `<div class="row-controls" title="預設配信視窗（系統會自動延後以避免重疊）｜◀▶ 各 1M 移動，起始/結束連動">
+    html += `<div class="row-controls" title="左 ＝ 配信希望開始月齡（系統會自動延後避免重疊）｜右 ＝ 配信上限（超過此月齡則略過）｜◀▶ 各獨立 ±1M">
         <div class="${stepperClass}">
           <button class="step-btn left" onclick="stepInput(${idx}, 'startAge', -1)" title="開始 -1M">◀</button>
           <input type="number" class="${inputClass}" value="${desiredStart}"
                  min="${MIN_AGE}" max="84" step="1"
                  data-idx="${idx}" data-field="startAge"
-                 onchange="onRowInputChange(this)" title="預設開始月齡（M｜整數）">
+                 onchange="onRowInputChange(this)" title="配信希望開始月齡">
           <button class="step-btn right" onclick="stepInput(${idx}, 'startAge', 1)" title="開始 +1M">▶</button>
         </div>
         <div class="${stepperClass}" style="margin-left:6px;">
-          <button class="step-btn left" onclick="stepInput(${idx}, 'endAge', -1)" title="結束 -1M">◀</button>
+          <button class="step-btn left" onclick="stepInput(${idx}, 'endAge', -1)" title="上限 -1M">◀</button>
           <input type="number" class="${inputClass}" value="${desiredEnd}"
                  min="${MIN_AGE}" max="84" step="1"
                  data-idx="${idx}" data-field="endAge"
-                 onchange="onRowInputChange(this)" title="預設結束月齡（M｜整數）">
-          <button class="step-btn right" onclick="stepInput(${idx}, 'endAge', 1)" title="結束 +1M">▶</button>
+                 onchange="onRowInputChange(this)" title="配信上限月齡（超過則略過）">
+          <button class="step-btn right" onclick="stepInput(${idx}, 'endAge', 1)" title="上限 +1M">▶</button>
         </div>
         <button class="reset-btn" onclick="resetDefault(${idx})"
                 ${customized ? '' : 'disabled'}
@@ -1676,7 +1651,8 @@ function renderChart(timeline) {
     <div class="legend-item"><span class="legend-band birthday"></span>🎂 生日月（跳過）</div>
     <div class="legend-item"><span class="legend-band preg"></span>👶 妊娠期</div>
     <div class="legend-item"><span class="warn-icon">⚠</span>訊息次數不足（&lt;${MAX_COUNT}次）</div>
-    <div class="legend-item"><span class="warn-icon" style="color:var(--manual);">↪</span>因重疊自動延後</div>
+    <div class="legend-item"><span class="warn-icon" style="color:var(--manual);">↪</span>因重疊或生日月自動延後</div>
+    <div class="legend-item"><span class="warn-icon" style="color:#7C5DC0;">⤴</span>跨生日月延伸</div>
     <div class="legend-item"><span class="warn-icon" style="color:var(--accent);">⚑</span>已超過 WEB P70</div>
     <div class="legend-item"><span class="legend-badge" style="background:var(--manual);">客製</span>客製化預設</div>
   </div>`;
@@ -1685,11 +1661,11 @@ function renderChart(timeline) {
   html += `<div class="logic-box">
     <strong>配信順序邏輯</strong>
     ① 依發展主題順序（語彙啟蒙 → 生活習慣 → 語彙知育 → 情緒人際 → 英語啟蒙 → 英語進階 → 邏輯集中 → 數感邏輯 → 就學準備）<br>
-    ② 各商品右側「預設配信視窗」（開始 / 結束月齡）為使用者可調整的<strong>預設值</strong>。初始配置 ＝ 9M 起每 6M 一組的 2M 視窗（9-11、15-17、21-23、…、57-59），全部 9 商品的 4 次 dots 都落在生日月（${BIRTHDAY_MONTHS.join(' / ')}M）之前。輸入時開始與結束<strong>連動移動</strong>（寬度保持不變）<br>
-    ③ 配信節奏 ＝ 每商品 隔週1次、最多${MAX_COUNT}次（依輸入的視窗長度自動計算）<br>
-    ④ 重疊調整 ＝ 若前一商品的結束月齡超過下一商品的預設開始，系統會自動延後（保持視窗長度），以「↪」標示<br>
-    ⑤ 終止基準 ＝ <strong>WEB P70</strong>（紅色虛線）：70% 的 WEB 自主購買者在此月齡前已下單。商品仍會配信，但若開始月齡已超過此線，以「<span style="color:var(--accent);">⚑</span>」警示（大半購買者已下單，WEB 自主購買意義較弱，建議後續轉 T 通路）<br>
-    ⑥ 生日月（${BIRTHDAY_MONTHS.join('M / ')}M）自動跳過（祝賀訊息由別軌道配送）
+    ② 預設配置 ＝ 9M 起、每 3M 一組的 2M 視窗（9-11、12-14、15-17、…、33-35）。商品 9 個全部排在 9~35M 區段內<br>
+    ③ 右側「開始月齡」 ＝ 配信希望開始月齡。系統會自動延後避免與前商品重疊（以「↪」標示）<br>
+    ④ 右側「配信上限月齡」 ＝ 此月齡之後不再配信本商品。如登錄月齡（或前商品結束）已超過上限，此商品<strong>略過</strong>（例：5 歲登錄者不會再收到 P1 點讀圖鑑）<br>
+    ⑤ 配信節奏 ＝ 每商品 隔週1次、最多 ${MAX_COUNT} 次。Dot 若落在生日月（${BIRTHDAY_MONTHS.join(' / ')}M）會自動推到下一隔週枠，campaign 自動跨月延伸（以「<span style="color:#7C5DC0;">⤴</span>」標示）<br>
+    ⑥ WEB P70 警示 ＝ 70% 的 WEB 自主購買者在此月齡前已下單。開始月齡超過此值會以「<span style="color:var(--accent);">⚑</span>」標示，提示 WEB 自主購買意義較弱（建議後續轉 T 通路）
   </div>`;
 
   document.getElementById('chartInner').innerHTML = html;
