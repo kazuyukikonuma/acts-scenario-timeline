@@ -17,6 +17,8 @@
     --text3: #9B9890;
     --accent: #E24B4A;
     --blue: #85B7EB;
+    --warn: #D88A0E;
+    --manual: #2F7DD1;
     --border: #D5D1C8;
     --card: #FFFFFF;
   }
@@ -129,6 +131,29 @@
     margin-left: 4px;
   }
 
+  .action-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-left: auto;
+  }
+
+  .action-btn {
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text2);
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+
+  .action-btn:hover { background: var(--bg2); color: var(--text); }
+
+  .action-btn.danger:hover { color: var(--accent); border-color: var(--accent); }
+
   .summary-cards {
     display: flex;
     gap: 10px;
@@ -173,6 +198,7 @@
     padding: 20px 24px 16px;
     border: 1px solid var(--border);
     overflow-x: auto;
+    position: relative;
   }
 
   .chart-inner {
@@ -187,7 +213,7 @@
   }
 
   .row-label {
-    width: 96px;
+    width: 110px;
     flex-shrink: 0;
     text-align: right;
   }
@@ -196,6 +222,10 @@
     font-size: 11px;
     font-weight: 500;
     color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
   }
 
   .row-label-theme {
@@ -206,16 +236,43 @@
   .row-label.skipped .row-label-name { opacity: 0.35; }
   .row-label.skipped .row-label-theme { opacity: 0.3; }
 
+  .manual-tag {
+    font-size: 9px;
+    background: var(--manual);
+    color: #fff;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .warn-icon {
+    color: var(--warn);
+    font-size: 12px;
+    cursor: help;
+  }
+
   .bar-wrap {
     flex: 1;
     height: 36px;
     position: relative;
     background: var(--bg2);
     border-radius: 5px;
-    overflow: hidden;
+    overflow: visible;
   }
 
-  .bar-wrap.skipped { opacity: 0.25; }
+  .bar-wrap-inner {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 5px;
+  }
+
+  .bar-wrap.skipped .bar-wrap-inner { opacity: 0.25; }
+
+  .bar-wrap.manual .bar-wrap-inner {
+    box-shadow: inset 0 0 0 1.5px var(--manual);
+  }
 
   .bar-bg {
     position: absolute;
@@ -223,6 +280,14 @@
     height: 26px;
     border-radius: 4px;
     pointer-events: none;
+  }
+
+  .bar-bg.msg-span {
+    opacity: 0.30;
+  }
+
+  .bar-bg.rest-span {
+    opacity: 0.10;
   }
 
   .dot {
@@ -235,6 +300,7 @@
     z-index: 2;
     transition: transform 0.1s;
     cursor: default;
+    box-shadow: 0 0 0 1.5px var(--card);
   }
 
   .dot:hover { transform: translate(-50%, -50%) scale(1.5); }
@@ -272,6 +338,16 @@
     pointer-events: none;
   }
 
+  .bar-warn {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    font-size: 11px;
+    z-index: 4;
+    color: var(--warn);
+    cursor: help;
+  }
+
   .skip-label {
     position: absolute;
     inset: 0;
@@ -282,10 +358,29 @@
     color: var(--text3);
   }
 
+  .edit-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text2);
+    cursor: pointer;
+    font-size: 12px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .edit-btn:hover { background: var(--bg2); color: var(--text); }
+  .edit-btn.active { background: var(--manual); color: #fff; border-color: var(--manual); }
+
   .axis {
     position: relative;
     height: 24px;
-    margin-left: 106px;
+    margin-left: 120px;
     margin-top: 4px;
   }
 
@@ -301,7 +396,7 @@
     gap: 16px;
     margin-top: 14px;
     flex-wrap: wrap;
-    padding-left: 106px;
+    padding-left: 120px;
   }
 
   .legend-item {
@@ -322,6 +417,14 @@
     width: 14px;
     height: 2px;
     border-radius: 1px;
+  }
+
+  .legend-badge {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-weight: 600;
+    color: #fff;
   }
 
   .logic-box {
@@ -348,6 +451,236 @@
     color: var(--text3);
     text-align: right;
   }
+
+  .editor-popover {
+    position: absolute;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    z-index: 100;
+    min-width: 240px;
+  }
+
+  .editor-popover .ep-title {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .editor-popover .ep-mode {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+
+  .editor-popover .ep-mode-btn {
+    flex: 1;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    color: var(--text2);
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  .editor-popover .ep-mode-btn.active {
+    background: var(--manual);
+    color: #fff;
+    border-color: var(--manual);
+  }
+
+  .editor-popover .ep-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+  }
+
+  .editor-popover label {
+    font-size: 11px;
+    color: var(--text2);
+    width: 56px;
+  }
+
+  .editor-popover input[type="number"] {
+    flex: 1;
+    font-size: 12px;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-family: inherit;
+    width: 70px;
+  }
+
+  .editor-popover .ep-hint {
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  .editor-popover .ep-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    justify-content: flex-end;
+  }
+
+  .editor-popover .ep-btn {
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text2);
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  .editor-popover .ep-btn.primary {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+
+  .editor-popover .ep-btn:hover { background: var(--bg2); }
+  .editor-popover .ep-btn.primary:hover { background: var(--text2); }
+
+  .batch-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-top: 20px;
+    overflow: hidden;
+  }
+
+  .batch-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .batch-header:hover { background: var(--bg2); }
+
+  .batch-header-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .batch-header-count {
+    font-size: 10px;
+    background: var(--manual);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  .batch-chev {
+    font-size: 12px;
+    color: var(--text2);
+    transition: transform 0.15s;
+  }
+
+  .batch-panel.open .batch-chev { transform: rotate(90deg); }
+
+  .batch-body {
+    display: none;
+    padding: 0 20px 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .batch-panel.open .batch-body { display: block; }
+
+  .batch-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    font-size: 11px;
+  }
+
+  .batch-table th {
+    text-align: left;
+    color: var(--text2);
+    font-weight: 500;
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--border);
+    font-size: 10px;
+  }
+
+  .batch-table td {
+    padding: 6px;
+    border-bottom: 1px solid var(--bg2);
+    vertical-align: middle;
+  }
+
+  .batch-table input[type="number"] {
+    width: 64px;
+    font-size: 11px;
+    padding: 3px 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: inherit;
+  }
+
+  .batch-table .auto-value {
+    color: var(--text3);
+    font-size: 10px;
+  }
+
+  .batch-table .sku-cell {
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .batch-table .theme-cell {
+    color: var(--text3);
+    font-size: 10px;
+  }
+
+  .batch-table .row-reset {
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 10px;
+  }
+
+  .batch-table .row-reset:hover { text-decoration: underline; }
+
+  .batch-table tr.manual td.sku-cell::before {
+    content: '●';
+    color: var(--manual);
+    margin-right: 4px;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: var(--bg);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+
+  .toast.show { opacity: 1; }
 </style>
 </head>
 <body>
@@ -355,7 +688,7 @@
 
 <div class="header">
   <h1>ACTS｜LC8T 登錄月齡別配信情境時間軸</h1>
-  <p>依發展主題順序配信。切入月齡以商品適用年齡下限為基準。調整登錄月齡與配信終止基準，確認各商品的配信情境。</p>
+  <p>依發展主題順序配信。切入月齡以商品適用年齡下限為基準。調整登錄月齡與配信終止基準，確認各商品的配信情境。各商品的配信起終月齡を手動で上書き可能（手動値は後続の自動計算にカスケード反映）。</p>
 </div>
 
 <div class="controls">
@@ -374,6 +707,10 @@
       <button class="pct-btn" id="btn-P90" onclick="setPct('P90')">P90</button>
     </div>
     <span class="pct-note" id="pctNote">→ 涵蓋70%的購買者</span>
+    <div class="action-row">
+      <button class="action-btn" onclick="copyShareUrl()">URLコピー</button>
+      <button class="action-btn danger" onclick="resetAllOverrides()">全リセット</button>
+    </div>
   </div>
 </div>
 
@@ -381,6 +718,24 @@
 
 <div class="chart-wrap">
   <div class="chart-inner" id="chartInner"></div>
+</div>
+
+<div class="batch-panel" id="batchPanel">
+  <div class="batch-header" onclick="toggleBatchPanel()">
+    <div class="batch-header-title">
+      商品別 配信ウィンドウ 一括編集
+      <span class="batch-header-count" id="batchCount" style="display:none;">0</span>
+    </div>
+    <div class="batch-chev">▶</div>
+  </div>
+  <div class="batch-body" id="batchBody"></div>
+</div>
+
+<div id="editorPopover" class="editor-popover" style="display:none;"></div>
+<div id="toast" class="toast"></div>
+
+<div class="footer">ACTS｜LC8T 配信設計 v1.2（隔週・最多4次・2個月｜手動上書き対応）｜ Benesse Taiwan ｜ 2026-05-12</div>
+
 </div>
 
 <script>
@@ -396,6 +751,12 @@ const skus = [
   { name: '注音拼音套組',theme: '就學準備', entryAge: 54, median: 50, P50: 50, P60: 53, P70: 57, P75: 59, P90: 68, price: 3200, color: '#993556' },
 ];
 
+const INTERVAL = 0.5;        // 隔週 = 0.5ヶ月
+const MAX_COUNT = 4;         // 1商品あたり最大配信回数
+const CAMPAIGN_WINDOW = 2;   // 標準キャンペーン枠（ヶ月）
+const EPS = 1e-9;            // 浮動小数点境界対策
+const PCT_KEYS = ['P50','P60','P70','P75','P90'];
+
 const pctNotes = {
   P50: '涵蓋50%的購買者',
   P60: '涵蓋60%的購買者',
@@ -406,69 +767,158 @@ const pctNotes = {
 
 let currentPct = 'P70';
 let currentAge = 10;
+let overrides = {};   // { [idx]: { startAge, endAge } }
 
-function setPct(p) {
-  currentPct = p;
-  ['P50','P60','P70','P75','P90'].forEach(k => {
-    const btn = document.getElementById('btn-' + k);
-    btn.classList.toggle('active', k === p);
-  });
-  document.getElementById('pctNote').textContent = '→ ' + pctNotes[p];
-  render(currentAge);
+function round2(v) { return Math.round(v * 100) / 100; }
+
+function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+
+function computeMessageCount(remaining) {
+  if (remaining <= EPS) return 0;
+  const slots = Math.floor(remaining / INTERVAL + EPS) + 1;
+  return clamp(slots, 1, MAX_COUNT);
 }
 
-function buildTimeline(regAge, pctKey) {
+function buildTimeline(regAge, pctKey, overridesMap) {
   const results = [];
   let cursor = regAge;
-  skus.forEach(sku => {
+  skus.forEach((sku, idx) => {
     const cutoff = sku[pctKey];
-    if (regAge >= cutoff) { results.push({ sku, skipped: true, reason: '登錄時已超過' + pctKey }); return; }
-    const startAge = Math.max(cursor, sku.entryAge);
-    if (startAge >= cutoff) { results.push({ sku, skipped: true, reason: '前商品結束後已超過' + pctKey }); return; }
+    const override = overridesMap[idx];
+
+    if (override) {
+      const startAge = round2(override.startAge);
+      const endAge = round2(override.endAge);
+      const remaining = endAge - startAge;
+      const count = computeMessageCount(remaining);
+      const msgs = Array.from({length: count}, (_, i) => round2(startAge + INTERVAL * i));
+      const overCutoff = startAge >= cutoff - EPS;
+      results.push({
+        sku, idx, skipped: false, manual: true,
+        startAge, endAge, msgs, count,
+        warning: count < MAX_COUNT,
+        overCutoff
+      });
+      cursor = Math.max(cursor, endAge);
+      return;
+    }
+
+    if (regAge >= cutoff - EPS) {
+      results.push({ sku, idx, skipped: true, manual: false, reason: '登錄時已超過' + pctKey });
+      return;
+    }
+    const startAge = round2(Math.max(cursor, sku.entryAge));
+    if (startAge >= cutoff - EPS) {
+      results.push({ sku, idx, skipped: true, manual: false, reason: '前商品結束後已超過' + pctKey });
+      return;
+    }
     const remaining = cutoff - startAge;
-    const interval = 0.5; // 隔週 = 0.5ヶ月
-    const maxCount = 4;
-    const count = Math.min(maxCount, Math.max(1, Math.floor(remaining / interval) + 1));
-    const duration = Math.min(2, remaining); // 最大2ヶ月の配信ウィンドウ
-    const msgs = Array.from({length: count}, (_, i) => +(startAge + interval * i).toFixed(2));
-    results.push({ sku, skipped: false, startAge, endAge: startAge + duration, msgs, count });
-    cursor = startAge + duration;
+    const count = computeMessageCount(remaining);
+    const duration = Math.min(CAMPAIGN_WINDOW, remaining);
+    const msgs = Array.from({length: count}, (_, i) => round2(startAge + INTERVAL * i));
+    const endAge = round2(startAge + duration);
+    results.push({
+      sku, idx, skipped: false, manual: false,
+      startAge, endAge, msgs, count,
+      warning: count < MAX_COUNT
+    });
+    cursor = endAge;
   });
   return results;
 }
 
-function render(regAge) {
-  const timeline = buildTimeline(regAge, currentPct);
-  const active = timeline.filter(t => !t.skipped);
-  const maxAge = active.length > 0 ? Math.max(72, active[active.length - 1].endAge + 4) : 72;
+function setPct(p) {
+  currentPct = p;
+  PCT_KEYS.forEach(k => {
+    const btn = document.getElementById('btn-' + k);
+    btn.classList.toggle('active', k === p);
+  });
+  document.getElementById('pctNote').textContent = '→ ' + pctNotes[p];
+  closeEditor();
+  render();
+  syncUrl();
+}
 
-  function p(v) { return Math.min(100, Math.max(0, (v / maxAge) * 100)); }
+function setOverride(idx, startAge, endAge) {
+  const s = clamp(round2(startAge), 0, 72);
+  const e = clamp(round2(endAge), s + INTERVAL, 84);
+  overrides[idx] = { startAge: s, endAge: e };
+}
+
+function clearOverride(idx) {
+  delete overrides[idx];
+}
+
+function resetAllOverrides() {
+  if (Object.keys(overrides).length === 0) return;
+  if (!confirm('全ての手動設定をクリアしますか？')) return;
+  overrides = {};
+  closeEditor();
+  render();
+  syncUrl();
+  showToast('手動設定をリセットしました');
+}
+
+function render() {
+  const timeline = buildTimeline(currentAge, currentPct, overrides);
+  const active = timeline.filter(t => !t.skipped);
+  const maxAge = active.length > 0
+    ? Math.max(72, Math.ceil(active[active.length - 1].endAge) + 4)
+    : 72;
+
+  function p(v) { return clamp((v / maxAge) * 100, 0, 100); }
 
   let html = '';
 
-  timeline.forEach(({ sku, skipped, startAge, endAge, msgs, count, reason }) => {
+  timeline.forEach(({ sku, idx, skipped, manual, startAge, endAge, msgs, count, reason, warning, overCutoff }) => {
     const labelClass = skipped ? 'row-label skipped' : 'row-label';
-    html += `<div class="row">
+    const barClass = 'bar-wrap' + (skipped ? ' skipped' : '') + (manual ? ' manual' : '');
+    const editActive = !!overrides[idx];
+
+    let warnTag = '';
+    if (!skipped && warning) {
+      const remainingTxt = ((endAge - startAge)).toFixed(1);
+      warnTag = `<span class="warn-icon" title="残り${remainingTxt}ヶ月では${count}回のみ配信可能（標準${MAX_COUNT}回）">⚠</span>`;
+    }
+    if (manual && overCutoff) {
+      warnTag += `<span class="warn-icon" title="手動開始月齡が${currentPct}（${sku[currentPct]}M）を超えています">⚑</span>`;
+    }
+
+    html += `<div class="row" data-idx="${idx}">
       <div class="${labelClass}">
-        <div class="row-label-name">${sku.name}</div>
+        <div class="row-label-name">${warnTag}${manual ? '<span class="manual-tag">手動</span>' : ''}${sku.name}</div>
         <div class="row-label-theme">${sku.theme}</div>
       </div>
-      <div class="bar-wrap${skipped ? ' skipped' : ''}">`;
+      <div class="${barClass}">
+        <div class="bar-wrap-inner">`;
 
     if (skipped) {
-      html += `<div class="skip-label">略過（${reason}）</div>`;
+      html += `<div class="skip-label" title="${reason}">略過（${reason}）</div>`;
     } else {
       const bl = p(startAge), br = p(endAge);
-      html += `<div class="bar-bg" style="left:${bl}%;width:${Math.max(br-bl,0.5)}%;background:${sku.color};opacity:0.15;"></div>`;
+      const msgSpanEnd = msgs.length > 0 ? p(msgs[msgs.length - 1]) : bl;
+      const drawnEnd = Math.max(msgSpanEnd, bl + 0.3);
+
+      html += `<div class="bar-bg msg-span" style="left:${bl}%;width:${Math.max(drawnEnd - bl, 0.5)}%;background:${sku.color};"></div>`;
+      if (br > drawnEnd + 0.1) {
+        html += `<div class="bar-bg rest-span" style="left:${drawnEnd}%;width:${br - drawnEnd}%;background:${sku.color};"></div>`;
+      }
       msgs.forEach((m, i) => {
         html += `<div class="dot" style="left:${p(m)}%;background:${sku.color};" title="${m.toFixed(1)}M（第${i+1}次）NT$${sku.price.toLocaleString()}"></div>`;
       });
       html += `<div class="median-line" style="left:${p(sku.median)}%;" title="WEB中位數 ${sku.median}M"></div>`;
-      html += `<div class="bar-label" style="left:${bl}%;color:${sku.color};">${Math.round(startAge)}M起 ${count}次 NT$${sku.price.toLocaleString()}</div>`;
+      const labelTxt = `${startAge}M起 ${count}次 NT$${sku.price.toLocaleString()}`;
+      html += `<div class="bar-label" style="left:${bl}%;color:${sku.color};">${labelTxt}</div>`;
+      if (warning) {
+        html += `<div class="bar-warn" title="${count}回のみ配信可能">⚠</div>`;
+      }
     }
 
-    html += `<div class="cursor-line" style="left:${p(regAge)}%;"></div>`;
-    html += `</div></div>`;
+    html += `<div class="cursor-line" style="left:${p(currentAge)}%;"></div>
+        </div>
+      </div>
+      <button class="edit-btn ${editActive ? 'active' : ''}" onclick="openEditor(${idx}, event)" title="${editActive ? '手動設定を編集' : '配信ウィンドウを編集'}">✎</button>
+    </div>`;
   });
 
   const tickStep = maxAge > 70 ? 12 : 6;
@@ -482,22 +932,26 @@ function render(regAge) {
     <div class="legend-item"><span class="legend-dot" style="background:#E24B4A;"></span>登錄月齡</div>
     <div class="legend-item"><span class="legend-line" style="background:#85B7EB;"></span>WEB購買中位數</div>
     <div class="legend-item">● 每個點＝1次訊息</div>
+    <div class="legend-item"><span class="warn-icon">⚠</span>配信回数不足（&lt;${MAX_COUNT}回）</div>
+    <div class="legend-item"><span class="legend-badge" style="background:var(--manual);">手動</span>手動上書き</div>
   </div>`;
 
   html += `<div class="logic-box">
     <strong>配信順序ロジック</strong>
     ① 發展主題順（語彙啟蒙 → 生活習慣 → 語彙知育 → 情緒人際 → 英語啟蒙 → 英語進階 → 邏輯集中 → 數感邏輯 → 就學準備）<br>
-    ② 切入月齡 ＝ 商品適用年齡下限（非WEB中位數）<br>
-    ③ 配信節奏 ＝ 每商品最多2個月・隔週1次・最多4次<br>
-    ④ 終止基準 ＝ 選擇的百分位數 &nbsp;⑤ 超過終止基準的商品略過
+    ② 切入月齢 ＝ 商品適用年齢下限（非WEB中位數）<br>
+    ③ 配信節奏 ＝ 每商品 隔週1次・最多${MAX_COUNT}次・キャンペーン枠最大${CAMPAIGN_WINDOW}ヶ月<br>
+    ④ 終止基準 ＝ 選擇的百分位數 &nbsp;⑤ 超過終止基準的商品略過<br>
+    ⑥ 手動上書き ＝ 任意商品の起終月齢を手動指定可能。手動値の終了月齢は後続商品の自動計算にカスケード反映。
   </div>`;
 
   document.getElementById('chartInner').innerHTML = html;
 
   const totalMsgs = active.reduce((s, t) => s + t.count, 0);
-  const lastEnd = active.length > 0 ? active[active.length - 1].endAge : regAge;
-  const duration = (lastEnd - regAge).toFixed(1);
+  const lastEnd = active.length > 0 ? active[active.length - 1].endAge : currentAge;
+  const duration = (lastEnd - currentAge).toFixed(1);
   const skipCount = timeline.filter(t => t.skipped).length;
+  const warnCount = active.filter(t => t.warning).length;
   const totalLTV = active.reduce((s, t) => s + t.sku.price, 0);
 
   document.getElementById('summaryCards').innerHTML = `
@@ -505,21 +959,280 @@ function render(regAge) {
     <div class="card"><div class="card-label">配信期間</div><div class="card-value">${duration}個月</div></div>
     <div class="card"><div class="card-label">完成月齡</div><div class="card-value">${Math.round(lastEnd)}M</div></div>
     <div class="card"><div class="card-label">略過商品</div><div class="card-value">${skipCount}件</div></div>
+    <div class="card"><div class="card-label">回數不足</div><div class="card-value">${warnCount}件</div></div>
     <div class="card highlight"><div class="card-label">最大LTV（配信対象）</div><div class="card-value">NT$${totalLTV.toLocaleString()}</div></div>
   `;
+
+  renderBatchPanel(timeline);
+}
+
+function renderBatchPanel(timeline) {
+  const overrideCount = Object.keys(overrides).length;
+  const countEl = document.getElementById('batchCount');
+  countEl.textContent = overrideCount;
+  countEl.style.display = overrideCount > 0 ? 'inline-block' : 'none';
+
+  let html = `<table class="batch-table">
+    <thead>
+      <tr>
+        <th style="width:24%;">商品</th>
+        <th style="width:18%;">自動算出</th>
+        <th style="width:14%;">上書き 開始(M)</th>
+        <th style="width:14%;">上書き 終了(M)</th>
+        <th style="width:18%;">実際の配信</th>
+        <th style="width:12%;">操作</th>
+      </tr>
+    </thead>
+    <tbody>`;
+
+  timeline.forEach(t => {
+    const { sku, idx, skipped, manual, startAge, endAge, count, reason } = t;
+    const ov = overrides[idx];
+    const autoTl = manual ? buildTimeline(currentAge, currentPct, {}) : null;
+    const autoEntry = autoTl ? autoTl[idx] : t;
+    const autoTxt = autoEntry.skipped
+      ? `<span class="auto-value">略過</span>`
+      : `<span class="auto-value">${autoEntry.startAge}M ~ ${autoEntry.endAge}M</span>`;
+
+    const actualTxt = skipped
+      ? `<span class="auto-value">略過 (${reason})</span>`
+      : `${startAge}M ~ ${endAge}M ・${count}次`;
+
+    html += `<tr class="${manual ? 'manual' : ''}">
+      <td class="sku-cell">${sku.name}<div class="theme-cell">${sku.theme} ・ ${sku.entryAge}M~</div></td>
+      <td>${autoTxt}</td>
+      <td><input type="number" step="0.5" min="0" max="72" value="${ov ? ov.startAge : ''}" placeholder="${autoEntry.startAge ?? ''}" data-idx="${idx}" data-field="startAge" onchange="onBatchInput(this)"></td>
+      <td><input type="number" step="0.5" min="0" max="84" value="${ov ? ov.endAge : ''}" placeholder="${autoEntry.endAge ?? ''}" data-idx="${idx}" data-field="endAge" onchange="onBatchInput(this)"></td>
+      <td>${actualTxt}</td>
+      <td>${ov ? `<span class="row-reset" onclick="clearOverrideAndRender(${idx})">リセット</span>` : '<span style="color:var(--text3);font-size:10px;">自動</span>'}</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>`;
+  document.getElementById('batchBody').innerHTML = html;
+}
+
+function onBatchInput(input) {
+  const idx = parseInt(input.dataset.idx);
+  const field = input.dataset.field;
+  const value = parseFloat(input.value);
+
+  const row = input.closest('tr');
+  const startInput = row.querySelector('input[data-field="startAge"]');
+  const endInput = row.querySelector('input[data-field="endAge"]');
+  const startVal = parseFloat(startInput.value);
+  const endVal = parseFloat(endInput.value);
+
+  const existing = overrides[idx];
+  const fallbackStart = existing ? existing.startAge : (skus[idx].entryAge);
+  const fallbackEnd = existing ? existing.endAge : (skus[idx].entryAge + CAMPAIGN_WINDOW);
+
+  const newStart = !isNaN(startVal) ? startVal : (field === 'startAge' ? value : fallbackStart);
+  const newEnd = !isNaN(endVal) ? endVal : (field === 'endAge' ? value : fallbackEnd);
+
+  if (input.value === '' && (isNaN(startVal) && isNaN(endVal))) {
+    clearOverride(idx);
+  } else {
+    setOverride(idx, newStart, newEnd);
+  }
+  render();
+  syncUrl();
+}
+
+function clearOverrideAndRender(idx) {
+  clearOverride(idx);
+  render();
+  syncUrl();
+}
+
+function openEditor(idx, event) {
+  event.stopPropagation();
+  const btn = event.currentTarget;
+  const rect = btn.getBoundingClientRect();
+  const scrollY = window.scrollY;
+  const scrollX = window.scrollX;
+
+  const sku = skus[idx];
+  const ov = overrides[idx];
+  const autoTl = buildTimeline(currentAge, currentPct, {});
+  const auto = autoTl[idx];
+
+  const startVal = ov ? ov.startAge : (auto.skipped ? sku.entryAge : auto.startAge);
+  const endVal = ov ? ov.endAge : (auto.skipped ? sku.entryAge + CAMPAIGN_WINDOW : auto.endAge);
+  const isManual = !!ov;
+
+  const pop = document.getElementById('editorPopover');
+  pop.innerHTML = `
+    <div class="ep-title">${sku.name}（${sku.theme}）</div>
+    <div class="ep-mode">
+      <button class="ep-mode-btn ${!isManual ? 'active' : ''}" id="epModeAuto">自動</button>
+      <button class="ep-mode-btn ${isManual ? 'active' : ''}" id="epModeManual">手動</button>
+    </div>
+    <div class="ep-input-row">
+      <label>開始(M)</label>
+      <input type="number" id="epStart" step="0.5" min="0" max="72" value="${startVal}">
+    </div>
+    <div class="ep-input-row">
+      <label>終了(M)</label>
+      <input type="number" id="epEnd" step="0.5" min="0" max="84" value="${endVal}">
+    </div>
+    <div class="ep-hint">
+      参考：適用下限 ${sku.entryAge}M ／ ${currentPct} ${sku[currentPct]}M ／ WEB中位 ${sku.median}M<br>
+      自動算出：${auto.skipped ? '略過 (' + auto.reason + ')' : auto.startAge + 'M ~ ' + auto.endAge + 'M'}
+    </div>
+    <div class="ep-actions">
+      <button class="ep-btn" onclick="closeEditor()">キャンセル</button>
+      <button class="ep-btn primary" id="epApply">適用</button>
+    </div>
+  `;
+  pop.style.display = 'block';
+
+  let popLeft = rect.left + scrollX - pop.offsetWidth + 24;
+  if (popLeft < 8) popLeft = 8;
+  if (popLeft + pop.offsetWidth > window.innerWidth - 8) {
+    popLeft = window.innerWidth - pop.offsetWidth - 8;
+  }
+  pop.style.left = popLeft + 'px';
+  pop.style.top = (rect.bottom + scrollY + 4) + 'px';
+
+  document.getElementById('epModeAuto').onclick = () => {
+    document.getElementById('epModeAuto').classList.add('active');
+    document.getElementById('epModeManual').classList.remove('active');
+  };
+  document.getElementById('epModeManual').onclick = () => {
+    document.getElementById('epModeManual').classList.add('active');
+    document.getElementById('epModeAuto').classList.remove('active');
+  };
+
+  document.getElementById('epApply').onclick = () => {
+    const manualActive = document.getElementById('epModeManual').classList.contains('active');
+    if (manualActive) {
+      const s = parseFloat(document.getElementById('epStart').value);
+      const e = parseFloat(document.getElementById('epEnd').value);
+      if (isNaN(s) || isNaN(e) || e <= s) {
+        showToast('開始 < 終了 となる値を入力してください');
+        return;
+      }
+      setOverride(idx, s, e);
+    } else {
+      clearOverride(idx);
+    }
+    closeEditor();
+    render();
+    syncUrl();
+  };
+}
+
+function closeEditor() {
+  const pop = document.getElementById('editorPopover');
+  pop.style.display = 'none';
+  pop.innerHTML = '';
+}
+
+document.addEventListener('click', (e) => {
+  const pop = document.getElementById('editorPopover');
+  if (pop.style.display === 'block' && !pop.contains(e.target) && !e.target.closest('.edit-btn')) {
+    closeEditor();
+  }
+});
+
+function toggleBatchPanel() {
+  document.getElementById('batchPanel').classList.toggle('open');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function encodeOverrides() {
+  return Object.entries(overrides)
+    .map(([k, v]) => `${k}:${v.startAge}-${v.endAge}`)
+    .join(',');
+}
+
+function decodeOverrides(str) {
+  const result = {};
+  if (!str) return result;
+  str.split(',').forEach(entry => {
+    const m = entry.match(/^(\d+):(-?\d+(?:\.\d+)?)-(-?\d+(?:\.\d+)?)$/);
+    if (!m) return;
+    const idx = parseInt(m[1]);
+    const s = parseFloat(m[2]);
+    const e = parseFloat(m[3]);
+    if (idx >= 0 && idx < skus.length && !isNaN(s) && !isNaN(e) && e > s) {
+      result[idx] = { startAge: round2(s), endAge: round2(e) };
+    }
+  });
+  return result;
+}
+
+function readUrl() {
+  const params = new URLSearchParams(location.search);
+  const age = parseInt(params.get('age'));
+  const pct = params.get('pct');
+  const o = params.get('o');
+  if (!isNaN(age) && age >= 0 && age <= 72) currentAge = age;
+  if (pct && PCT_KEYS.includes(pct)) currentPct = pct;
+  if (o) overrides = decodeOverrides(o);
+}
+
+function syncUrl() {
+  const params = new URLSearchParams();
+  params.set('age', currentAge);
+  params.set('pct', currentPct);
+  const oStr = encodeOverrides();
+  if (oStr) params.set('o', oStr);
+  history.replaceState(null, '', location.pathname + '?' + params.toString());
+}
+
+function copyShareUrl() {
+  syncUrl();
+  const url = location.href;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(
+      () => showToast('URLをコピーしました'),
+      () => fallbackCopy(url)
+    );
+  } else {
+    fallbackCopy(url);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showToast('URLをコピーしました'); }
+  catch (_) { showToast('コピー失敗：' + text); }
+  document.body.removeChild(ta);
 }
 
 document.getElementById('ageSlider').addEventListener('input', function() {
   currentAge = parseInt(this.value);
   document.getElementById('ageLabel').textContent = currentAge + 'M';
-  render(currentAge);
+  closeEditor();
+  render();
+  syncUrl();
 });
 
-render(10);
+// init
+readUrl();
+document.getElementById('ageSlider').value = currentAge;
+document.getElementById('ageLabel').textContent = currentAge + 'M';
+PCT_KEYS.forEach(k => {
+  const btn = document.getElementById('btn-' + k);
+  btn.classList.toggle('active', k === currentPct);
+});
+document.getElementById('pctNote').textContent = '→ ' + pctNotes[currentPct];
+render();
 </script>
 
-<div class="footer">ACTS｜LC8T 配信設計 v1.1（隔週・最多4次・2個月）｜ Benesse Taiwan ｜ 2026-05-06</div>
-
-</div>
 </body>
 </html>
