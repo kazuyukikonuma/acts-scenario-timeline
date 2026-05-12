@@ -454,6 +454,37 @@
     z-index: 2;
   }
 
+  .config-line {
+    position: absolute;
+    top: -4px;
+    height: calc(100% + 8px);
+    width: 0;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .config-line.start {
+    border-left: 2px solid var(--manual);
+    opacity: 0.75;
+  }
+  .config-line.end {
+    border-left: 2px dashed var(--accent);
+    opacity: 0.65;
+  }
+  .config-line .config-tag {
+    position: absolute;
+    top: -14px;
+    left: 2px;
+    font-size: 9px;
+    font-weight: 700;
+    background: var(--card);
+    padding: 0 3px;
+    border-radius: 2px;
+    white-space: nowrap;
+    line-height: 1.3;
+  }
+  .config-line.start .config-tag { color: var(--manual); }
+  .config-line.end .config-tag { color: var(--accent); }
+
   .dot.past-cutoff {
     box-shadow: 0 0 0 1.5px var(--card), 0 0 0 2px var(--accent);
     opacity: 0.85;
@@ -1201,7 +1232,7 @@
 
 <div id="toast" class="toast"></div>
 
-<div class="footer">LC8T｜ACTS 配信設計 v2.2 ｜ Benesse Taiwan ｜ 最後更新：2026-05-12 18:30 UTC</div>
+<div class="footer">LC8T｜ACTS 配信設計 v2.3 ｜ Benesse Taiwan ｜ 最後更新：2026-05-12 19:00 UTC</div>
 
 </div>
 
@@ -1323,21 +1354,20 @@ function buildSlots(startAge) {
   return { msgs, blocked: stretched };
 }
 
-// 初期デフォルト：3M サイクル（9M起点、各商品 2M 配信窓 + 1M 隙間）
+// 初期デフォルト：3M サイクル（9M起点）の開始月齡 + 配信上限 ＝ 開始 +12M
 //   ・「開始月齡」 ＝ 配信希望開始月齡（システムが前商品終了後に必要なら自動延後）
-//   ・「結束月齡」 ＝ 配信上限（actualStart > 上限 なら略過 ＝ この月齢を超えた子には売らない）
-// 生日月（11/23/35/47/59M）は各商品の終了月齡に等しく、dots は窓の前半で完結。
-// 万一 dot が生日月に落ちる場合、その枠は次の隔週枠に押し出される（campaign は自動伸長）。
+//   ・「結束月齡」 ＝ 配信上限（actualStart > 上限 なら略過、上限 ＝ 開始 +12M で
+//     「登錄から 12M 以内の會員に届く」意味）
 const INITIAL_WINDOWS = [
-  [9, 11],   // 點讀圖鑑
-  [12, 14],  // 好習慣套組
-  [15, 17],  // 語彙智育套組
-  [18, 20],  // 好情緒EQ套組
-  [21, 23],  // 英語Plus初階
-  [24, 26],  // 英語進階版
-  [27, 29],  // 點讀大冒險
-  [30, 32],  // 數學套組
-  [33, 35],  // 注音拼音套組
+  [9,  21],   // 點讀圖鑑
+  [12, 24],   // 好習慣套組
+  [15, 27],   // 語彙智育套組
+  [18, 30],   // 好情緒EQ套組
+  [21, 33],   // 英語Plus初階
+  [24, 36],   // 英語進階版
+  [27, 39],   // 點讀大冒險
+  [30, 42],   // 數學套組
+  [33, 45],   // 注音拼音套組
 ];
 
 function initialDefaults(idx) {
@@ -1650,8 +1680,17 @@ function renderChart(timeline) {
     }
 
     html += `<div class="cursor-line" style="left:${p(currentAge)}%;"></div>
-        </div>
-      </div>`;
+        </div>`;
+    // 設定の開始 / 上限月齡 縱バー（bar-wrap-inner の外側に配置、label をはみ出させる）
+    if (!skipped) {
+      if (desiredStart >= minAge && desiredStart <= maxAge) {
+        html += `<div class="config-line start" style="left:${p(desiredStart)}%;" title="設定開始月齡 ${desiredStart}M"><span class="config-tag">${desiredStart}</span></div>`;
+      }
+      if (desiredEnd >= minAge && desiredEnd <= maxAge) {
+        html += `<div class="config-line end" style="left:${p(desiredEnd)}%;" title="配信上限月齡 ${desiredEnd}M（超過則略過）"><span class="config-tag">${desiredEnd}</span></div>`;
+      }
+    }
+    html += `</div>`;
 
     // Row controls (inline) — inputs = default delivery window (system shifts to avoid overlap)
     const inputClass = 'ctrl-input' + (customized ? ' customized' : '');
@@ -1696,6 +1735,8 @@ function renderChart(timeline) {
   html += `<div class="legend">
     <div class="legend-item"><span class="legend-dot" style="background:#E24B4A;"></span>登錄月齡</div>
     <div class="legend-item"><span class="legend-line" style="background:#85B7EB;"></span>WEB 購買中位數</div>
+    <div class="legend-item"><span class="legend-line" style="background:var(--manual);"></span>設定開始月齡</div>
+    <div class="legend-item"><span class="legend-line" style="border-top:2px dashed var(--accent);background:transparent;"></span>配信上限月齡</div>
     <div class="legend-item">● 每個點＝1次訊息</div>
     <div class="legend-item"><span class="legend-band birthday"></span>🎂 生日月（跳過）</div>
     <div class="legend-item"><span class="legend-band preg"></span>👶 妊娠期</div>
