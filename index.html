@@ -410,6 +410,29 @@
     z-index: 2;
   }
 
+  .cutoff-line {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 0;
+    border-left: 1.5px dashed var(--accent);
+    opacity: 0.55;
+    z-index: 2;
+  }
+
+  .dot.past-cutoff {
+    box-shadow: 0 0 0 1.5px var(--card), 0 0 0 2.5px var(--accent);
+    opacity: 0.85;
+  }
+
+  .bar-wrap.past-cutoff .bar-wrap-inner {
+    background: repeating-linear-gradient(
+      135deg,
+      transparent 0 6px,
+      rgba(226,75,74,0.06) 6px 12px
+    );
+  }
+
   .cursor-line {
     position: absolute;
     top: 0;
@@ -778,6 +801,23 @@
     color: var(--manual);
     margin-left: 4px;
     font-size: 11px;
+  }
+
+  .lookup-table .lk-past {
+    color: var(--accent);
+    margin-left: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .lookup-table .lk-past-end {
+    color: var(--warn);
+    margin-left: 4px;
+    font-size: 11px;
+  }
+
+  .lookup-table td.lk-pastcut {
+    background-image: repeating-linear-gradient(135deg, transparent 0 4px, rgba(226,75,74,0.10) 4px 8px);
   }
 
   .lookup-meta {
@@ -1186,20 +1226,12 @@ function buildTimeline(regAge, pctKey, channel, overridesMap) {
     const desiredEnd = def.endAge;
     const duration = desiredEnd - desiredStart;
     const actualStart = Math.max(cursor, desiredStart);
+    const actualEnd = actualStart + duration;
     const shifted = actualStart > desiredStart + EPS;
 
-    if (actualStart >= cutoff - EPS) {
-      const reason = (cursor > desiredStart)
-        ? '前商品結束後已超過' + pctKey
-        : '預設起點已超過' + pctKey;
-      results.push({
-        sku, idx, stats, cutoff, skipped: true,
-        customized, desiredStart, desiredEnd, reason
-      });
-      return;
-    }
+    const startPastCutoff = actualStart >= cutoff - EPS;
+    const endPastCutoff = actualEnd > cutoff + EPS;
 
-    const actualEnd = actualStart + duration;
     const { msgs, blocked } = buildSlots(actualStart, actualEnd);
     results.push({
       sku, idx, stats, cutoff, skipped: false,
@@ -1208,7 +1240,8 @@ function buildTimeline(regAge, pctKey, channel, overridesMap) {
       startAge: actualStart, endAge: actualEnd,
       msgs, blocked, count: msgs.length,
       warning: msgs.length < MAX_COUNT,
-      overCutoff: actualEnd > cutoff + EPS
+      startPastCutoff, endPastCutoff,
+      overCutoff: endPastCutoff
     });
     cursor = actualEnd;
   });
@@ -1352,14 +1385,13 @@ function render() {
 }
 
 function renderSummary(timeline) {
-  const active = timeline.filter(t => !t.skipped);
-  const totalMsgs = active.reduce((s, t) => s + t.count, 0);
-  const totalBlocked = active.reduce((s, t) => s + (t.blocked ? t.blocked.length : 0), 0);
-  const lastEnd = active.length > 0 ? active[active.length - 1].endAge : currentAge;
+  const totalMsgs = timeline.reduce((s, t) => s + t.count, 0);
+  const totalBlocked = timeline.reduce((s, t) => s + (t.blocked ? t.blocked.length : 0), 0);
+  const lastEnd = timeline.length > 0 ? timeline[timeline.length - 1].endAge : currentAge;
   const duration = (lastEnd - currentAge).toFixed(1);
-  const skipCount = timeline.filter(t => t.skipped).length;
-  const warnCount = active.filter(t => t.warning).length;
-  const totalLTV = active.reduce((s, t) => s + t.sku.price, 0);
+  const pastCutoffCount = timeline.filter(t => t.startPastCutoff).length;
+  const warnCount = timeline.filter(t => t.warning).length;
+  const totalLTV = timeline.reduce((s, t) => s + t.sku.price, 0);
   const totalN = skus.reduce((s, sku) => s + getStats(sku, currentChannel).n, 0);
 
   document.getElementById('summaryCards').innerHTML = `
@@ -1368,7 +1400,7 @@ function renderSummary(timeline) {
     <div class="card"><div class="card-label">生日月跳過</div><div class="card-value">${totalBlocked}次</div></div>
     <div class="card"><div class="card-label">配信期間</div><div class="card-value">${duration}個月</div></div>
     <div class="card"><div class="card-label">完成月齡</div><div class="card-value">${Math.round(lastEnd)}M</div></div>
-    <div class="card"><div class="card-label">略過商品</div><div class="card-value">${skipCount}件</div></div>
+    <div class="card"><div class="card-label">起點超過${currentPct}</div><div class="card-value">${pastCutoffCount}件</div></div>
     <div class="card"><div class="card-label">次數不足</div><div class="card-value">${warnCount}件</div></div>
     <div class="card highlight"><div class="card-label">最大LTV（配信対象）</div><div class="card-value">NT$${totalLTV.toLocaleString()}</div></div>
   `;
@@ -1385,24 +1417,25 @@ function renderChart(timeline) {
 
   let html = '';
 
-  timeline.forEach(({ sku, idx, stats, skipped, customized, shifted, desiredStart, desiredEnd, startAge, endAge, msgs, blocked, count, reason, warning, overCutoff }) => {
-    const labelClass = skipped ? 'row-label skipped' : 'row-label';
-    const barClass = 'bar-wrap' + (skipped ? ' skipped' : '') + (customized ? ' customized' : '');
+  timeline.forEach(({ sku, idx, stats, customized, shifted, desiredStart, desiredEnd, startAge, endAge, msgs, blocked, count, warning, startPastCutoff, endPastCutoff }) => {
+    const barClass = 'bar-wrap' + (customized ? ' customized' : '') + (startPastCutoff ? ' past-cutoff' : '');
 
     let warnTag = '';
-    if (!skipped && warning) {
-      warnTag = `<span class="warn-icon" title="可配信僅 ${count} 次（標準 ${MAX_COUNT} 次｜生日月跳過 ${blocked ? blocked.length : 0} 次）">⚠</span>`;
+    if (warning) {
+      warnTag += `<span class="warn-icon" title="可配信僅 ${count} 次（標準 ${MAX_COUNT} 次｜生日月跳過 ${blocked ? blocked.length : 0} 次）">⚠</span>`;
     }
-    if (!skipped && shifted) {
+    if (shifted) {
       warnTag += `<span class="warn-icon" title="預設起點 ${desiredStart}M 與前商品重疊，已自動延後至 ${startAge}M" style="color:var(--manual);">↪</span>`;
     }
-    if (!skipped && overCutoff) {
-      warnTag += `<span class="warn-icon" title="配信結束 ${endAge}M 超過 ${currentPct}（${stats[currentPct]}M）">⚑</span>`;
+    if (startPastCutoff) {
+      warnTag += `<span class="warn-icon" title="開始 ${startAge}M 已超過 ${currentPct}（${stats[currentPct]}M）：大半購買者已下單，配信意義較弱" style="color:var(--accent);">⚑</span>`;
+    } else if (endPastCutoff) {
+      warnTag += `<span class="warn-icon" title="結束 ${endAge}M 超過 ${currentPct}（${stats[currentPct]}M）：部分訊息超過購買主峰">⚑</span>`;
     }
 
     // Row label
     html += `<div class="row" data-idx="${idx}">
-      <div class="${labelClass}">
+      <div class="row-label">
         <div class="row-label-name">${warnTag}${customized ? '<span class="manual-tag">客製</span>' : ''}${sku.name}</div>
         <div class="row-label-theme">${sku.theme}</div>
       </div>
@@ -1423,9 +1456,7 @@ function renderChart(timeline) {
       }
     });
 
-    if (skipped) {
-      html += `<div class="skip-label" title="${reason}">略過（${reason}）</div>`;
-    } else {
+    {
       const bl = p(startAge), br = p(endAge);
       const msgAll = (msgs.length > 0 || (blocked && blocked.length > 0))
         ? [...msgs, ...(blocked || [])]
@@ -1438,9 +1469,15 @@ function renderChart(timeline) {
       if (br > drawnEnd + 0.1) {
         html += `<div class="bar-bg rest-span" style="left:${drawnEnd}%;width:${br - drawnEnd}%;background:${sku.color};"></div>`;
       }
+      // Cutoff marker (if within visible range)
+      if (stats[currentPct] >= minAge && stats[currentPct] <= maxAge) {
+        html += `<div class="cutoff-line" style="left:${p(stats[currentPct])}%;" title="${currentChannel} ${currentPct} = ${stats[currentPct]}M"></div>`;
+      }
       // Active dots
       msgs.forEach((m, i) => {
-        html += `<div class="dot" style="left:${p(m)}%;background:${sku.color};" title="${m.toFixed(1)}M（第${i+1}次）NT$${sku.price.toLocaleString()}"></div>`;
+        const pastCutoff = m >= stats[currentPct] - EPS;
+        const cls = pastCutoff ? 'dot past-cutoff' : 'dot';
+        html += `<div class="${cls}" style="left:${p(m)}%;background:${sku.color};" title="${m.toFixed(1)}M（第${i+1}次）NT$${sku.price.toLocaleString()}${pastCutoff?' ⚑ 超過 '+currentPct:''}"></div>`;
       });
       // Blocked dots (dashed outline)
       (blocked || []).forEach(m => {
@@ -1492,11 +1529,13 @@ function renderChart(timeline) {
   html += `<div class="legend">
     <div class="legend-item"><span class="legend-dot" style="background:#E24B4A;"></span>登錄月齡</div>
     <div class="legend-item"><span class="legend-line" style="background:#85B7EB;"></span>${currentChannel} 購買中位數</div>
+    <div class="legend-item"><span class="legend-line" style="border-top:1.5px dashed var(--accent);background:transparent;"></span>${currentChannel} ${currentPct} 終止線</div>
     <div class="legend-item">● 每個點＝1次訊息</div>
     <div class="legend-item"><span class="legend-band birthday"></span>🎂 生日月（跳過）</div>
     <div class="legend-item"><span class="legend-band preg"></span>👶 妊娠期</div>
     <div class="legend-item"><span class="warn-icon">⚠</span>訊息次數不足（&lt;${MAX_COUNT}次）</div>
     <div class="legend-item"><span class="warn-icon" style="color:var(--manual);">↪</span>因重疊自動延後</div>
+    <div class="legend-item"><span class="warn-icon" style="color:var(--accent);">⚑</span>已超過 ${currentPct}</div>
     <div class="legend-item"><span class="legend-badge" style="background:var(--manual);">客製</span>客製化預設</div>
   </div>`;
 
@@ -1504,10 +1543,10 @@ function renderChart(timeline) {
   html += `<div class="logic-box">
     <strong>配信順序邏輯</strong>
     ① 依發展主題順序（語彙啟蒙 → 生活習慣 → 語彙知育 → 情緒人際 → 英語啟蒙 → 英語進階 → 邏輯集中 → 數感邏輯 → 就學準備）<br>
-    ② 各商品右側「預設配信視窗」（開始 / 結束月齡）為使用者可調整的<strong>預設值</strong>，初始為「商品適用年齡下限 ~ +${CAMPAIGN_WINDOW}個月」<br>
+    ② 各商品右側「預設配信視窗」（開始 / 結束月齡）為使用者可調整的<strong>預設值</strong>，初始為「商品適用年齡下限 ~ +${CAMPAIGN_WINDOW}個月」。輸入時開始與結束<strong>連動移動</strong>（寬度保持不變）<br>
     ③ 配信節奏 ＝ 每商品 隔週1次、最多${MAX_COUNT}次（依輸入的視窗長度自動計算）<br>
     ④ 重疊調整 ＝ 若前一商品的結束月齡超過下一商品的預設開始，系統會自動延後（保持視窗長度），以「↪」標示<br>
-    ⑤ 終止基準（目前：${currentChannel} 的 ${currentPct}）：若延後後的開始月齡超過此值則該商品略過<br>
+    ⑤ 終止基準（目前：${currentChannel} 的 ${currentPct}）：紅色虛線標示。商品仍會配信，但若開始月齡已超過此線，以「<span style="color:var(--accent);">⚑</span>」警示（大半購買者已下單）<br>
     ⑥ 生日月（${BIRTHDAY_MONTHS.join('M / ')}M）自動跳過（祝賀訊息由別軌道配送）
   </div>`;
 
@@ -1538,21 +1577,25 @@ function renderStatsTable(timeline) {
     <tbody>`;
 
   timeline.forEach(t => {
-    const { sku, idx, stats, skipped, customized, shifted, startAge, endAge, count, warning, reason, blocked } = t;
+    const { sku, idx, stats, customized, shifted, startAge, endAge, count, warning, blocked, startPastCutoff, endPastCutoff } = t;
 
     const pctCells = PCT_ALL.map(k => {
       const active = (k === currentPct) ? ' pct-active' : '';
       return `<td class="pct-cell${active}">${stats[k]}</td>`;
     }).join('');
 
-    const rowClass = (skipped ? 'skipped' : '') + (customized ? ' manual' : '');
-    const startTxt = skipped ? '—' : startAge + 'M';
-    const endTxt = skipped ? '—' : endAge + 'M';
+    const rowClass = customized ? 'manual' : '';
+    const startTxt = startAge + 'M';
+    const endTxt = endAge + 'M';
     const blockedTxt = (blocked && blocked.length) ? `（跳過 ${blocked.length}）` : '';
-    const countTxt = skipped ? '0' : (count + '次' + blockedTxt + (warning ? ' ⚠' : ''));
-    const status = skipped
-      ? `<span class="actual-skip">略過（${reason}）</span>`
-      : (customized ? (shifted ? '客製 ↪' : '客製') : (shifted ? '預設 ↪' : '預設'));
+    const countTxt = count + '次' + blockedTxt + (warning ? ' ⚠' : '');
+    const statusParts = [];
+    if (customized) statusParts.push('客製');
+    else statusParts.push('預設');
+    if (shifted) statusParts.push('↪');
+    if (startPastCutoff) statusParts.push('<span style="color:var(--accent);">⚑超過</span>');
+    else if (endPastCutoff) statusParts.push('⚑');
+    const status = statusParts.join(' ');
 
     html += `<tr class="${rowClass}">
       <td class="text-left name-cell sku-cell">
@@ -1583,7 +1626,7 @@ function renderStatsTable(timeline) {
 
 function timelineKey(tl) {
   return tl.map(t =>
-    t.skipped ? 'S' : `${t.startAge}-${t.endAge}-${t.count}-${(t.blocked||[]).length}-${t.customized?1:0}`
+    `${t.startAge}-${t.endAge}-${t.count}-${(t.blocked||[]).length}-${t.customized?1:0}-${t.startPastCutoff?1:0}`
   ).join('|');
 }
 
@@ -1626,15 +1669,14 @@ function renderLookupPanel() {
     html += `<tr class="${rowClass}">
       <td class="age-col">${ageLabel}</td>`;
     tl.forEach(t => {
-      if (t.skipped) {
-        html += `<td class="lk-skip" title="${t.reason}">略過</td>`;
-      } else {
-        const bdTag = (t.blocked && t.blocked.length) ? `<span class="lk-bd" title="生日月跳過 ${t.blocked.length} 次">⊘${t.blocked.length}</span>` : '';
-        const shiftTag = t.shifted ? `<span class="lk-shift" title="預設 ${t.desiredStart}~${t.desiredEnd}M｜因重疊延後">↪</span>` : '';
-        const cellClass = 'lk-cell' + (t.customized ? ' lk-custom' : '');
-        const bg = `${t.sku.color}1f`;
-        html += `<td class="${cellClass}" style="background:${bg};" title="${t.sku.name}｜${t.startAge}M ~ ${t.endAge}M｜${t.count}次${t.customized?'（客製預設）':''}${t.shifted?'｜重疊延後':''}">${t.startAge}~${t.endAge}M${shiftTag}${bdTag}</td>`;
-      }
+      const bdTag = (t.blocked && t.blocked.length) ? `<span class="lk-bd" title="生日月跳過 ${t.blocked.length} 次">⊘${t.blocked.length}</span>` : '';
+      const shiftTag = t.shifted ? `<span class="lk-shift" title="預設 ${t.desiredStart}~${t.desiredEnd}M｜因重疊延後">↪</span>` : '';
+      const pastTag = t.startPastCutoff
+        ? `<span class="lk-past" title="開始已超過 ${currentPct}（${t.stats[currentPct]}M）">⚑</span>`
+        : (t.endPastCutoff ? `<span class="lk-past-end" title="結束超過 ${currentPct}（${t.stats[currentPct]}M）">⚑</span>` : '');
+      const cellClass = 'lk-cell' + (t.customized ? ' lk-custom' : '') + (t.startPastCutoff ? ' lk-pastcut' : '');
+      const bg = `${t.sku.color}1f`;
+      html += `<td class="${cellClass}" style="background:${bg};" title="${t.sku.name}｜${t.startAge}M ~ ${t.endAge}M｜${t.count}次${t.customized?'（客製預設）':''}${t.shifted?'｜重疊延後':''}${t.startPastCutoff?'｜開始已超過'+currentPct:''}">${t.startAge}~${t.endAge}M${shiftTag}${pastTag}${bdTag}</td>`;
     });
     html += `</tr>`;
   });
@@ -1643,7 +1685,8 @@ function renderLookupPanel() {
     <div class="lookup-meta">
       連續的登錄月齡若產生相同配信排程，會合併為一區段顯示。
       目前共 <strong>${groups.length}</strong> 個區段（通路 <strong>${currentChannel}</strong>｜終止基準固定 <strong>${currentPct}</strong>）。
-      紅色行＝目前選擇的登錄月齡。<strong>⊘N</strong> ＝ 該商品因生日月跳過的訊息次數。<strong>↪</strong> ＝ 因前商品重疊自動延後。藍色外框 ＝ 客製化預設視窗。
+      紅色行＝目前選擇的登錄月齡。<strong>⊘N</strong> ＝ 該商品因生日月跳過的訊息次數。<strong>↪</strong> ＝ 因前商品重疊自動延後。
+      <span style="color:var(--accent);">⚑</span> ＝ 開始已超過 ${currentPct}（紅色斜線背景）。藍色外框 ＝ 客製化預設視窗。
     </div>`;
   document.getElementById('lookupBody').innerHTML = html;
 }
