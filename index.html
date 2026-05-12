@@ -16,6 +16,7 @@
     --text2: #6B6760;
     --text3: #9B9890;
     --accent: #E24B4A;
+    --accent-soft: #FCEFEF;
     --blue: #85B7EB;
     --warn: #D88A0E;
     --manual: #2F7DD1;
@@ -24,6 +25,10 @@
     --highlight: #FFF8DC;
     --preg: #F7C9D5;
     --birthday: #F8D34A;
+    /* radius 3-tier: small (controls), medium (cards), large (panels) */
+    --r-sm: 4px;
+    --r-md: 8px;
+    --r-lg: 12px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -58,7 +63,7 @@
 
   .controls {
     background: var(--card);
-    border-radius: 12px;
+    border-radius: var(--r-lg);
     padding: 20px 24px;
     margin-bottom: 20px;
     border: 1px solid var(--border);
@@ -99,7 +104,7 @@
   .nudge-btn {
     width: 28px;
     height: 28px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     border: 1px solid var(--border);
     background: var(--card);
     color: var(--text);
@@ -123,7 +128,7 @@
     min-width: 56px;
     background: var(--bg2);
     padding: 4px 10px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     text-align: center;
   }
   .age-display.preg { background: var(--preg); color: var(--text); }
@@ -137,7 +142,7 @@
   .seg-btn {
     font-size: 12px;
     padding: 5px 14px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     cursor: pointer;
     border: 1px solid var(--border);
     background: var(--bg2);
@@ -175,7 +180,7 @@
   .action-btn {
     font-size: 11px;
     padding: 5px 12px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     cursor: pointer;
     border: 1px solid var(--border);
     background: var(--card);
@@ -185,7 +190,18 @@
   }
 
   .action-btn:hover { background: var(--bg2); color: var(--text); }
-  .action-btn.danger:hover { color: var(--accent); border-color: var(--accent); }
+
+  .action-btn.danger {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .action-btn.danger:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
   .action-btn.primary {
     background: var(--manual);
     color: #fff;
@@ -206,10 +222,10 @@
     background: var(--card);
     color: var(--text2);
     cursor: pointer;
-    font-size: 7px;
+    font-size: 8px;
     padding: 0;
     line-height: 1;
-    border-radius: 2px;
+    border-radius: var(--r-sm);
     transition: all 0.1s;
   }
   .move-btn:not(:disabled):hover { background: var(--manual); color: #fff; border-color: var(--manual); }
@@ -250,7 +266,7 @@
   .card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: var(--r-md);
     padding: 12px 18px;
     min-width: 90px;
   }
@@ -293,14 +309,14 @@
 
   .chart-wrap {
     background: var(--card);
-    border-radius: 12px;
+    border-radius: var(--r-lg);
     padding: 20px 24px 16px;
     border: 1px solid var(--border);
     overflow-x: auto;
     position: relative;
   }
 
-  .chart-inner { min-width: 880px; }
+  .chart-inner { min-width: 800px; }
 
   .row {
     display: flex;
@@ -316,7 +332,7 @@
   }
 
   .row-label-name {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--text);
     display: flex;
@@ -326,7 +342,7 @@
   }
 
   .row-label-theme {
-    font-size: 10px;
+    font-size: 10.5px;
     color: var(--text3);
   }
 
@@ -338,7 +354,7 @@
     background: var(--manual);
     color: #fff;
     padding: 1px 5px;
-    border-radius: 3px;
+    border-radius: var(--r-sm);
     font-weight: 600;
     letter-spacing: 0.04em;
   }
@@ -354,7 +370,7 @@
     height: 36px;
     position: relative;
     background: var(--bg2);
-    border-radius: 5px;
+    border-radius: var(--r-sm);
     overflow: visible;
     min-width: 320px;
   }
@@ -363,7 +379,7 @@
     position: absolute;
     inset: 0;
     overflow: hidden;
-    border-radius: 5px;
+    border-radius: var(--r-sm);
   }
 
   .bar-wrap.skipped .bar-wrap-inner { opacity: 0.45; }
@@ -387,7 +403,7 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    background: rgba(248, 211, 74, 0.32);
+    background: rgba(248, 211, 74, 0.20);
     z-index: 0;
     pointer-events: auto;
     cursor: help;
@@ -434,12 +450,12 @@
     height: 100%;
     width: 1.5px;
     background: var(--blue);
-    opacity: 0.7;
+    opacity: 0.5;
     z-index: 2;
   }
 
   .dot.past-cutoff {
-    box-shadow: 0 0 0 1.5px var(--card), 0 0 0 2.5px var(--accent);
+    box-shadow: 0 0 0 1.5px var(--card), 0 0 0 2px var(--accent);
     opacity: 0.85;
   }
 
@@ -466,7 +482,7 @@
   .bar-label {
     position: absolute;
     top: 2px;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 500;
     padding-left: 4px;
     white-space: nowrap;
@@ -503,9 +519,9 @@
   }
 
   .ctrl-input {
-    width: 38px;
-    font-size: 11px;
-    padding: 4px 4px;
+    width: 32px;
+    font-size: 12px;
+    padding: 3px 3px;
     border: 1px solid var(--border);
     border-radius: 0;
     text-align: center;
@@ -538,8 +554,8 @@
   }
 
   .step-btn {
-    width: 18px;
-    height: 24px;
+    width: 16px;
+    height: 22px;
     border: 1px solid var(--border);
     background: var(--card);
     color: var(--text);
@@ -550,24 +566,26 @@
     line-height: 1;
     user-select: none;
   }
-  .step-btn.left { border-radius: 4px 0 0 4px; border-right: 0; }
-  .step-btn.right { border-radius: 0 4px 4px 0; border-left: 0; }
+  .step-btn.left { border-radius: var(--r-sm) 0 0 var(--r-sm); border-right: 0; }
+  .step-btn.right { border-radius: 0 var(--r-sm) var(--r-sm) 0; border-left: 0; }
   .step-btn:hover { background: var(--manual); color: #fff; border-color: var(--manual); }
   .step-btn:active { background: #2766B4; }
   .input-stepper.customized .step-btn { border-color: var(--manual); }
 
   .reset-btn {
-    font-size: 13px;
-    padding: 2px 7px;
-    border-radius: 5px;
+    font-size: 12px;
+    padding: 2px 5px;
+    border-radius: var(--r-sm);
     border: 1px solid var(--border);
     cursor: pointer;
     font-weight: 500;
     transition: all 0.12s;
     background: var(--card);
     color: var(--text2);
-    min-width: 28px;
-    line-height: 1.4;
+    min-width: 22px;
+    height: 22px;
+    line-height: 1;
+    margin-left: 4px;
   }
   .reset-btn:not(:disabled):hover { background: var(--bg2); color: var(--accent); border-color: var(--accent); }
   .reset-btn:disabled { opacity: 0.25; cursor: not-allowed; }
@@ -585,7 +603,7 @@
   .axis-tick {
     position: absolute;
     transform: translateX(-50%);
-    font-size: 10px;
+    font-size: 11px;
     color: var(--text3);
     top: 0;
   }
@@ -593,7 +611,7 @@
   .axis-bd {
     position: absolute;
     transform: translateX(-50%);
-    font-size: 10px;
+    font-size: 10.5px;
     color: #C9990C;
     top: 12px;
     font-weight: 600;
@@ -612,7 +630,7 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text2);
   }
 
@@ -622,7 +640,7 @@
   .legend-band {
     width: 14px;
     height: 14px;
-    border-radius: 3px;
+    border-radius: var(--r-sm);
   }
   .legend-band.preg {
     background: repeating-linear-gradient(45deg,
@@ -634,7 +652,7 @@
   .legend-badge {
     font-size: 9px;
     padding: 1px 5px;
-    border-radius: 3px;
+    border-radius: var(--r-sm);
     font-weight: 600;
     color: #fff;
   }
@@ -643,8 +661,8 @@
     margin-top: 16px;
     padding: 12px 16px;
     background: var(--bg2);
-    border-radius: 8px;
-    font-size: 11px;
+    border-radius: var(--r-md);
+    font-size: 12px;
     color: var(--text2);
     line-height: 1.9;
     border-left: 3px solid var(--text3);
@@ -667,7 +685,7 @@
   .batch-panel {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: var(--r-lg);
     margin-top: 20px;
     overflow: hidden;
   }
@@ -697,7 +715,7 @@
     background: var(--manual);
     color: #fff;
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: var(--r-sm);
     font-weight: 600;
   }
 
@@ -805,7 +823,7 @@
   .lookup-table {
     border-collapse: separate;
     border-spacing: 0;
-    font-size: 11px;
+    font-size: 12px;
     margin-top: 12px;
     font-variant-numeric: tabular-nums;
   }
@@ -904,12 +922,12 @@
   }
 
   .lookup-meta {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text2);
     margin-top: 12px;
     padding: 10px 12px;
     background: var(--bg2);
-    border-radius: 8px;
+    border-radius: var(--r-md);
     line-height: 1.7;
   }
 
@@ -985,7 +1003,7 @@
 
   .stats-table-wrap {
     background: var(--card);
-    border-radius: 12px;
+    border-radius: var(--r-lg);
     padding: 20px 24px;
     border: 1px solid var(--border);
     overflow-x: auto;
@@ -1059,12 +1077,12 @@
   .stats-table .n-cell { color: var(--text2); font-variant-numeric: tabular-nums; }
 
   .ch-meta {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text2);
     margin-top: 10px;
     padding: 10px 12px;
     background: var(--bg2);
-    border-radius: 8px;
+    border-radius: var(--r-md);
     line-height: 1.7;
   }
 
@@ -1076,7 +1094,7 @@
     background: var(--text);
     color: var(--bg);
     padding: 8px 16px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     font-size: 12px;
     z-index: 200;
     opacity: 0;
@@ -1183,62 +1201,63 @@
 
 <div id="toast" class="toast"></div>
 
-<div class="footer">LC8T｜ACTS 配信設計 v2.1 ｜ Benesse Taiwan ｜ 最後更新：2026-05-12 18:05 UTC</div>
+<div class="footer">LC8T｜ACTS 配信設計 v2.2 ｜ Benesse Taiwan ｜ 最後更新：2026-05-12 18:30 UTC</div>
 
 </div>
 
 <script>
 // 再集計データ（訂單日期 >= 2025-01-01）
+// 商品色：發展主題で5系統に整理（語彙=緑、生活情緒=橙、英語=赤系、邏輯數學=青紫、就學=teal）
 const skus = [
-  { sku:'20250FE00', name:'點讀圖鑑',     theme:'語彙啟蒙', entryAge:6,  price:2399, color:'#1D9E75',
+  { sku:'20250FE00', name:'點讀圖鑑',     theme:'語彙啟蒙', entryAge:6,  price:2399, color:'#4FAD80',
     channels:{
       WEB:{n:324,  median:17, P25:13, P50:17, P60:19, P70:23, P75:25, P90:45},
       TM: {n:307,  median:17, P25:13, P50:17, P60:19, P70:22, P75:25, P90:40},
       KOL:{n:315,  median:19, P25:15, P50:19, P60:22, P70:26, P75:30, P90:49},
       ALL:{n:946,  median:18, P25:14, P50:18, P60:20, P70:24, P75:26, P90:45}}},
-  { sku:'20240FA00', name:'好習慣套組',   theme:'生活習慣', entryAge:12, price:4299, color:'#3266AD',
+  { sku:'20240FA00', name:'好習慣套組',   theme:'生活習慣', entryAge:12, price:4299, color:'#E0A23C',
     channels:{
       WEB:{n:258,  median:19, P25:14, P50:19, P60:22, P70:24, P75:27, P90:55},
       TM: {n:590,  median:16, P25:12, P50:16, P60:18, P70:20, P75:22, P90:29},
       KOL:{n:287,  median:18, P25:13, P50:18, P60:19, P70:21, P75:24, P90:28},
       ALL:{n:1135, median:17, P25:12, P50:17, P60:19, P70:22, P75:23, P90:33}}},
-  { sku:'20250FD00', name:'語彙智育套組', theme:'語彙知育', entryAge:12, price:4900, color:'#7F77DD',
+  { sku:'20250FD00', name:'語彙智育套組', theme:'語彙知育', entryAge:12, price:4900, color:'#2A7A56',
     channels:{
       WEB:{n:270,  median:23, P25:17, P50:23, P60:27, P70:31, P75:35, P90:59},
       TM: {n:464,  median:23, P25:15, P50:23, P60:25, P70:28, P75:30, P90:39},
       KOL:{n:245,  median:22, P25:16, P50:22, P60:25, P70:28, P75:30, P90:47},
       ALL:{n:979,  median:23, P25:16, P50:23, P60:25, P70:29, P75:31, P90:47}}},
-  { sku:'20250FA00', name:'好情緒EQ套組', theme:'情緒人際', entryAge:30, price:2199, color:'#EF9F27',
+  { sku:'20250FA00', name:'好情緒EQ套組', theme:'情緒人際', entryAge:30, price:2199, color:'#B17725',
     channels:{
       WEB:{n:832,  median:33, P25:25, P50:33, P60:36, P70:39, P75:41, P90:55},
       TM: {n:1608, median:36, P25:28, P50:36, P60:36, P70:39, P75:42, P90:49},
       KOL:{n:576,  median:30, P25:21, P50:30, P60:32, P70:35, P75:36, P90:43},
       ALL:{n:3016, median:34, P25:25, P50:34, P60:36, P70:38, P75:40, P90:49}}},
-  { sku:'20230MY00', name:'英語Plus初階', theme:'英語啟蒙', entryAge:12, price:4800, color:'#D4537E',
+  { sku:'20230MY00', name:'英語Plus初階', theme:'英語啟蒙', entryAge:12, price:4800, color:'#DB5F8E',
     channels:{
       WEB:{n:332,  median:30, P25:22, P50:30, P60:35, P70:38, P75:40, P90:55},
       TM: {n:893,  median:31, P25:22, P50:31, P60:35, P70:36, P75:38, P90:49},
       KOL:{n:272,  median:23, P25:17, P50:23, P60:27, P70:30, P75:31, P90:46},
       ALL:{n:1497, median:29, P25:20, P50:29, P60:33, P70:36, P75:38, P90:49}}},
-  { sku:'20220MY00', name:'英語進階版',   theme:'英語進階', entryAge:36, price:4500, color:'#639922',
+  { sku:'20220MY00', name:'英語進階版',   theme:'英語進階', entryAge:36, price:4500, color:'#9F3A66',
     channels:{
       WEB:{n:117,  median:40, P25:32, P50:40, P60:46, P70:50, P75:51, P90:62},
       TM: {n:584,  median:38, P25:29, P50:38, P60:43, P70:48, P75:48, P90:60},
       KOL:{n:99,   median:33, P25:21, P50:33, P60:36, P70:41, P75:44, P90:54},
       ALL:{n:800,  median:38, P25:29, P50:38, P60:43, P70:48, P75:48, P90:60}}},
-  { sku:'20250FF00', name:'點讀大冒險',   theme:'邏輯集中', entryAge:36, price:2999, color:'#0F6E56',
+  { sku:'20250FF00', name:'點讀大冒險',   theme:'邏輯集中', entryAge:36, price:2999, color:'#5C68C2',
     channels:{
       WEB:{n:210,  median:40, P25:33, P50:40, P60:43, P70:45, P75:46, P90:57},
       TM: {n:213,  median:42, P25:33, P50:42, P60:44, P70:47, P75:48, P90:56},
       KOL:{n:159,  median:36, P25:28, P50:36, P60:39, P70:42, P75:43, P90:51},
       ALL:{n:582,  median:40, P25:32, P50:40, P60:42, P70:45, P75:47, P90:55}}},
-  { sku:'20250FG00', name:'數學套組',     theme:'數感邏輯', entryAge:42, price:3200, color:'#854F0B',
+  { sku:'20250FG00', name:'數學套組',     theme:'數感邏輯', entryAge:42, price:3200, color:'#2E3B85',
     channels:{
       WEB:{n:243,  median:45, P25:38, P50:45, P60:49, P70:52, P75:54, P90:64},
       TM: {n:266,  median:45, P25:36, P50:45, P60:48, P70:53, P75:55, P90:60},
       KOL:{n:345,  median:42, P25:33, P50:42, P60:46, P70:48, P75:50, P90:55},
       ALL:{n:854,  median:44, P25:35, P50:44, P60:47, P70:50, P75:52, P90:59}}},
-  { sku:'20240FM00', name:'注音拼音套組', theme:'就學準備', entryAge:54, price:3200, color:'#993556',
+  { sku:'20240FM00', name:'注音拼音套組', theme:'就學準備', entryAge:54, price:3200, color:'#4C8AAA',
     channels:{
       WEB:{n:374,  median:51, P25:40, P50:51, P60:55, P70:58, P75:61, P90:70},
       TM: {n:1154, median:48, P25:36, P50:48, P60:48, P70:53, P75:55, P90:60},
