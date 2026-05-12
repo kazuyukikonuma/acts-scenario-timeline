@@ -718,6 +718,33 @@
 
   .batch-panel.open .batch-body { display: block; }
 
+  .info-panel .batch-body {
+    padding: 4px 24px 20px;
+  }
+
+  .info-section {
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid var(--bg2);
+  }
+  .info-section:first-child {
+    margin-top: 8px;
+    border-top: 0;
+  }
+  .info-section .info-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .info-section p {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.7;
+    margin: 3px 0;
+  }
+  .info-section p strong { color: var(--text); }
+
   .batch-table {
     width: 100%;
     border-collapse: collapse;
@@ -1065,7 +1092,47 @@
 
 <div class="header">
   <h1>LC8T｜ACTS 登錄月齡別配信情境時間軸</h1>
-  <p>ACTS 配信情境模擬器：以 BCL 登錄月齡為起點，依發展主題順序排程 9 商品的訊息配信，目標是促進 <strong>WEB 自主購買</strong>。預設配置 ＝ 9M 起每 3M 一組的 2M 視窗（9-11、12-14、15-17、…、33-35），生日月間隔自然形成緩衝。<strong>右側右欄＝配信上限月齡</strong>，超過該月齡的會員則此商品不配信（避免 5 歲還在賣初級商品）。如配信中段遇到生日月，dot 自動跳過並推到下一隔週枠（campaign 跨月延伸）。其他通路（TM / KOL）的購買月齡分佈僅作為參考資料置於頁面最下方。妊娠期（-10M ~ -1M）為登錄後等待出生期間。</p>
+</div>
+
+<div class="batch-panel info-panel" id="infoPanel">
+  <div class="batch-header" onclick="toggleInfoPanel()">
+    <div class="batch-header-title">ℹ 使用說明 / 設計概念</div>
+    <div class="batch-chev">▶</div>
+  </div>
+  <div class="batch-body">
+    <div class="info-section">
+      <div class="info-title">📋 工具目的</div>
+      <p>ACTS 配信情境模擬器：以 BCL 登錄月齡為起點，依發展主題順序排程 9 商品的訊息配信，目標是促進 <strong>WEB 自主購買</strong>。</p>
+      <p>預設配置 ＝ 9M 起每 3M 一組的 2M 視窗（9-11、12-14、15-17、…、33-35），生日月間隔自然形成緩衝。</p>
+    </div>
+
+    <div class="info-section">
+      <div class="info-title">🎂 生日月（11M / 23M / 35M / 47M / 59M）</div>
+      <p>祝賀訊息軌道使用此月份。ACTS 的 dot 若落在生日月會自動推到下一隔週枠 ⇒ campaign 自動跨月延伸（如 10M 開始時，10M-11M(BM)-12M 跨三個月）。</p>
+    </div>
+
+    <div class="info-section">
+      <div class="info-title">👶 妊娠期（-10M ~ -1M）</div>
+      <p>寶寶尚未出生的等待期。</p>
+    </div>
+
+    <div class="info-section">
+      <div class="info-title">📐 右側兩欄</div>
+      <p>・<strong>左 ＝ 配信希望開始月齡</strong>：系統會延後避免重疊。</p>
+      <p>・<strong>右 ＝ 配信上限月齡</strong>：超過此月齡則此商品略過（避免 5 歲還在賣初級商品）。</p>
+      <p>・<strong>◀▶</strong>：各獨立 ±1M。</p>
+    </div>
+
+    <div class="info-section">
+      <div class="info-title">⚙ 重設為預設排程</div>
+      <p>清除所有客製化、回到預設 3M 週期排程（9-11、12-14、15-17、…、33-35）。</p>
+    </div>
+
+    <div class="info-section">
+      <div class="info-title">📊 參考資料</div>
+      <p>其他通路（TM / KOL）的購買月齡分佈僅作為參考資料置於頁面最下方。</p>
+    </div>
+  </div>
 </div>
 
 <div class="controls">
@@ -1089,28 +1156,8 @@
 
 <div class="summary-cards" id="summaryCards"></div>
 
-<div class="tabs">
-  <div class="tab active" data-view="chart" onclick="setView('chart')">圖表</div>
-  <div class="tab" data-view="table" onclick="setView('table')">表格</div>
-</div>
-
-<div id="chartView">
-  <div class="chart-notice">
-    <span class="nb-icon">🎂</span><strong>生日月（11 / 23 / 35 / 47 / 59M）</strong>：祝賀訊息軌道使用此月份。ACTS 的 dot 若落在生日月會自動推到下一隔週枠 ⇒ campaign 自動跨月延伸（如 10M 開始時，10-11(BM)-12 跨三月）。
-    <span class="sep">｜</span>
-    <span class="nb-icon">👶</span><strong>妊娠期（-10M ~ -1M）</strong>：寶寶尚未出生的等待期。
-    <br>
-    <span class="nb-icon">📐</span><strong>右側兩欄</strong>：左 ＝ 配信希望開始月齡（系統會延後避免重疊）｜右 ＝ <strong>配信上限月齡</strong>（超過此月齡則此商品略過，避免 5 歲還在賣初級商品）。◀▶ 各獨立 ±1M。
-    <span class="sep">｜</span>
-    <span class="nb-icon">⚙</span><strong>排程最佳化</strong>：清除所有客製化、回到預設 3M 週期排程（9-11、12-14、15-17、…、33-35）。
-  </div>
-  <div class="chart-wrap">
-    <div class="chart-inner" id="chartInner"></div>
-  </div>
-</div>
-
-<div id="tableView" style="display:none;">
-  <div class="stats-table-wrap" id="statsTableWrap"></div>
+<div class="chart-wrap">
+  <div class="chart-inner" id="chartInner"></div>
 </div>
 
 <div class="batch-panel" id="lookupPanel">
@@ -1136,7 +1183,7 @@
 
 <div id="toast" class="toast"></div>
 
-<div class="footer">LC8T｜ACTS 配信設計 v2.0 ｜ Benesse Taiwan ｜ 最後更新：2026-05-12 17:50 UTC</div>
+<div class="footer">LC8T｜ACTS 配信設計 v2.1 ｜ Benesse Taiwan ｜ 最後更新：2026-05-12 18:05 UTC</div>
 
 </div>
 
@@ -1229,7 +1276,6 @@ const chNotes = {
 const currentPct = 'P70';
 const currentChannel = 'WEB';
 let currentAge = 10;
-let currentView = 'chart';
 let overrides = {};
 let order = skus.map((_, i) => i);  // display order (permutation of indices)
 
@@ -1357,17 +1403,10 @@ function updateAgeLabel() {
   document.getElementById('ageInc').disabled = currentAge >= MAX_AGE_SLIDER;
 }
 
-// setPct / setChannel removed: P70 and WEB are fixed by design.
-// ACTS 設計目標 = WEB 自主購買誘発、cutoff = WEB P70.
+// setPct / setChannel / setView removed: P70, WEB, single chart view fixed by design.
 
-function setView(v) {
-  currentView = v;
-  document.querySelectorAll('.tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.view === v);
-  });
-  document.getElementById('chartView').style.display = v === 'chart' ? 'block' : 'none';
-  document.getElementById('tableView').style.display = v === 'table' ? 'block' : 'none';
-  syncUrl();
+function toggleInfoPanel() {
+  document.getElementById('infoPanel').classList.toggle('open');
 }
 
 function setDefaults(idx, startAge, endAge) {
@@ -1480,29 +1519,20 @@ function render() {
   const timeline = buildTimeline(currentAge, currentPct, currentChannel, overrides);
   renderSummary(timeline);
   renderChart(timeline);
-  renderStatsTable(timeline);
   renderLookupPanel();
   renderMedianPanel();
 }
 
 function renderSummary(timeline) {
   const totalMsgs = timeline.reduce((s, t) => s + t.count, 0);
-  const totalBlocked = timeline.reduce((s, t) => s + (t.blocked ? t.blocked.length : 0), 0);
   const lastEnd = timeline.length > 0 ? timeline[timeline.length - 1].endAge : currentAge;
   const duration = (lastEnd - currentAge).toFixed(1);
-  const pastCutoffCount = timeline.filter(t => t.startPastCutoff).length;
-  const warnCount = timeline.filter(t => t.warning).length;
-  const totalLTV = timeline.reduce((s, t) => s + t.sku.price, 0);
-  const totalN = skus.reduce((s, sku) => s + getStats(sku, currentChannel).n, 0);
+  const totalLTV = timeline.reduce((s, t) => s + (t.skipped ? 0 : t.sku.price), 0);
 
   document.getElementById('summaryCards').innerHTML = `
-    <div class="card"><div class="card-label">WEB 購買者 n 合計</div><div class="card-value">${totalN.toLocaleString()}</div></div>
     <div class="card"><div class="card-label">總訊息次數</div><div class="card-value">${totalMsgs}次</div></div>
-    <div class="card"><div class="card-label">生日月跳過</div><div class="card-value">${totalBlocked}次</div></div>
     <div class="card"><div class="card-label">配信期間</div><div class="card-value">${duration}個月</div></div>
     <div class="card"><div class="card-label">完成月齡</div><div class="card-value">${Math.round(lastEnd)}M</div></div>
-    <div class="card"><div class="card-label">起點超過 P70</div><div class="card-value">${pastCutoffCount}件</div></div>
-    <div class="card"><div class="card-label">次數不足</div><div class="card-value">${warnCount}件</div></div>
     <div class="card highlight"><div class="card-label">最大LTV（配信対象）</div><div class="card-value">NT$${totalLTV.toLocaleString()}</div></div>
   `;
 }
@@ -1671,76 +1701,6 @@ function renderChart(timeline) {
   document.getElementById('chartInner').innerHTML = html;
 }
 
-function renderStatsTable(timeline) {
-  const headerCols = PCT_ALL.map(k => {
-    const active = (k === currentPct) ? ' pct-active' : '';
-    return `<th class="pct-col${active}">${k}</th>`;
-  }).join('');
-
-  let html = `<table class="stats-table">
-    <thead>
-      <tr>
-        <th class="text-left" style="min-width:140px;">商品 / 主題</th>
-        <th>適用下限</th>
-        <th>n</th>
-        <th>中位</th>
-        ${headerCols}
-        <th>配信開始</th>
-        <th>配信結束</th>
-        <th>次數</th>
-        <th>價格</th>
-        <th>狀態</th>
-      </tr>
-    </thead>
-    <tbody>`;
-
-  timeline.forEach(t => {
-    const { sku, idx, stats, customized, shifted, startAge, endAge, count, warning, blocked, startPastCutoff, endPastCutoff } = t;
-
-    const pctCells = PCT_ALL.map(k => {
-      const active = (k === currentPct) ? ' pct-active' : '';
-      return `<td class="pct-cell${active}">${stats[k]}</td>`;
-    }).join('');
-
-    const rowClass = customized ? 'manual' : '';
-    const startTxt = startAge + 'M';
-    const endTxt = endAge + 'M';
-    const blockedTxt = (blocked && blocked.length) ? `（跳過 ${blocked.length}）` : '';
-    const countTxt = count + '次' + blockedTxt + (warning ? ' ⚠' : '');
-    const statusParts = [];
-    if (customized) statusParts.push('客製');
-    else statusParts.push('預設');
-    if (shifted) statusParts.push('↪');
-    if (startPastCutoff) statusParts.push('<span style="color:var(--accent);">⚑超過</span>');
-    else if (endPastCutoff) statusParts.push('⚑');
-    const status = statusParts.join(' ');
-
-    html += `<tr class="${rowClass}">
-      <td class="text-left name-cell sku-cell">
-        <span class="sku-color-bar" style="background:${sku.color};"></span>${sku.name}
-        <span class="theme-sub">${sku.theme} ・ ${sku.sku}</span>
-      </td>
-      <td>${sku.entryAge}M</td>
-      <td class="n-cell">${stats.n.toLocaleString()}</td>
-      <td>${stats.median}</td>
-      ${pctCells}
-      <td>${startTxt}</td>
-      <td>${endTxt}</td>
-      <td>${countTxt}</td>
-      <td>NT$${sku.price.toLocaleString()}</td>
-      <td>${status}</td>
-    </tr>`;
-  });
-
-  html += `</tbody></table>
-    <div class="ch-meta">
-      <strong>WEB 通路</strong>：公式EC 自主購買者の月齢分佈（ACTS 設計対象）。P 值來自重新匯總資料（訂單日期 ≥ 2025-01-01）。「中位」＝ P50。<br>
-      黃色欄為配信終止基準（<strong>P70</strong>）。「配信開始 / 結束」為實際排程（已套用右側欄位的預設視窗＋重疊延後）。<br>
-      生日月（${BIRTHDAY_MONTHS.join('M / ')}M）自動跳過，「次數」欄會顯示跳過幾次。狀態 ↪ ＝ 因重疊自動延後、⚑ ＝ 已超過 P70。其他通路（TM / KOL）資料請見頁面最下方參考資料。
-    </div>`;
-
-  document.getElementById('statsTableWrap').innerHTML = html;
-}
 
 function timelineKey(tl) {
   return tl.map(t =>
@@ -2060,11 +2020,9 @@ function decodeOrder(str) {
 function readUrl() {
   const params = new URLSearchParams(location.search);
   const age = parseInt(params.get('age'));
-  const v = params.get('v');
   const o = params.get('o');
   const ord = params.get('order');
   if (!isNaN(age) && age >= MIN_AGE && age <= MAX_AGE_SLIDER) currentAge = age;
-  if (v === 'chart' || v === 'table') currentView = v;
   if (o) overrides = decodeOverrides(o);
   const decodedOrder = decodeOrder(ord);
   if (decodedOrder) order = decodedOrder;
@@ -2073,7 +2031,6 @@ function readUrl() {
 function syncUrl() {
   const params = new URLSearchParams();
   params.set('age', currentAge);
-  params.set('v', currentView);
   const oStr = encodeOverrides();
   if (oStr) params.set('o', oStr);
   const ordStr = encodeOrder();
@@ -2117,7 +2074,6 @@ document.getElementById('ageSlider').addEventListener('input', function() {
 readUrl();
 document.getElementById('ageSlider').value = currentAge;
 updateAgeLabel();
-setView(currentView);
 render();
 </script>
 
