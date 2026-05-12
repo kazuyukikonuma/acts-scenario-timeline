@@ -849,10 +849,11 @@
     font-size: 11px;
   }
 
-  .median-table th.ch-WEB { color: #2F7DD1; }
+  .median-table th.ch-WEB { color: #2F7DD1; background: #E8F1FA; }
   .median-table th.ch-TM { color: #E24B4A; }
   .median-table th.ch-KOL { color: #D4537E; }
   .median-table th.ch-ALL { color: var(--text); }
+  .median-table td.cell-web { background: #F4F9FE; font-weight: 600; }
 
   .median-table th.text-left, .median-table td.text-left { text-align: left; }
 
@@ -1008,7 +1009,7 @@
 
 <div class="header">
   <h1>ACTS｜LC8T 登錄月齡別配信情境時間軸</h1>
-  <p>依發展主題順序配信。切入月齡以商品適用年齡下限為基準。可切換通路（WEB / TM / KOL / ALL）使用 2025 年後重新匯總的購買月齡分佈。生日月（11M / 23M / 35M / 47M / 59M）會配送祝賀訊息，ACTS 不在此期間配送。妊娠期（-10M ~ -1M）也包含在時間軸中。</p>
+  <p>ACTS 配信情境模擬器：以 BCL 登錄月齡為起點，依發展主題順序排程 9 商品的訊息配信，目標是促進 <strong>WEB 自主購買</strong>。各商品的「預設配信視窗」可調整，系統自動延後重疊。終止基準為 <strong>WEB P70</strong>（70% 購買者已下單）。其他通路（TM / KOL）的購買月齡分佈僅作為參考資料置於頁面最下方。生日月（11M / 23M / 35M / 47M / 59M）的祝賀訊息由別軌道配送，ACTS 不在此期間配信。妊娠期（-10M ~ -1M）為登錄後等待出生期間。</p>
 </div>
 
 <div class="controls">
@@ -1022,14 +1023,6 @@
     <span class="age-display" id="ageLabel">10M</span>
   </div>
   <div class="control-row">
-    <span class="control-label">算定通路</span>
-    <div class="btn-group" id="chBtns">
-      <button class="seg-btn ch-WEB active" data-ch="WEB" onclick="setChannel('WEB')">WEB</button>
-      <button class="seg-btn ch-TM" data-ch="TM" onclick="setChannel('TM')">TM（電話）</button>
-      <button class="seg-btn ch-KOL" data-ch="KOL" onclick="setChannel('KOL')">KOL</button>
-      <button class="seg-btn ch-ALL" data-ch="ALL" onclick="setChannel('ALL')">ALL</button>
-    </div>
-    <span class="pct-note" id="chNote"></span>
     <div class="action-row">
       <button class="action-btn" onclick="copyShareUrl()">複製網址</button>
       <button class="action-btn danger" onclick="resetAllOverrides()">全部重設</button>
@@ -1174,9 +1167,9 @@ const chNotes = {
   ALL:'全通路合算',
 };
 
-let currentPct = 'P70';
+const currentPct = 'P70';
+const currentChannel = 'WEB';
 let currentAge = 10;
-let currentChannel = 'WEB';
 let currentView = 'chart';
 let overrides = {};
 
@@ -1267,27 +1260,8 @@ function updateAgeLabel() {
   document.getElementById('ageInc').disabled = currentAge >= MAX_AGE_SLIDER;
 }
 
-function setPct(p) {
-  currentPct = p;
-  PCT_KEYS.forEach(k => {
-    const btn = document.getElementById('btn-' + k);
-    if (btn) btn.classList.toggle('active', k === p);
-  });
-  const note = document.getElementById('pctNote');
-  if (note) note.textContent = '→ ' + pctNotes[p];
-  render();
-  syncUrl();
-}
-
-function setChannel(ch) {
-  currentChannel = ch;
-  document.querySelectorAll('#chBtns .seg-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.ch === ch);
-  });
-  document.getElementById('chNote').textContent = '→ ' + chNotes[ch];
-  render();
-  syncUrl();
-}
+// setPct / setChannel removed: P70 and WEB are fixed by design.
+// ACTS 設計目標 = WEB 自主購買誘発、cutoff = WEB P70.
 
 function setView(v) {
   currentView = v;
@@ -1395,12 +1369,12 @@ function renderSummary(timeline) {
   const totalN = skus.reduce((s, sku) => s + getStats(sku, currentChannel).n, 0);
 
   document.getElementById('summaryCards').innerHTML = `
-    <div class="card"><div class="card-label">CH ${currentChannel} 的 n 合計</div><div class="card-value">${totalN.toLocaleString()}</div></div>
+    <div class="card"><div class="card-label">WEB 購買者 n 合計</div><div class="card-value">${totalN.toLocaleString()}</div></div>
     <div class="card"><div class="card-label">總訊息次數</div><div class="card-value">${totalMsgs}次</div></div>
     <div class="card"><div class="card-label">生日月跳過</div><div class="card-value">${totalBlocked}次</div></div>
     <div class="card"><div class="card-label">配信期間</div><div class="card-value">${duration}個月</div></div>
     <div class="card"><div class="card-label">完成月齡</div><div class="card-value">${Math.round(lastEnd)}M</div></div>
-    <div class="card"><div class="card-label">起點超過${currentPct}</div><div class="card-value">${pastCutoffCount}件</div></div>
+    <div class="card"><div class="card-label">起點超過 P70</div><div class="card-value">${pastCutoffCount}件</div></div>
     <div class="card"><div class="card-label">次數不足</div><div class="card-value">${warnCount}件</div></div>
     <div class="card highlight"><div class="card-label">最大LTV（配信対象）</div><div class="card-value">NT$${totalLTV.toLocaleString()}</div></div>
   `;
@@ -1528,14 +1502,14 @@ function renderChart(timeline) {
   // Legend
   html += `<div class="legend">
     <div class="legend-item"><span class="legend-dot" style="background:#E24B4A;"></span>登錄月齡</div>
-    <div class="legend-item"><span class="legend-line" style="background:#85B7EB;"></span>${currentChannel} 購買中位數</div>
-    <div class="legend-item"><span class="legend-line" style="border-top:1.5px dashed var(--accent);background:transparent;"></span>${currentChannel} ${currentPct} 終止線</div>
+    <div class="legend-item"><span class="legend-line" style="background:#85B7EB;"></span>WEB 購買中位數</div>
+    <div class="legend-item"><span class="legend-line" style="border-top:1.5px dashed var(--accent);background:transparent;"></span>WEB P70 終止線</div>
     <div class="legend-item">● 每個點＝1次訊息</div>
     <div class="legend-item"><span class="legend-band birthday"></span>🎂 生日月（跳過）</div>
     <div class="legend-item"><span class="legend-band preg"></span>👶 妊娠期</div>
     <div class="legend-item"><span class="warn-icon">⚠</span>訊息次數不足（&lt;${MAX_COUNT}次）</div>
     <div class="legend-item"><span class="warn-icon" style="color:var(--manual);">↪</span>因重疊自動延後</div>
-    <div class="legend-item"><span class="warn-icon" style="color:var(--accent);">⚑</span>已超過 ${currentPct}</div>
+    <div class="legend-item"><span class="warn-icon" style="color:var(--accent);">⚑</span>已超過 WEB P70</div>
     <div class="legend-item"><span class="legend-badge" style="background:var(--manual);">客製</span>客製化預設</div>
   </div>`;
 
@@ -1546,7 +1520,7 @@ function renderChart(timeline) {
     ② 各商品右側「預設配信視窗」（開始 / 結束月齡）為使用者可調整的<strong>預設值</strong>，初始為「商品適用年齡下限 ~ +${CAMPAIGN_WINDOW}個月」。輸入時開始與結束<strong>連動移動</strong>（寬度保持不變）<br>
     ③ 配信節奏 ＝ 每商品 隔週1次、最多${MAX_COUNT}次（依輸入的視窗長度自動計算）<br>
     ④ 重疊調整 ＝ 若前一商品的結束月齡超過下一商品的預設開始，系統會自動延後（保持視窗長度），以「↪」標示<br>
-    ⑤ 終止基準（目前：${currentChannel} 的 ${currentPct}）：紅色虛線標示。商品仍會配信，但若開始月齡已超過此線，以「<span style="color:var(--accent);">⚑</span>」警示（大半購買者已下單）<br>
+    ⑤ 終止基準 ＝ <strong>WEB P70</strong>（紅色虛線）：70% 的 WEB 自主購買者在此月齡前已下單。商品仍會配信，但若開始月齡已超過此線，以「<span style="color:var(--accent);">⚑</span>」警示（大半購買者已下單，WEB 自主購買意義較弱，建議後續轉 T 通路）<br>
     ⑥ 生日月（${BIRTHDAY_MONTHS.join('M / ')}M）自動跳過（祝賀訊息由別軌道配送）
   </div>`;
 
@@ -1616,9 +1590,9 @@ function renderStatsTable(timeline) {
 
   html += `</tbody></table>
     <div class="ch-meta">
-      <strong>目前通路：${currentChannel}</strong>　|　${chNotes[currentChannel]}<br>
-      黃色欄為配信終止基準（<strong>${currentPct}</strong>）。P 值來自重新匯總資料（訂單日期 ≥ 2025-01-01）。「中位」＝ P50。<br>
-      「配信開始 / 結束」為實際排程（已套用右側欄位的預設視窗＋重疊延後）。生日月（${BIRTHDAY_MONTHS.join('M / ')}M）自動跳過，「次數」欄會顯示跳過幾次。狀態 ↪ ＝ 因重疊自動延後。
+      <strong>WEB 通路</strong>：公式EC 自主購買者の月齢分佈（ACTS 設計対象）。P 值來自重新匯總資料（訂單日期 ≥ 2025-01-01）。「中位」＝ P50。<br>
+      黃色欄為配信終止基準（<strong>P70</strong>）。「配信開始 / 結束」為實際排程（已套用右側欄位的預設視窗＋重疊延後）。<br>
+      生日月（${BIRTHDAY_MONTHS.join('M / ')}M）自動跳過，「次數」欄會顯示跳過幾次。狀態 ↪ ＝ 因重疊自動延後、⚑ ＝ 已超過 P70。其他通路（TM / KOL）資料請見頁面最下方參考資料。
     </div>`;
 
   document.getElementById('statsTableWrap').innerHTML = html;
@@ -1683,10 +1657,9 @@ function renderLookupPanel() {
 
   html += `</tbody></table>
     <div class="lookup-meta">
-      連續的登錄月齡若產生相同配信排程，會合併為一區段顯示。
-      目前共 <strong>${groups.length}</strong> 個區段（通路 <strong>${currentChannel}</strong>｜終止基準固定 <strong>${currentPct}</strong>）。
+      連續的登錄月齡若產生相同配信排程，會合併為一區段顯示。目前共 <strong>${groups.length}</strong> 個區段。
       紅色行＝目前選擇的登錄月齡。<strong>⊘N</strong> ＝ 該商品因生日月跳過的訊息次數。<strong>↪</strong> ＝ 因前商品重疊自動延後。
-      <span style="color:var(--accent);">⚑</span> ＝ 開始已超過 ${currentPct}（紅色斜線背景）。藍色外框 ＝ 客製化預設視窗。
+      <span style="color:var(--accent);">⚑</span> ＝ 開始已超過 WEB P70（紅色斜線背景）。藍色外框 ＝ 客製化預設視窗。
     </div>`;
   document.getElementById('lookupBody').innerHTML = html;
 }
@@ -1720,7 +1693,6 @@ function renderMedianPanel() {
     const diff = k.median - w.median;
     const diffClass = diff < 0 ? 'diff-neg' : (diff > 0 ? 'diff-pos' : 'diff-zero');
     const diffTxt = diff === 0 ? '±0' : (diff > 0 ? `+${diff}` : `${diff}`);
-    const highlight = (ch) => currentChannel === ch ? ' style="background:var(--highlight);font-weight:700;"' : '';
 
     html += `<tr>
       <td class="text-left name-cell">
@@ -1728,10 +1700,10 @@ function renderMedianPanel() {
         <span class="theme-sub">${sku.theme} ・ ${sku.sku}</span>
       </td>
       <td>${sku.entryAge}M</td>
-      <td${highlight('WEB')}>${w.median}M<span class="n-sub">n=${w.n.toLocaleString()}</span></td>
-      <td${highlight('TM')}>${t.median}M<span class="n-sub">n=${t.n.toLocaleString()}</span></td>
-      <td${highlight('KOL')}>${k.median}M<span class="n-sub">n=${k.n.toLocaleString()}</span></td>
-      <td${highlight('ALL')}>${a.median}M<span class="n-sub">n=${a.n.toLocaleString()}</span></td>
+      <td class="cell-web">${w.median}M<span class="n-sub">n=${w.n.toLocaleString()}</span></td>
+      <td>${t.median}M<span class="n-sub">n=${t.n.toLocaleString()}</span></td>
+      <td>${k.median}M<span class="n-sub">n=${k.n.toLocaleString()}</span></td>
+      <td>${a.median}M<span class="n-sub">n=${a.n.toLocaleString()}</span></td>
       <td class="${diffClass}">${diffTxt}M</td>
       <td class="n-cell">${a.n.toLocaleString()}</td>
     </tr>`;
@@ -1755,9 +1727,9 @@ function renderMedianPanel() {
 
   html += `</tbody></table>
     <div class="lookup-meta">
-      <strong>資料來源：</strong>歸戶主檔 × 訂單主檔 × 訂單明細（訂單日期 ≥ 2025-01-01）の3ファイルJOIN再集計。<br>
-      <strong>中位＝median（P50）</strong>。「KOL − WEB」欄為KOL中位減WEB中位，<span class="diff-neg" style="font-weight:700;">負値</span>はKOL通路で WEB より早期購買されることを示す（Confluence ACTS 仮説「KOLが中央値より4〜11M早く購買」の根拠）。<br>
-      上方で選擇中の通路 (<strong>${currentChannel}</strong>) 欄を黃色強調。
+      <strong>資料來源：</strong>歸戶主檔 × 訂單主檔 × 訂單明細（訂單日期 ≥ 2025-01-01）の3ファイル JOIN 再集計。<br>
+      <strong>中位＝median（P50）</strong>。<strong>WEB 欄</strong>（薄藍背景）= ACTS 設計対象通路。「KOL − WEB」欄為 KOL 中位減 WEB 中位，<span class="diff-neg" style="font-weight:700;">負値</span>＝ KOL 通路で WEB より早期購買（Confluence ACTS 仮説「KOL が中央値より 4〜11M 早く購買」の実データ根拠）。<br>
+      この表は<strong>設計の参考資料</strong>であり、ACTS 配信ロジックの cutoff は WEB P70 で固定です。
     </div>`;
 
   document.getElementById('medianBody').innerHTML = html;
@@ -1796,13 +1768,9 @@ function decodeOverrides(str) {
 function readUrl() {
   const params = new URLSearchParams(location.search);
   const age = parseInt(params.get('age'));
-  const pct = params.get('pct');
-  const ch = params.get('ch');
   const v = params.get('v');
   const o = params.get('o');
   if (!isNaN(age) && age >= MIN_AGE && age <= MAX_AGE_SLIDER) currentAge = age;
-  if (pct && PCT_KEYS.includes(pct)) currentPct = pct;
-  if (ch && CHANNELS.includes(ch)) currentChannel = ch;
   if (v === 'chart' || v === 'table') currentView = v;
   if (o) overrides = decodeOverrides(o);
 }
@@ -1810,8 +1778,6 @@ function readUrl() {
 function syncUrl() {
   const params = new URLSearchParams();
   params.set('age', currentAge);
-  params.set('pct', currentPct);
-  params.set('ch', currentChannel);
   params.set('v', currentView);
   const oStr = encodeOverrides();
   if (oStr) params.set('o', oStr);
@@ -1854,16 +1820,6 @@ document.getElementById('ageSlider').addEventListener('input', function() {
 readUrl();
 document.getElementById('ageSlider').value = currentAge;
 updateAgeLabel();
-PCT_KEYS.forEach(k => {
-  const btn = document.getElementById('btn-' + k);
-  if (btn) btn.classList.toggle('active', k === currentPct);
-});
-const pctNoteInit = document.getElementById('pctNote');
-if (pctNoteInit) pctNoteInit.textContent = '→ ' + pctNotes[currentPct];
-document.querySelectorAll('#chBtns .seg-btn').forEach(b => {
-  b.classList.toggle('active', b.dataset.ch === currentChannel);
-});
-document.getElementById('chNote').textContent = '→ ' + chNotes[currentChannel];
 setView(currentView);
 render();
 </script>
