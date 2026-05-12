@@ -503,15 +503,21 @@
   }
 
   .ctrl-input {
-    width: 50px;
+    width: 38px;
     font-size: 11px;
-    padding: 4px 5px;
+    padding: 4px 4px;
     border: 1px solid var(--border);
-    border-radius: 4px;
-    text-align: right;
+    border-radius: 0;
+    text-align: center;
     font-family: inherit;
     background: var(--card);
     color: var(--text);
+    -moz-appearance: textfield;
+  }
+  .ctrl-input::-webkit-inner-spin-button,
+  .ctrl-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
 
   .ctrl-input.customized {
@@ -525,6 +531,30 @@
     border-color: var(--accent);
     background: #FFF0F0;
   }
+
+  .input-stepper {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .step-btn {
+    width: 18px;
+    height: 24px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 9px;
+    padding: 0;
+    transition: all 0.1s;
+    line-height: 1;
+    user-select: none;
+  }
+  .step-btn.left { border-radius: 4px 0 0 4px; border-right: 0; }
+  .step-btn.right { border-radius: 0 4px 4px 0; border-left: 0; }
+  .step-btn:hover { background: var(--manual); color: #fff; border-color: var(--manual); }
+  .step-btn:active { background: #2766B4; }
+  .input-stepper.customized .step-btn { border-color: var(--manual); }
 
   .reset-btn {
     font-size: 13px;
@@ -1050,7 +1080,7 @@
   </div>
   <div class="control-row">
     <div class="action-row">
-      <button class="action-btn primary" onclick="autoOptimize()" title="依目前登錄月齡，自動為各商品挑選不撞生日月的最早起始月齡（順序保持不變）">⚙ 自動最佳化</button>
+      <button class="action-btn primary" onclick="autoOptimize()" title="自動為每個商品挑選『不撞生日月的最早起始月齡』。&#10;・各商品的視窗寬度（持續月數）保持不變&#10;・順序維持不變、cursor 順序傳遞&#10;・結果：所有 4 次訊息都不會在 11M/23M/35M/47M/59M 失效&#10;・按下後可在右側欄位看到自動填入的數字，反白「客製」標記，可再手動微調">⚙ 排程最佳化</button>
       <button class="action-btn" onclick="copyShareUrl()">複製網址</button>
       <button class="action-btn danger" onclick="resetAllOverrides()">全部重設</button>
     </div>
@@ -1069,8 +1099,10 @@
     <span class="nb-icon">🎂</span><strong>生日月（11M / 23M / 35M / 47M / 59M）</strong>：此月份會配送生日祝賀訊息，ACTS 不在此月份配送商品訊息（自動跳過）。
     <span class="sep">｜</span>
     <span class="nb-icon">👶</span><strong>妊娠期（-10M ~ -1M）</strong>：寶寶尚未出生的等待期，登錄後待出生後依商品預設視窗啟動配信。
+    <br>
+    <span class="nb-icon">📐</span><strong>右側欄位 ＝ 預設配信視窗</strong>：◀▶ 鈕點 1M 平移、開始與結束連動（寬度保持）。系統會自動依順序檢查重疊並延後，避免兩商品同時配信。
     <span class="sep">｜</span>
-    <span class="nb-icon">📐</span><strong>右側欄位 ＝ 預設配信視窗</strong>：可調整的開始 / 結束月齡。系統會自動依順序檢查重疊並延後（保持視窗長度），避免兩商品同時配信。
+    <span class="nb-icon">⚙</span><strong>排程最佳化</strong>：上方按鈕，會依目前登錄月齡<u>一次設定全部 9 商品的起始月齡</u>，讓 4 次訊息都不撞生日月。視窗寬度與順序保持不變，按下後可再個別微調。
   </div>
   <div class="chart-wrap">
     <div class="chart-inner" id="chartInner"></div>
@@ -1104,7 +1136,7 @@
 
 <div id="toast" class="toast"></div>
 
-<div class="footer">LC8T｜ACTS 配信設計 v1.6 ｜ Benesse Taiwan ｜ 最後更新：2026-05-12 16:10 UTC</div>
+<div class="footer">LC8T｜ACTS 配信設計 v1.7 ｜ Benesse Taiwan ｜ 最後更新：2026-05-12 16:35 UTC</div>
 
 </div>
 
@@ -1321,6 +1353,30 @@ function resetDefault(idx) {
   syncUrl();
 }
 
+function stepInput(idx, field, delta) {
+  const before = getDefaults(idx);
+  const duration = before.endAge - before.startAge;
+  let newStart, newEnd;
+  if (field === 'startAge') {
+    newStart = before.startAge + delta;
+    newEnd = newStart + duration;
+  } else {
+    newEnd = before.endAge + delta;
+    newStart = newEnd - duration;
+  }
+  if (newStart < MIN_AGE) {
+    const shift = MIN_AGE - newStart;
+    newStart += shift; newEnd += shift;
+  }
+  if (newEnd > 84) {
+    const shift = newEnd - 84;
+    newStart -= shift; newEnd -= shift;
+  }
+  setDefaults(idx, newStart, newEnd);
+  render();
+  syncUrl();
+}
+
 function onRowInputChange(input) {
   const idx = parseInt(input.dataset.idx);
   const field = input.dataset.field;
@@ -1408,6 +1464,7 @@ function nextCleanStart(minS) {
 function autoOptimize() {
   let cursor = currentAge;
   const newOverrides = {};
+  let changedCount = 0;
   order.forEach((skuIdx) => {
     const sku = skus[skuIdx];
     const current = overrides[skuIdx] || initialDefaults(skuIdx);
@@ -1419,12 +1476,19 @@ function autoOptimize() {
     if (cleanStart !== init.startAge || cleanEnd !== init.endAge) {
       newOverrides[skuIdx] = { startAge: cleanStart, endAge: cleanEnd };
     }
+    if (current.startAge !== cleanStart || current.endAge !== cleanEnd) {
+      changedCount++;
+    }
     cursor = cleanEnd;
   });
   overrides = newOverrides;
   render();
   syncUrl();
-  showToast('已自動最佳化（避開生日月、4次完整配信）');
+  if (changedCount === 0) {
+    showToast('目前排程已是最佳，無需調整');
+  } else {
+    showToast(`已最佳化 ${changedCount} 個商品的起始月齡（避開生日月）`);
+  }
 }
 
 function render() {
@@ -1551,15 +1615,24 @@ function renderChart(timeline) {
 
     // Row controls (inline) — inputs = default delivery window (system shifts to avoid overlap)
     const inputClass = 'ctrl-input' + (customized ? ' customized' : '');
-    html += `<div class="row-controls" title="預設配信視窗（系統會自動延後以避免重疊）">
-        <input type="number" class="${inputClass}" value="${desiredStart}"
-               min="${MIN_AGE}" max="84" step="1"
-               data-idx="${idx}" data-field="startAge"
-               onchange="onRowInputChange(this)" title="預設開始月齡（M｜整數）">
-        <input type="number" class="${inputClass}" value="${desiredEnd}"
-               min="${MIN_AGE}" max="84" step="1"
-               data-idx="${idx}" data-field="endAge"
-               onchange="onRowInputChange(this)" title="預設結束月齡（M｜整數）">
+    const stepperClass = 'input-stepper' + (customized ? ' customized' : '');
+    html += `<div class="row-controls" title="預設配信視窗（系統會自動延後以避免重疊）｜◀▶ 各 1M 移動，起始/結束連動">
+        <div class="${stepperClass}">
+          <button class="step-btn left" onclick="stepInput(${idx}, 'startAge', -1)" title="開始 -1M">◀</button>
+          <input type="number" class="${inputClass}" value="${desiredStart}"
+                 min="${MIN_AGE}" max="84" step="1"
+                 data-idx="${idx}" data-field="startAge"
+                 onchange="onRowInputChange(this)" title="預設開始月齡（M｜整數）">
+          <button class="step-btn right" onclick="stepInput(${idx}, 'startAge', 1)" title="開始 +1M">▶</button>
+        </div>
+        <div class="${stepperClass}" style="margin-left:6px;">
+          <button class="step-btn left" onclick="stepInput(${idx}, 'endAge', -1)" title="結束 -1M">◀</button>
+          <input type="number" class="${inputClass}" value="${desiredEnd}"
+                 min="${MIN_AGE}" max="84" step="1"
+                 data-idx="${idx}" data-field="endAge"
+                 onchange="onRowInputChange(this)" title="預設結束月齡（M｜整數）">
+          <button class="step-btn right" onclick="stepInput(${idx}, 'endAge', 1)" title="結束 +1M">▶</button>
+        </div>
         <button class="reset-btn" onclick="resetDefault(${idx})"
                 ${customized ? '' : 'disabled'}
                 title="${customized ? '重設為原始預設值 (' + initialDefaults(idx).startAge + '~' + initialDefaults(idx).endAge + 'M)' : '已是預設值'}">↺</button>
