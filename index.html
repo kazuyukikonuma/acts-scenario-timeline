@@ -699,6 +699,97 @@
     margin-right: 4px;
   }
 
+  .lookup-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 11px;
+    margin-top: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lookup-table th, .lookup-table td {
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--bg2);
+    padding: 5px 8px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .lookup-table thead th {
+    background: var(--bg2);
+    font-weight: 600;
+    font-size: 10px;
+    color: var(--text);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .lookup-table thead th .theme-sub {
+    display: block;
+    font-size: 9px;
+    color: var(--text3);
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .lookup-table .age-col {
+    position: sticky;
+    left: 0;
+    background: var(--card);
+    font-weight: 600;
+    text-align: right;
+    z-index: 1;
+    min-width: 80px;
+    border-right: 1px solid var(--border);
+  }
+
+  .lookup-table thead th.age-col { z-index: 3; background: var(--bg2); }
+
+  .lookup-table tr.current td { background: var(--highlight); }
+  .lookup-table tr.current td.age-col {
+    background: var(--accent);
+    color: #fff;
+  }
+  .lookup-table tr.preg td.age-col { color: #C5447A; }
+  .lookup-table tr.preg.current td.age-col { color: #fff; background: var(--accent); }
+
+  .lookup-table td.lk-skip {
+    color: var(--text3);
+    font-size: 10px;
+    opacity: 0.5;
+  }
+
+  .lookup-table td.lk-cell {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .lookup-table .lk-bd {
+    color: var(--warn);
+    margin-left: 4px;
+    font-size: 9px;
+    font-weight: 600;
+  }
+
+  .lookup-table .lk-manual::after {
+    content: '✎';
+    color: var(--manual);
+    margin-left: 4px;
+    font-size: 9px;
+  }
+
+  .lookup-meta {
+    font-size: 11px;
+    color: var(--text2);
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: var(--bg2);
+    border-radius: 8px;
+    line-height: 1.7;
+  }
+
   .stats-table-wrap {
     background: var(--card);
     border-radius: 12px;
@@ -830,17 +921,6 @@
       <button class="seg-btn ch-ALL" data-ch="ALL" onclick="setChannel('ALL')">ALL</button>
     </div>
     <span class="pct-note" id="chNote"></span>
-  </div>
-  <div class="control-row">
-    <span class="control-label">配信終止基準</span>
-    <div class="btn-group">
-      <button class="seg-btn" id="btn-P50" onclick="setPct('P50')">P50</button>
-      <button class="seg-btn" id="btn-P60" onclick="setPct('P60')">P60</button>
-      <button class="seg-btn active" id="btn-P70" onclick="setPct('P70')">P70</button>
-      <button class="seg-btn" id="btn-P75" onclick="setPct('P75')">P75</button>
-      <button class="seg-btn" id="btn-P90" onclick="setPct('P90')">P90</button>
-    </div>
-    <span class="pct-note" id="pctNote">→ 涵蓋70%的購買者</span>
     <div class="action-row">
       <button class="action-btn" onclick="copyShareUrl()">複製網址</button>
       <button class="action-btn danger" onclick="resetAllOverrides()">全部重設</button>
@@ -870,15 +950,15 @@
   <div class="stats-table-wrap" id="statsTableWrap"></div>
 </div>
 
-<div class="batch-panel" id="batchPanel">
-  <div class="batch-header" onclick="toggleBatchPanel()">
+<div class="batch-panel" id="lookupPanel">
+  <div class="batch-header" onclick="toggleLookupPanel()">
     <div class="batch-header-title">
-      商品別 配信視窗 批次編輯
-      <span class="batch-header-count" id="batchCount" style="display:none;">0</span>
+      登錄月齡 × 商品別 配信月齡 一覽表
+      <span class="batch-header-count" id="lookupRowCount" style="display:none;">0</span>
     </div>
     <div class="batch-chev">▶</div>
   </div>
-  <div class="batch-body" id="batchBody"></div>
+  <div class="batch-body" id="lookupBody"></div>
 </div>
 
 <div id="toast" class="toast"></div>
@@ -1070,7 +1150,8 @@ function setPct(p) {
     const btn = document.getElementById('btn-' + k);
     if (btn) btn.classList.toggle('active', k === p);
   });
-  document.getElementById('pctNote').textContent = '→ ' + pctNotes[p];
+  const note = document.getElementById('pctNote');
+  if (note) note.textContent = '→ ' + pctNotes[p];
   render();
   syncUrl();
 }
@@ -1096,8 +1177,8 @@ function setView(v) {
 }
 
 function setOverride(idx, startAge, endAge) {
-  const s = clamp(round2(startAge), MIN_AGE, 72);
-  const e = clamp(round2(endAge), s + INTERVAL, 84);
+  const s = clamp(Math.round(startAge), MIN_AGE, 72);
+  const e = clamp(Math.round(endAge), s + 1, 84);
   overrides[idx] = { startAge:s, endAge:e };
 }
 
@@ -1132,13 +1213,13 @@ function onRowInputChange(input) {
   const row = input.closest('.row');
   const startInput = row.querySelector('input[data-field="startAge"]');
   const endInput = row.querySelector('input[data-field="endAge"]');
-  const s = parseFloat(startInput.value);
-  const e = parseFloat(endInput.value);
+  const s = Math.round(parseFloat(startInput.value));
+  const e = Math.round(parseFloat(endInput.value));
   startInput.classList.remove('invalid');
   endInput.classList.remove('invalid');
-  if (isNaN(s) || isNaN(e) || e <= s + EPS) {
+  if (isNaN(s) || isNaN(e) || e <= s) {
     input.classList.add('invalid');
-    showToast('開始 < 終了 となる値を入力してください');
+    showToast('開始 < 結束 整數值，請重新輸入');
     return;
   }
   setOverride(idx, s, e);
@@ -1160,7 +1241,7 @@ function render() {
   renderSummary(timeline);
   renderChart(timeline);
   renderStatsTable(timeline);
-  renderBatchPanel(timeline);
+  renderLookupPanel();
 }
 
 function renderSummary(timeline) {
@@ -1278,13 +1359,13 @@ function renderChart(timeline) {
     const placeholderEnd = skipped ? '—' : '';
     html += `<div class="row-controls">
         <input type="number" class="ctrl-input" value="${dispStart}" placeholder="${placeholderStart}"
-               min="${MIN_AGE}" max="84" step="0.5"
+               min="${MIN_AGE}" max="84" step="1"
                data-idx="${idx}" data-field="startAge" ${readonlyAttr}
-               onchange="onRowInputChange(this)" title="開始月齡（M）">
+               onchange="onRowInputChange(this)" title="開始月齡（M｜整數）">
         <input type="number" class="ctrl-input" value="${dispEnd}" placeholder="${placeholderEnd}"
-               min="${MIN_AGE}" max="84" step="0.5"
+               min="${MIN_AGE}" max="84" step="1"
                data-idx="${idx}" data-field="endAge" ${readonlyAttr}
-               onchange="onRowInputChange(this)" title="結束月齡（M）">
+               onchange="onRowInputChange(this)" title="結束月齡（M｜整數）">
         <button class="mode-btn ${isManual ? 'manual' : 'auto'}" onclick="toggleManualMode(${idx})"
                 title="${isManual ? '點擊切回自動' : '點擊切換為手動'}">${isManual ? '手動' : '自動'}</button>
       </div>
@@ -1395,84 +1476,74 @@ function renderStatsTable(timeline) {
   document.getElementById('statsTableWrap').innerHTML = html;
 }
 
-function renderBatchPanel(timeline) {
-  const overrideCount = Object.keys(overrides).length;
-  const countEl = document.getElementById('batchCount');
-  countEl.textContent = overrideCount;
-  countEl.style.display = overrideCount > 0 ? 'inline-block' : 'none';
+function timelineKey(tl) {
+  return tl.map(t =>
+    t.skipped ? 'S' : `${t.startAge}-${t.endAge}-${t.count}-${(t.blocked||[]).length}-${t.manual?1:0}`
+  ).join('|');
+}
 
-  let html = `<table class="batch-table">
+function renderLookupPanel() {
+  // Group consecutive registration ages whose schedule key matches
+  const groups = [];
+  let prevKey = null;
+  for (let age = MIN_AGE; age <= MAX_AGE_SLIDER; age++) {
+    const tl = buildTimeline(age, currentPct, currentChannel, overrides);
+    const key = timelineKey(tl);
+    if (key === prevKey) {
+      groups[groups.length - 1].ageEnd = age;
+    } else {
+      groups.push({ ageStart: age, ageEnd: age, tl });
+      prevKey = key;
+    }
+  }
+
+  const countEl = document.getElementById('lookupRowCount');
+  countEl.textContent = groups.length + ' 區段';
+  countEl.style.display = 'inline-block';
+
+  let html = `<table class="lookup-table">
     <thead>
       <tr>
-        <th style="width:22%;">商品</th>
-        <th style="width:14%;">適用下限 / ${currentPct}</th>
-        <th style="width:16%;">自動算出</th>
-        <th style="width:12%;">覆寫 開始(M)</th>
-        <th style="width:12%;">覆寫 結束(M)</th>
-        <th style="width:14%;">實際配信</th>
-        <th style="width:10%;">操作</th>
+        <th class="age-col">登錄月齡</th>
+        ${skus.map(s => `<th title="${s.theme} ・ ${s.sku}" style="border-bottom:2px solid ${s.color};">${s.name}<span class="theme-sub">${s.theme}</span></th>`).join('')}
       </tr>
     </thead>
     <tbody>`;
 
-  timeline.forEach(t => {
-    const { sku, idx, stats, skipped, manual, startAge, endAge, count, reason, blocked } = t;
-    const ov = overrides[idx];
-    const autoTl = manual ? buildTimeline(currentAge, currentPct, currentChannel, {}) : null;
-    const autoEntry = autoTl ? autoTl[idx] : t;
-    const autoTxt = autoEntry.skipped
-      ? `<span class="auto-value">略過</span>`
-      : `<span class="auto-value">${autoEntry.startAge}M ~ ${autoEntry.endAge}M</span>`;
+  groups.forEach(({ageStart, ageEnd, tl}) => {
+    const ageLabel = ageStart === ageEnd
+      ? `${ageStart}M`
+      : `${ageStart}M ~ ${ageEnd}M`;
+    const isCurrent = currentAge >= ageStart && currentAge <= ageEnd;
+    const isPreg = ageEnd < 0;
+    const rowClass = (isCurrent ? 'current ' : '') + (isPreg ? 'preg' : '');
 
-    const blockedTxt = (blocked && blocked.length) ? `（跳過 ${blocked.length}）` : '';
-    const actualTxt = skipped
-      ? `<span class="auto-value">略過 (${reason})</span>`
-      : `${startAge}M ~ ${endAge}M ・${count}次${blockedTxt}`;
-
-    html += `<tr class="${manual ? 'manual' : ''}">
-      <td class="sku-cell">${sku.name}<div class="theme-cell">${sku.theme} ・ ${sku.entryAge}M~</div></td>
-      <td><span class="auto-value">${sku.entryAge}M / ${stats[currentPct]}M</span></td>
-      <td>${autoTxt}</td>
-      <td><input type="number" step="0.5" min="${MIN_AGE}" max="72" value="${ov ? ov.startAge : ''}" placeholder="${autoEntry.startAge ?? ''}" data-idx="${idx}" data-field="startAge" onchange="onBatchInput(this)"></td>
-      <td><input type="number" step="0.5" min="${MIN_AGE}" max="84" value="${ov ? ov.endAge : ''}" placeholder="${autoEntry.endAge ?? ''}" data-idx="${idx}" data-field="endAge" onchange="onBatchInput(this)"></td>
-      <td>${actualTxt}</td>
-      <td>${ov ? `<span class="row-reset" onclick="clearOverrideAndRender(${idx})">重設</span>` : '<span style="color:var(--text3);font-size:10px;">自動</span>'}</td>
-    </tr>`;
+    html += `<tr class="${rowClass}">
+      <td class="age-col">${ageLabel}</td>`;
+    tl.forEach(t => {
+      if (t.skipped) {
+        html += `<td class="lk-skip" title="${t.reason}">略過</td>`;
+      } else {
+        const bdTag = (t.blocked && t.blocked.length) ? `<span class="lk-bd" title="生日月跳過 ${t.blocked.length} 次">⊘${t.blocked.length}</span>` : '';
+        const cellClass = 'lk-cell' + (t.manual ? ' lk-manual' : '');
+        const bg = `${t.sku.color}1f`;
+        html += `<td class="${cellClass}" style="background:${bg};" title="${t.sku.name}｜${t.startAge}M ~ ${t.endAge}M｜${t.count}次${t.manual?'（手動）':''}">${t.startAge}~${t.endAge}M${bdTag}</td>`;
+      }
+    });
+    html += `</tr>`;
   });
 
-  html += `</tbody></table>`;
-  document.getElementById('batchBody').innerHTML = html;
+  html += `</tbody></table>
+    <div class="lookup-meta">
+      連續的登錄月齡若產生相同配信排程，會合併為一區段顯示。
+      目前共 <strong>${groups.length}</strong> 個區段（通路 <strong>${currentChannel}</strong>｜終止基準固定 <strong>${currentPct}</strong>）。
+      紅色行＝目前選擇的登錄月齡。<strong>⊘N</strong> ＝ 該商品因生日月跳過的訊息次數。✎ ＝ 手動覆寫。
+    </div>`;
+  document.getElementById('lookupBody').innerHTML = html;
 }
 
-function onBatchInput(input) {
-  const idx = parseInt(input.dataset.idx);
-  const row = input.closest('tr');
-  const startInput = row.querySelector('input[data-field="startAge"]');
-  const endInput = row.querySelector('input[data-field="endAge"]');
-  const startVal = parseFloat(startInput.value);
-  const endVal = parseFloat(endInput.value);
-  const existing = overrides[idx];
-  const fallbackStart = existing ? existing.startAge : skus[idx].entryAge;
-  const fallbackEnd = existing ? existing.endAge : skus[idx].entryAge + CAMPAIGN_WINDOW;
-  const newStart = !isNaN(startVal) ? startVal : fallbackStart;
-  const newEnd = !isNaN(endVal) ? endVal : fallbackEnd;
-  if (input.value === '' && isNaN(startVal) && isNaN(endVal)) {
-    clearOverride(idx);
-  } else {
-    setOverride(idx, newStart, newEnd);
-  }
-  render();
-  syncUrl();
-}
-
-function clearOverrideAndRender(idx) {
-  clearOverride(idx);
-  render();
-  syncUrl();
-}
-
-function toggleBatchPanel() {
-  document.getElementById('batchPanel').classList.toggle('open');
+function toggleLookupPanel() {
+  document.getElementById('lookupPanel').classList.toggle('open');
 }
 
 function showToast(msg) {
@@ -1570,7 +1641,8 @@ PCT_KEYS.forEach(k => {
   const btn = document.getElementById('btn-' + k);
   if (btn) btn.classList.toggle('active', k === currentPct);
 });
-document.getElementById('pctNote').textContent = '→ ' + pctNotes[currentPct];
+const pctNoteInit = document.getElementById('pctNote');
+if (pctNoteInit) pctNoteInit.textContent = '→ ' + pctNotes[currentPct];
 document.querySelectorAll('#chBtns .seg-btn').forEach(b => {
   b.classList.toggle('active', b.dataset.ch === currentChannel);
 });
