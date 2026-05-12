@@ -22,6 +22,8 @@
     --border: #D5D1C8;
     --card: #FFFFFF;
     --highlight: #FFF8DC;
+    --preg: #F7C9D5;
+    --birthday: #F8D34A;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,7 +37,7 @@
   }
 
   .container {
-    max-width: 1180px;
+    max-width: 1280px;
     margin: 0 auto;
   }
 
@@ -80,23 +82,51 @@
     font-weight: 500;
   }
 
+  .age-slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    max-width: 420px;
+  }
+
   input[type="range"] {
     flex: 1;
-    max-width: 320px;
     accent-color: var(--accent);
     height: 4px;
   }
+
+  .nudge-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.12s;
+    user-select: none;
+  }
+  .nudge-btn:hover { background: var(--bg2); border-color: var(--text2); }
+  .nudge-btn:active { background: var(--bg3); }
+  .nudge-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
   .age-display {
     font-size: 18px;
     font-weight: 500;
     color: var(--text);
-    min-width: 48px;
+    min-width: 56px;
     background: var(--bg2);
     padding: 4px 10px;
     border-radius: 6px;
     text-align: center;
   }
+  .age-display.preg { background: var(--preg); color: var(--text); }
 
   .btn-group {
     display: flex;
@@ -220,6 +250,19 @@
   .card.highlight .card-label { color: rgba(255,255,255,0.6); }
   .card.highlight .card-value { color: #fff; }
 
+  .chart-notice {
+    background: #FFF7DD;
+    border: 1px solid #E8D87B;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    font-size: 11px;
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .chart-notice .nb-icon { font-size: 13px; margin-right: 4px; }
+  .chart-notice .sep { color: var(--text3); margin: 0 8px; }
+
   .chart-wrap {
     background: var(--card);
     border-radius: 12px;
@@ -229,7 +272,7 @@
     position: relative;
   }
 
-  .chart-inner { min-width: 560px; }
+  .chart-inner { min-width: 880px; }
 
   .row {
     display: flex;
@@ -285,6 +328,7 @@
     background: var(--bg2);
     border-radius: 5px;
     overflow: visible;
+    min-width: 320px;
   }
 
   .bar-wrap-inner {
@@ -294,8 +338,33 @@
     border-radius: 5px;
   }
 
-  .bar-wrap.skipped .bar-wrap-inner { opacity: 0.25; }
+  .bar-wrap.skipped .bar-wrap-inner { opacity: 0.45; }
   .bar-wrap.manual .bar-wrap-inner { box-shadow: inset 0 0 0 1.5px var(--manual); }
+
+  .preg-band {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      rgba(247,201,213,0.30) 0px,
+      rgba(247,201,213,0.30) 4px,
+      rgba(247,201,213,0.55) 4px,
+      rgba(247,201,213,0.55) 8px
+    );
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .birthday-band {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: rgba(248, 211, 74, 0.32);
+    z-index: 0;
+    pointer-events: auto;
+    cursor: help;
+  }
 
   .bar-bg {
     position: absolute;
@@ -303,6 +372,7 @@
     height: 26px;
     border-radius: 4px;
     pointer-events: none;
+    z-index: 1;
   }
 
   .bar-bg.msg-span { opacity: 0.30; }
@@ -315,13 +385,21 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    z-index: 2;
+    z-index: 3;
     transition: transform 0.1s;
     cursor: default;
     box-shadow: 0 0 0 1.5px var(--card);
   }
 
   .dot:hover { transform: translate(-50%, -50%) scale(1.5); }
+
+  .dot.blocked {
+    background: transparent !important;
+    border: 1.5px dashed rgba(0,0,0,0.35);
+    box-shadow: none;
+    width: 10px;
+    height: 10px;
+  }
 
   .median-line {
     position: absolute;
@@ -330,7 +408,7 @@
     width: 1.5px;
     background: var(--blue);
     opacity: 0.7;
-    z-index: 1;
+    z-index: 2;
   }
 
   .cursor-line {
@@ -339,8 +417,8 @@
     height: 100%;
     width: 2px;
     background: var(--accent);
-    opacity: 0.8;
-    z-index: 3;
+    opacity: 0.85;
+    z-index: 4;
     transform: translateX(-50%);
     transition: left 0.1s;
   }
@@ -352,7 +430,7 @@
     font-weight: 500;
     padding-left: 4px;
     white-space: nowrap;
-    z-index: 4;
+    z-index: 5;
     pointer-events: none;
   }
 
@@ -361,7 +439,7 @@
     top: 2px;
     right: 4px;
     font-size: 11px;
-    z-index: 4;
+    z-index: 5;
     color: var(--warn);
     cursor: help;
   }
@@ -374,31 +452,65 @@
     padding-left: 10px;
     font-size: 10px;
     color: var(--text3);
+    z-index: 3;
   }
 
-  .edit-btn {
-    width: 24px;
-    height: 24px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    background: var(--card);
-    color: var(--text2);
-    cursor: pointer;
-    font-size: 12px;
-    flex-shrink: 0;
+  .row-controls {
     display: flex;
+    gap: 4px;
     align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
+    flex-shrink: 0;
   }
 
-  .edit-btn:hover { background: var(--bg2); color: var(--text); }
-  .edit-btn.active { background: var(--manual); color: #fff; border-color: var(--manual); }
+  .ctrl-input {
+    width: 50px;
+    font-size: 11px;
+    padding: 4px 5px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    text-align: right;
+    font-family: inherit;
+    background: var(--card);
+    color: var(--text);
+  }
+
+  .ctrl-input:read-only {
+    background: var(--bg2);
+    color: var(--text2);
+    cursor: not-allowed;
+  }
+
+  .ctrl-input.invalid {
+    border-color: var(--accent);
+    background: #FFF0F0;
+  }
+
+  .mode-btn {
+    font-size: 10px;
+    padding: 4px 9px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.12s;
+    background: var(--bg2);
+    color: var(--text2);
+    min-width: 44px;
+    text-align: center;
+  }
+  .mode-btn:hover { background: var(--bg3); }
+  .mode-btn.manual {
+    background: var(--manual);
+    color: #fff;
+    border-color: var(--manual);
+  }
+  .mode-btn.manual:hover { background: #2766B4; }
 
   .axis {
     position: relative;
-    height: 24px;
+    height: 26px;
     margin-left: 120px;
+    margin-right: 174px;
     margin-top: 4px;
   }
 
@@ -407,6 +519,17 @@
     transform: translateX(-50%);
     font-size: 10px;
     color: var(--text3);
+    top: 0;
+  }
+
+  .axis-bd {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: #C9990C;
+    top: 12px;
+    font-weight: 600;
+    white-space: nowrap;
   }
 
   .legend {
@@ -427,6 +550,18 @@
 
   .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
   .legend-line { width: 14px; height: 2px; border-radius: 1px; }
+
+  .legend-band {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+  }
+  .legend-band.preg {
+    background: repeating-linear-gradient(45deg,
+      rgba(247,201,213,0.30) 0 4px,
+      rgba(247,201,213,0.55) 4px 8px);
+  }
+  .legend-band.birthday { background: rgba(248,211,74,0.40); }
 
   .legend-badge {
     font-size: 9px;
@@ -460,101 +595,6 @@
     color: var(--text3);
     text-align: right;
   }
-
-  .editor-popover {
-    position: absolute;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 14px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-    z-index: 100;
-    min-width: 240px;
-  }
-
-  .editor-popover .ep-title {
-    font-size: 12px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--text);
-  }
-
-  .editor-popover .ep-mode { display: flex; gap: 4px; margin-bottom: 10px; }
-
-  .editor-popover .ep-mode-btn {
-    flex: 1;
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 5px;
-    border: 1px solid var(--border);
-    background: var(--bg2);
-    color: var(--text2);
-    cursor: pointer;
-    font-weight: 500;
-  }
-
-  .editor-popover .ep-mode-btn.active {
-    background: var(--manual);
-    color: #fff;
-    border-color: var(--manual);
-  }
-
-  .editor-popover .ep-input-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-    align-items: center;
-  }
-
-  .editor-popover label {
-    font-size: 11px;
-    color: var(--text2);
-    width: 56px;
-  }
-
-  .editor-popover input[type="number"] {
-    flex: 1;
-    font-size: 12px;
-    padding: 4px 8px;
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    font-family: inherit;
-    width: 70px;
-  }
-
-  .editor-popover .ep-hint {
-    font-size: 10px;
-    color: var(--text3);
-    margin-top: 6px;
-    line-height: 1.5;
-  }
-
-  .editor-popover .ep-actions {
-    display: flex;
-    gap: 6px;
-    margin-top: 10px;
-    justify-content: flex-end;
-  }
-
-  .editor-popover .ep-btn {
-    font-size: 11px;
-    padding: 5px 12px;
-    border-radius: 5px;
-    border: 1px solid var(--border);
-    background: var(--card);
-    color: var(--text2);
-    cursor: pointer;
-    font-weight: 500;
-  }
-
-  .editor-popover .ep-btn.primary {
-    background: var(--text);
-    color: var(--bg);
-    border-color: var(--text);
-  }
-
-  .editor-popover .ep-btn:hover { background: var(--bg2); }
-  .editor-popover .ep-btn.primary:hover { background: var(--text2); }
 
   .batch-panel {
     background: var(--card);
@@ -768,17 +808,21 @@
 
 <div class="header">
   <h1>ACTS｜LC8T 登錄月齡別配信情境時間軸</h1>
-  <p>依發展主題順序配信。切入月齡以商品適用年齡下限為基準。チャネル別の購買月齢分布（再集計データ・2025年以降）から配信終止基準を切替可能。各商品の配信ウィンドウは手動で上書きできます。</p>
+  <p>依發展主題順序配信。切入月齡以商品適用年齡下限為基準。可切換通路（WEB / TM / KOL / ALL）使用 2025 年後重新匯總的購買月齡分佈。生日月（11M / 23M / 35M / 47M / 59M）會配送祝賀訊息，ACTS 不在此期間配送。妊娠期（-10M ~ -1M）也包含在時間軸中。</p>
 </div>
 
 <div class="controls">
   <div class="control-row">
     <span class="control-label">登錄月齡</span>
-    <input type="range" min="0" max="72" value="10" id="ageSlider" step="1">
+    <div class="age-slider-wrap">
+      <button class="nudge-btn" id="ageDec" onclick="adjustAge(-1)" title="-1M">◀</button>
+      <input type="range" min="-10" max="72" value="10" id="ageSlider" step="1">
+      <button class="nudge-btn" id="ageInc" onclick="adjustAge(1)" title="+1M">▶</button>
+    </div>
     <span class="age-display" id="ageLabel">10M</span>
   </div>
   <div class="control-row">
-    <span class="control-label">算定チャネル</span>
+    <span class="control-label">算定通路</span>
     <div class="btn-group" id="chBtns">
       <button class="seg-btn ch-WEB active" data-ch="WEB" onclick="setChannel('WEB')">WEB</button>
       <button class="seg-btn ch-TM" data-ch="TM" onclick="setChannel('TM')">TM（電話）</button>
@@ -798,8 +842,8 @@
     </div>
     <span class="pct-note" id="pctNote">→ 涵蓋70%的購買者</span>
     <div class="action-row">
-      <button class="action-btn" onclick="copyShareUrl()">URLコピー</button>
-      <button class="action-btn danger" onclick="resetAllOverrides()">全リセット</button>
+      <button class="action-btn" onclick="copyShareUrl()">複製網址</button>
+      <button class="action-btn danger" onclick="resetAllOverrides()">全部重設</button>
     </div>
   </div>
 </div>
@@ -807,11 +851,16 @@
 <div class="summary-cards" id="summaryCards"></div>
 
 <div class="tabs">
-  <div class="tab active" data-view="chart" onclick="setView('chart')">グラフ</div>
-  <div class="tab" data-view="table" onclick="setView('table')">表</div>
+  <div class="tab active" data-view="chart" onclick="setView('chart')">圖表</div>
+  <div class="tab" data-view="table" onclick="setView('table')">表格</div>
 </div>
 
 <div id="chartView">
+  <div class="chart-notice">
+    <span class="nb-icon">🎂</span><strong>生日月（11M / 23M / 35M / 47M / 59M）</strong>：此月份會配送生日祝賀訊息，ACTS 不在此月份配送商品訊息（自動跳過，手動設定亦無法在此月份產生訊息點）。
+    <span class="sep">｜</span>
+    <span class="nb-icon">👶</span><strong>妊娠期（-10M ~ -1M）</strong>：寶寶尚未出生的等待期，登錄後待出生後依商品適用年齡啟動配信。
+  </div>
   <div class="chart-wrap">
     <div class="chart-inner" id="chartInner"></div>
   </div>
@@ -824,7 +873,7 @@
 <div class="batch-panel" id="batchPanel">
   <div class="batch-header" onclick="toggleBatchPanel()">
     <div class="batch-header-title">
-      商品別 配信ウィンドウ 一括編集
+      商品別 配信視窗 批次編輯
       <span class="batch-header-count" id="batchCount" style="display:none;">0</span>
     </div>
     <div class="batch-chev">▶</div>
@@ -832,10 +881,9 @@
   <div class="batch-body" id="batchBody"></div>
 </div>
 
-<div id="editorPopover" class="editor-popover" style="display:none;"></div>
 <div id="toast" class="toast"></div>
 
-<div class="footer">ACTS｜LC8T 配信設計 v1.3（チャネル切替・表表示・隔週最多4次・2個月｜手動上書き対応）｜ Benesse Taiwan ｜ 2026-05-12</div>
+<div class="footer">ACTS｜LC8T 配信設計 v1.4（生日月跳過・妊娠期・內聯設定欄）｜ Benesse Taiwan ｜ 2026-05-12</div>
 
 </div>
 
@@ -906,15 +954,23 @@ const PCT_KEYS = ['P50','P60','P70','P75','P90'];
 const PCT_ALL = ['P25','P50','P60','P70','P75','P90'];
 const CHANNELS = ['WEB','TM','KOL','ALL'];
 
+const MIN_AGE = -10;            // 妊娠期下限
+const MAX_AGE_SLIDER = 72;
+const BIRTHDAY_MONTHS = [11, 23, 35, 47, 59];
+
+function isBirthdayMonth(m) {
+  return BIRTHDAY_MONTHS.includes(Math.floor(m + EPS));
+}
+
 const pctNotes = {
   P50:'涵蓋50%的購買者', P60:'涵蓋60%的購買者', P70:'涵蓋70%的購買者',
   P75:'涵蓋75%的購買者', P90:'涵蓋90%的購買者'
 };
 const chNotes = {
   WEB:'公式EC自主購買者（n合計の中央値ベース）',
-  TM:'電話営業による購買者（n合計の中央値ベース）',
+  TM:'電話營業による購買者（n合計の中央値ベース）',
   KOL:'KOL團購経由購買者（早期購買が多い傾向）',
-  ALL:'全チャネル合算',
+  ALL:'全通路合算',
 };
 
 let currentPct = 'P70';
@@ -930,10 +986,18 @@ function getStats(sku, channel) {
   return sku.channels[channel] || sku.channels.ALL;
 }
 
-function computeMessageCount(remaining) {
-  if (remaining <= EPS) return 0;
-  const slots = Math.floor(remaining / INTERVAL + EPS) + 1;
-  return clamp(slots, 1, MAX_COUNT);
+function buildSlots(startAge, endAge) {
+  const remaining = endAge - startAge;
+  if (remaining <= EPS) return { msgs: [], blocked: [] };
+  const maxSlots = clamp(Math.floor(remaining / INTERVAL + EPS) + 1, 1, MAX_COUNT);
+  const raw = Array.from({length: maxSlots}, (_, i) => round2(startAge + INTERVAL * i));
+  const msgs = [];
+  const blocked = [];
+  raw.forEach(m => {
+    if (isBirthdayMonth(m)) blocked.push(m);
+    else msgs.push(m);
+  });
+  return { msgs, blocked };
 }
 
 function buildTimeline(regAge, pctKey, channel, overridesMap) {
@@ -947,14 +1011,12 @@ function buildTimeline(regAge, pctKey, channel, overridesMap) {
     if (override) {
       const startAge = round2(override.startAge);
       const endAge = round2(override.endAge);
-      const remaining = endAge - startAge;
-      const count = computeMessageCount(remaining);
-      const msgs = Array.from({length: count}, (_, i) => round2(startAge + INTERVAL * i));
+      const { msgs, blocked } = buildSlots(startAge, endAge);
       const overCutoff = startAge >= cutoff - EPS;
       results.push({
         sku, idx, stats, cutoff, skipped:false, manual:true,
-        startAge, endAge, msgs, count,
-        warning: count < MAX_COUNT, overCutoff
+        startAge, endAge, msgs, blocked, count: msgs.length,
+        warning: msgs.length < MAX_COUNT, overCutoff
       });
       cursor = Math.max(cursor, endAge);
       return;
@@ -970,18 +1032,36 @@ function buildTimeline(regAge, pctKey, channel, overridesMap) {
       return;
     }
     const remaining = cutoff - startAge;
-    const count = computeMessageCount(remaining);
     const duration = Math.min(CAMPAIGN_WINDOW, remaining);
-    const msgs = Array.from({length: count}, (_, i) => round2(startAge + INTERVAL * i));
     const endAge = round2(startAge + duration);
+    const { msgs, blocked } = buildSlots(startAge, endAge);
     results.push({
       sku, idx, stats, cutoff, skipped:false, manual:false,
-      startAge, endAge, msgs, count,
-      warning: count < MAX_COUNT
+      startAge, endAge, msgs, blocked, count: msgs.length,
+      warning: msgs.length < MAX_COUNT
     });
     cursor = endAge;
   });
   return results;
+}
+
+function adjustAge(delta) {
+  const next = clamp(currentAge + delta, MIN_AGE, MAX_AGE_SLIDER);
+  if (next === currentAge) return;
+  currentAge = next;
+  const slider = document.getElementById('ageSlider');
+  slider.value = currentAge;
+  updateAgeLabel();
+  render();
+  syncUrl();
+}
+
+function updateAgeLabel() {
+  const lbl = document.getElementById('ageLabel');
+  lbl.textContent = currentAge + 'M';
+  lbl.classList.toggle('preg', currentAge < 0);
+  document.getElementById('ageDec').disabled = currentAge <= MIN_AGE;
+  document.getElementById('ageInc').disabled = currentAge >= MAX_AGE_SLIDER;
 }
 
 function setPct(p) {
@@ -991,7 +1071,6 @@ function setPct(p) {
     if (btn) btn.classList.toggle('active', k === p);
   });
   document.getElementById('pctNote').textContent = '→ ' + pctNotes[p];
-  closeEditor();
   render();
   syncUrl();
 }
@@ -1002,7 +1081,6 @@ function setChannel(ch) {
     b.classList.toggle('active', b.dataset.ch === ch);
   });
   document.getElementById('chNote').textContent = '→ ' + chNotes[ch];
-  closeEditor();
   render();
   syncUrl();
 }
@@ -1014,23 +1092,64 @@ function setView(v) {
   });
   document.getElementById('chartView').style.display = v === 'chart' ? 'block' : 'none';
   document.getElementById('tableView').style.display = v === 'table' ? 'block' : 'none';
-  closeEditor();
   syncUrl();
 }
 
 function setOverride(idx, startAge, endAge) {
-  const s = clamp(round2(startAge), 0, 72);
+  const s = clamp(round2(startAge), MIN_AGE, 72);
   const e = clamp(round2(endAge), s + INTERVAL, 84);
   overrides[idx] = { startAge:s, endAge:e };
 }
 
 function clearOverride(idx) { delete overrides[idx]; }
 
+function toggleManualMode(idx) {
+  if (overrides[idx]) {
+    clearOverride(idx);
+    render();
+    syncUrl();
+    return;
+  }
+  // auto → manual: snapshot current auto window
+  const tl = buildTimeline(currentAge, currentPct, currentChannel, {});
+  const auto = tl[idx];
+  let s, e;
+  if (auto.skipped) {
+    s = skus[idx].entryAge;
+    e = s + CAMPAIGN_WINDOW;
+  } else {
+    s = auto.startAge;
+    e = auto.endAge;
+  }
+  setOverride(idx, s, e);
+  render();
+  syncUrl();
+}
+
+function onRowInputChange(input) {
+  const idx = parseInt(input.dataset.idx);
+  if (!overrides[idx]) return;
+  const row = input.closest('.row');
+  const startInput = row.querySelector('input[data-field="startAge"]');
+  const endInput = row.querySelector('input[data-field="endAge"]');
+  const s = parseFloat(startInput.value);
+  const e = parseFloat(endInput.value);
+  startInput.classList.remove('invalid');
+  endInput.classList.remove('invalid');
+  if (isNaN(s) || isNaN(e) || e <= s + EPS) {
+    input.classList.add('invalid');
+    showToast('開始 < 終了 となる値を入力してください');
+    return;
+  }
+  setOverride(idx, s, e);
+  render();
+  syncUrl();
+}
+
 function resetAllOverrides() {
   if (Object.keys(overrides).length === 0) return;
   if (!confirm('全ての手動設定をクリアしますか？')) return;
   overrides = {};
-  closeEditor();
   render();
   syncUrl();
   showToast('手動設定をリセットしました');
@@ -1047,6 +1166,7 @@ function render() {
 function renderSummary(timeline) {
   const active = timeline.filter(t => !t.skipped);
   const totalMsgs = active.reduce((s, t) => s + t.count, 0);
+  const totalBlocked = active.reduce((s, t) => s + (t.blocked ? t.blocked.length : 0), 0);
   const lastEnd = active.length > 0 ? active[active.length - 1].endAge : currentAge;
   const duration = (lastEnd - currentAge).toFixed(1);
   const skipCount = timeline.filter(t => t.skipped).length;
@@ -1055,40 +1175,42 @@ function renderSummary(timeline) {
   const totalN = skus.reduce((s, sku) => s + getStats(sku, currentChannel).n, 0);
 
   document.getElementById('summaryCards').innerHTML = `
-    <div class="card"><div class="card-label">CH ${currentChannel} の n 合計</div><div class="card-value">${totalN.toLocaleString()}</div></div>
+    <div class="card"><div class="card-label">CH ${currentChannel} 的 n 合計</div><div class="card-value">${totalN.toLocaleString()}</div></div>
     <div class="card"><div class="card-label">總訊息次數</div><div class="card-value">${totalMsgs}次</div></div>
+    <div class="card"><div class="card-label">生日月跳過</div><div class="card-value">${totalBlocked}次</div></div>
     <div class="card"><div class="card-label">配信期間</div><div class="card-value">${duration}個月</div></div>
     <div class="card"><div class="card-label">完成月齡</div><div class="card-value">${Math.round(lastEnd)}M</div></div>
     <div class="card"><div class="card-label">略過商品</div><div class="card-value">${skipCount}件</div></div>
-    <div class="card"><div class="card-label">回數不足</div><div class="card-value">${warnCount}件</div></div>
+    <div class="card"><div class="card-label">次數不足</div><div class="card-value">${warnCount}件</div></div>
     <div class="card highlight"><div class="card-label">最大LTV（配信対象）</div><div class="card-value">NT$${totalLTV.toLocaleString()}</div></div>
   `;
 }
 
 function renderChart(timeline) {
   const active = timeline.filter(t => !t.skipped);
-  const maxAge = active.length > 0
-    ? Math.max(72, Math.ceil(active[active.length - 1].endAge) + 4)
-    : 72;
+  const minAge = MIN_AGE;
+  const dataMax = active.length > 0 ? Math.max(72, Math.ceil(active[active.length - 1].endAge) + 4) : 72;
+  const maxAge = dataMax;
+  const span = maxAge - minAge;
 
-  function p(v) { return clamp((v / maxAge) * 100, 0, 100); }
+  function p(v) { return clamp(((v - minAge) / span) * 100, 0, 100); }
 
   let html = '';
 
-  timeline.forEach(({ sku, idx, stats, skipped, manual, startAge, endAge, msgs, count, reason, warning, overCutoff }) => {
+  timeline.forEach(({ sku, idx, stats, skipped, manual, startAge, endAge, msgs, blocked, count, reason, warning, overCutoff }) => {
     const labelClass = skipped ? 'row-label skipped' : 'row-label';
     const barClass = 'bar-wrap' + (skipped ? ' skipped' : '') + (manual ? ' manual' : '');
     const editActive = !!overrides[idx];
 
     let warnTag = '';
     if (!skipped && warning) {
-      const remainingTxt = ((endAge - startAge)).toFixed(1);
-      warnTag = `<span class="warn-icon" title="残り${remainingTxt}ヶ月では${count}回のみ配信可能（標準${MAX_COUNT}回）">⚠</span>`;
+      warnTag = `<span class="warn-icon" title="可配信僅 ${count} 次（標準 ${MAX_COUNT} 次｜生日月跳過 ${blocked ? blocked.length : 0} 次）">⚠</span>`;
     }
     if (manual && overCutoff) {
-      warnTag += `<span class="warn-icon" title="手動開始月齡が${currentPct}（${stats[currentPct]}M）を超えています">⚑</span>`;
+      warnTag += `<span class="warn-icon" title="手動開始月齡超過 ${currentPct}（${stats[currentPct]}M）">⚑</span>`;
     }
 
+    // Row label
     html += `<div class="row" data-idx="${idx}">
       <div class="${labelClass}">
         <div class="row-label-name">${warnTag}${manual ? '<span class="manual-tag">手動</span>' : ''}${sku.name}</div>
@@ -1097,57 +1219,110 @@ function renderChart(timeline) {
       <div class="${barClass}">
         <div class="bar-wrap-inner">`;
 
+    // Pregnancy zone band (always shown)
+    const pregL = p(MIN_AGE), pregR = p(0);
+    if (pregR > pregL + 0.1) {
+      html += `<div class="preg-band" style="left:${pregL}%;width:${pregR - pregL}%;" title="妊娠期 ${MIN_AGE}M ~ -1M"></div>`;
+    }
+
+    // Birthday month bands
+    BIRTHDAY_MONTHS.forEach(b => {
+      const bl = p(b), br = p(b + 1);
+      if (br > bl + 0.05) {
+        html += `<div class="birthday-band" style="left:${bl}%;width:${br - bl}%;" title="生日月 ${b}M：祝賀訊息配信日"></div>`;
+      }
+    });
+
     if (skipped) {
       html += `<div class="skip-label" title="${reason}">略過（${reason}）</div>`;
     } else {
       const bl = p(startAge), br = p(endAge);
-      const msgSpanEnd = msgs.length > 0 ? p(msgs[msgs.length - 1]) : bl;
+      const msgAll = (msgs.length > 0 || (blocked && blocked.length > 0))
+        ? [...msgs, ...(blocked || [])]
+        : [];
+      const lastMsg = msgAll.length > 0 ? Math.max(...msgAll) : startAge;
+      const msgSpanEnd = p(lastMsg);
       const drawnEnd = Math.max(msgSpanEnd, bl + 0.3);
 
       html += `<div class="bar-bg msg-span" style="left:${bl}%;width:${Math.max(drawnEnd - bl, 0.5)}%;background:${sku.color};"></div>`;
       if (br > drawnEnd + 0.1) {
         html += `<div class="bar-bg rest-span" style="left:${drawnEnd}%;width:${br - drawnEnd}%;background:${sku.color};"></div>`;
       }
+      // Active dots
       msgs.forEach((m, i) => {
         html += `<div class="dot" style="left:${p(m)}%;background:${sku.color};" title="${m.toFixed(1)}M（第${i+1}次）NT$${sku.price.toLocaleString()}"></div>`;
       });
-      html += `<div class="median-line" style="left:${p(stats.median)}%;" title="${currentChannel}中位數 ${stats.median}M"></div>`;
+      // Blocked dots (dashed outline)
+      (blocked || []).forEach(m => {
+        html += `<div class="dot blocked" style="left:${p(m)}%;" title="${m.toFixed(1)}M：生日月跳過"></div>`;
+      });
+      html += `<div class="median-line" style="left:${p(stats.median)}%;" title="${currentChannel} 中位數 ${stats.median}M"></div>`;
       const labelTxt = `${startAge}M起 ${count}次 NT$${sku.price.toLocaleString()}`;
       html += `<div class="bar-label" style="left:${bl}%;color:${sku.color};">${labelTxt}</div>`;
       if (warning) {
-        html += `<div class="bar-warn" title="${count}回のみ配信可能">⚠</div>`;
+        html += `<div class="bar-warn" title="僅 ${count} 次（標準 ${MAX_COUNT}）">⚠</div>`;
       }
     }
 
     html += `<div class="cursor-line" style="left:${p(currentAge)}%;"></div>
         </div>
+      </div>`;
+
+    // Row controls (inline)
+    const ovr = overrides[idx];
+    const isManual = !!ovr;
+    const dispStart = isManual ? ovr.startAge : (skipped ? '' : startAge);
+    const dispEnd = isManual ? ovr.endAge : (skipped ? '' : endAge);
+    const readonlyAttr = isManual ? '' : 'readonly';
+    const placeholderStart = skipped ? '—' : '';
+    const placeholderEnd = skipped ? '—' : '';
+    html += `<div class="row-controls">
+        <input type="number" class="ctrl-input" value="${dispStart}" placeholder="${placeholderStart}"
+               min="${MIN_AGE}" max="84" step="0.5"
+               data-idx="${idx}" data-field="startAge" ${readonlyAttr}
+               onchange="onRowInputChange(this)" title="開始月齡（M）">
+        <input type="number" class="ctrl-input" value="${dispEnd}" placeholder="${placeholderEnd}"
+               min="${MIN_AGE}" max="84" step="0.5"
+               data-idx="${idx}" data-field="endAge" ${readonlyAttr}
+               onchange="onRowInputChange(this)" title="結束月齡（M）">
+        <button class="mode-btn ${isManual ? 'manual' : 'auto'}" onclick="toggleManualMode(${idx})"
+                title="${isManual ? '點擊切回自動' : '點擊切換為手動'}">${isManual ? '手動' : '自動'}</button>
       </div>
-      <button class="edit-btn ${editActive ? 'active' : ''}" onclick="openEditor(${idx}, event)" title="${editActive ? '手動設定を編集' : '配信ウィンドウを編集'}">✎</button>
     </div>`;
   });
 
-  const tickStep = maxAge > 70 ? 12 : 6;
+  // Axis
+  const tickStep = span > 60 ? 12 : 6;
+  const tickStart = Math.ceil(minAge / tickStep) * tickStep;
   html += `<div class="axis">`;
-  for (let m = 0; m <= maxAge; m += tickStep) {
+  for (let m = tickStart; m <= maxAge; m += tickStep) {
     html += `<div class="axis-tick" style="left:${p(m)}%">${m}M</div>`;
   }
+  BIRTHDAY_MONTHS.forEach(b => {
+    html += `<div class="axis-bd" style="left:${p(b + 0.5)}%" title="生日月">🎂${b}M</div>`;
+  });
   html += `</div>`;
 
+  // Legend
   html += `<div class="legend">
     <div class="legend-item"><span class="legend-dot" style="background:#E24B4A;"></span>登錄月齡</div>
-    <div class="legend-item"><span class="legend-line" style="background:#85B7EB;"></span>${currentChannel}購買中位數</div>
+    <div class="legend-item"><span class="legend-line" style="background:#85B7EB;"></span>${currentChannel} 購買中位數</div>
     <div class="legend-item">● 每個點＝1次訊息</div>
-    <div class="legend-item"><span class="warn-icon">⚠</span>配信回数不足（&lt;${MAX_COUNT}回）</div>
-    <div class="legend-item"><span class="legend-badge" style="background:var(--manual);">手動</span>手動上書き</div>
+    <div class="legend-item"><span class="legend-band birthday"></span>🎂 生日月（跳過）</div>
+    <div class="legend-item"><span class="legend-band preg"></span>👶 妊娠期</div>
+    <div class="legend-item"><span class="warn-icon">⚠</span>訊息次數不足（&lt;${MAX_COUNT}次）</div>
+    <div class="legend-item"><span class="legend-badge" style="background:var(--manual);">手動</span>手動覆寫</div>
   </div>`;
 
+  // Translated logic box (Traditional Chinese only)
   html += `<div class="logic-box">
-    <strong>配信順序ロジック</strong>
-    ① 發展主題順（語彙啟蒙 → 生活習慣 → 語彙知育 → 情緒人際 → 英語啟蒙 → 英語進階 → 邏輯集中 → 數感邏輯 → 就學準備）<br>
-    ② 切入月齢 ＝ 商品適用年齢下限（非WEB中位數）<br>
-    ③ 配信節奏 ＝ 每商品 隔週1次・最多${MAX_COUNT}次・キャンペーン枠最大${CAMPAIGN_WINDOW}ヶ月<br>
-    ④ 終止基準 ＝ 選擇的百分位數（現在: ${currentChannel} の ${currentPct}）&nbsp;⑤ 超過終止基準的商品略過<br>
-    ⑥ 手動上書き ＝ 任意商品の起終月齢を手動指定可能。手動値の終了月齢は後続商品の自動計算にカスケード反映。
+    <strong>配信順序邏輯</strong>
+    ① 依發展主題順序（語彙啟蒙 → 生活習慣 → 語彙知育 → 情緒人際 → 英語啟蒙 → 英語進階 → 邏輯集中 → 數感邏輯 → 就學準備）<br>
+    ② 切入月齡 ＝ 商品適用年齡下限（非WEB中位數）<br>
+    ③ 配信節奏 ＝ 每商品 隔週1次、最多${MAX_COUNT}次、活動期間最長${CAMPAIGN_WINDOW}個月<br>
+    ④ 終止基準 ＝ 所選百分位數（目前：${currentChannel} 的 ${currentPct}）　⑤ 超過終止基準的商品略過<br>
+    ⑥ 生日月（${BIRTHDAY_MONTHS.join('M / ')}M）自動跳過（祝賀訊息由別軌道配送）<br>
+    ⑦ 手動覆寫 ＝ 可手動指定任意商品的起始 / 結束月齡。手動值的結束月齡將級聯反映至後續商品的自動計算。
   </div>`;
 
   document.getElementById('chartInner').innerHTML = html;
@@ -1162,22 +1337,22 @@ function renderStatsTable(timeline) {
   let html = `<table class="stats-table">
     <thead>
       <tr>
-        <th class="text-left" style="min-width:140px;">商品 / テーマ</th>
+        <th class="text-left" style="min-width:140px;">商品 / 主題</th>
         <th>適用下限</th>
         <th>n</th>
         <th>中位</th>
         ${headerCols}
         <th>配信開始</th>
-        <th>配信終了</th>
-        <th>回数</th>
-        <th>価格</th>
-        <th>状態</th>
+        <th>配信結束</th>
+        <th>次數</th>
+        <th>價格</th>
+        <th>狀態</th>
       </tr>
     </thead>
     <tbody>`;
 
   timeline.forEach(t => {
-    const { sku, idx, stats, skipped, manual, startAge, endAge, count, warning, reason } = t;
+    const { sku, idx, stats, skipped, manual, startAge, endAge, count, warning, reason, blocked } = t;
 
     const pctCells = PCT_ALL.map(k => {
       const active = (k === currentPct) ? ' pct-active' : '';
@@ -1187,9 +1362,10 @@ function renderStatsTable(timeline) {
     const rowClass = (skipped ? 'skipped' : '') + (manual ? ' manual' : '');
     const startTxt = skipped ? '—' : startAge + 'M';
     const endTxt = skipped ? '—' : endAge + 'M';
-    const countTxt = skipped ? '0' : (count + '次' + (warning ? ' ⚠' : ''));
+    const blockedTxt = (blocked && blocked.length) ? `（跳過 ${blocked.length}）` : '';
+    const countTxt = skipped ? '0' : (count + '次' + blockedTxt + (warning ? ' ⚠' : ''));
     const status = skipped
-      ? `<span class="actual-skip">略過 (${reason})</span>`
+      ? `<span class="actual-skip">略過（${reason}）</span>`
       : (manual ? '手動' : '自動');
 
     html += `<tr class="${rowClass}">
@@ -1211,9 +1387,9 @@ function renderStatsTable(timeline) {
 
   html += `</tbody></table>
     <div class="ch-meta">
-      <strong>表示中のチャネル: ${currentChannel}</strong> ｜ ${chNotes[currentChannel]}<br>
-      ハイライト列（黄色）が現在の配信終止基準 <strong>${currentPct}</strong>。チャネル/百分位ボタンで切替できます。<br>
-      P値は再集計データ（訂單日期 ≥ 2025-01-01）。「中位」は median＝P50 と同じ実測値（参考表示）。
+      <strong>目前通路：${currentChannel}</strong>　|　${chNotes[currentChannel]}<br>
+      黃色欄為目前配信終止基準（<strong>${currentPct}</strong>）。可用上方按鈕切換通路 / 百分位。<br>
+      P 值來自重新匯總資料（訂單日期 ≥ 2025-01-01）。「中位」＝ P50。生日月（${BIRTHDAY_MONTHS.join('M / ')}M）自動跳過，「次數」欄會顯示跳過幾次。
     </div>`;
 
   document.getElementById('statsTableWrap').innerHTML = html;
@@ -1231,16 +1407,16 @@ function renderBatchPanel(timeline) {
         <th style="width:22%;">商品</th>
         <th style="width:14%;">適用下限 / ${currentPct}</th>
         <th style="width:16%;">自動算出</th>
-        <th style="width:12%;">上書き 開始(M)</th>
-        <th style="width:12%;">上書き 終了(M)</th>
-        <th style="width:14%;">実際の配信</th>
+        <th style="width:12%;">覆寫 開始(M)</th>
+        <th style="width:12%;">覆寫 結束(M)</th>
+        <th style="width:14%;">實際配信</th>
         <th style="width:10%;">操作</th>
       </tr>
     </thead>
     <tbody>`;
 
   timeline.forEach(t => {
-    const { sku, idx, stats, skipped, manual, startAge, endAge, count, reason } = t;
+    const { sku, idx, stats, skipped, manual, startAge, endAge, count, reason, blocked } = t;
     const ov = overrides[idx];
     const autoTl = manual ? buildTimeline(currentAge, currentPct, currentChannel, {}) : null;
     const autoEntry = autoTl ? autoTl[idx] : t;
@@ -1248,18 +1424,19 @@ function renderBatchPanel(timeline) {
       ? `<span class="auto-value">略過</span>`
       : `<span class="auto-value">${autoEntry.startAge}M ~ ${autoEntry.endAge}M</span>`;
 
+    const blockedTxt = (blocked && blocked.length) ? `（跳過 ${blocked.length}）` : '';
     const actualTxt = skipped
       ? `<span class="auto-value">略過 (${reason})</span>`
-      : `${startAge}M ~ ${endAge}M ・${count}次`;
+      : `${startAge}M ~ ${endAge}M ・${count}次${blockedTxt}`;
 
     html += `<tr class="${manual ? 'manual' : ''}">
       <td class="sku-cell">${sku.name}<div class="theme-cell">${sku.theme} ・ ${sku.entryAge}M~</div></td>
       <td><span class="auto-value">${sku.entryAge}M / ${stats[currentPct]}M</span></td>
       <td>${autoTxt}</td>
-      <td><input type="number" step="0.5" min="0" max="72" value="${ov ? ov.startAge : ''}" placeholder="${autoEntry.startAge ?? ''}" data-idx="${idx}" data-field="startAge" onchange="onBatchInput(this)"></td>
-      <td><input type="number" step="0.5" min="0" max="84" value="${ov ? ov.endAge : ''}" placeholder="${autoEntry.endAge ?? ''}" data-idx="${idx}" data-field="endAge" onchange="onBatchInput(this)"></td>
+      <td><input type="number" step="0.5" min="${MIN_AGE}" max="72" value="${ov ? ov.startAge : ''}" placeholder="${autoEntry.startAge ?? ''}" data-idx="${idx}" data-field="startAge" onchange="onBatchInput(this)"></td>
+      <td><input type="number" step="0.5" min="${MIN_AGE}" max="84" value="${ov ? ov.endAge : ''}" placeholder="${autoEntry.endAge ?? ''}" data-idx="${idx}" data-field="endAge" onchange="onBatchInput(this)"></td>
       <td>${actualTxt}</td>
-      <td>${ov ? `<span class="row-reset" onclick="clearOverrideAndRender(${idx})">リセット</span>` : '<span style="color:var(--text3);font-size:10px;">自動</span>'}</td>
+      <td>${ov ? `<span class="row-reset" onclick="clearOverrideAndRender(${idx})">重設</span>` : '<span style="color:var(--text3);font-size:10px;">自動</span>'}</td>
     </tr>`;
   });
 
@@ -1269,23 +1446,17 @@ function renderBatchPanel(timeline) {
 
 function onBatchInput(input) {
   const idx = parseInt(input.dataset.idx);
-  const field = input.dataset.field;
-  const value = parseFloat(input.value);
-
   const row = input.closest('tr');
   const startInput = row.querySelector('input[data-field="startAge"]');
   const endInput = row.querySelector('input[data-field="endAge"]');
   const startVal = parseFloat(startInput.value);
   const endVal = parseFloat(endInput.value);
-
   const existing = overrides[idx];
-  const fallbackStart = existing ? existing.startAge : (skus[idx].entryAge);
-  const fallbackEnd = existing ? existing.endAge : (skus[idx].entryAge + CAMPAIGN_WINDOW);
-
-  const newStart = !isNaN(startVal) ? startVal : (field === 'startAge' ? value : fallbackStart);
-  const newEnd = !isNaN(endVal) ? endVal : (field === 'endAge' ? value : fallbackEnd);
-
-  if (input.value === '' && (isNaN(startVal) && isNaN(endVal))) {
+  const fallbackStart = existing ? existing.startAge : skus[idx].entryAge;
+  const fallbackEnd = existing ? existing.endAge : skus[idx].entryAge + CAMPAIGN_WINDOW;
+  const newStart = !isNaN(startVal) ? startVal : fallbackStart;
+  const newEnd = !isNaN(endVal) ? endVal : fallbackEnd;
+  if (input.value === '' && isNaN(startVal) && isNaN(endVal)) {
     clearOverride(idx);
   } else {
     setOverride(idx, newStart, newEnd);
@@ -1299,98 +1470,6 @@ function clearOverrideAndRender(idx) {
   render();
   syncUrl();
 }
-
-function openEditor(idx, event) {
-  event.stopPropagation();
-  const btn = event.currentTarget;
-  const rect = btn.getBoundingClientRect();
-  const scrollY = window.scrollY;
-  const scrollX = window.scrollX;
-
-  const sku = skus[idx];
-  const stats = getStats(sku, currentChannel);
-  const ov = overrides[idx];
-  const autoTl = buildTimeline(currentAge, currentPct, currentChannel, {});
-  const auto = autoTl[idx];
-
-  const startVal = ov ? ov.startAge : (auto.skipped ? sku.entryAge : auto.startAge);
-  const endVal = ov ? ov.endAge : (auto.skipped ? sku.entryAge + CAMPAIGN_WINDOW : auto.endAge);
-  const isManual = !!ov;
-
-  const pop = document.getElementById('editorPopover');
-  pop.innerHTML = `
-    <div class="ep-title">${sku.name}（${sku.theme}）</div>
-    <div class="ep-mode">
-      <button class="ep-mode-btn ${!isManual ? 'active' : ''}" id="epModeAuto">自動</button>
-      <button class="ep-mode-btn ${isManual ? 'active' : ''}" id="epModeManual">手動</button>
-    </div>
-    <div class="ep-input-row">
-      <label>開始(M)</label>
-      <input type="number" id="epStart" step="0.5" min="0" max="72" value="${startVal}">
-    </div>
-    <div class="ep-input-row">
-      <label>終了(M)</label>
-      <input type="number" id="epEnd" step="0.5" min="0" max="84" value="${endVal}">
-    </div>
-    <div class="ep-hint">
-      参考：適用下限 ${sku.entryAge}M ／ ${currentChannel} ${currentPct} ${stats[currentPct]}M ／ ${currentChannel} 中位 ${stats.median}M（n=${stats.n.toLocaleString()}）<br>
-      自動算出：${auto.skipped ? '略過 (' + auto.reason + ')' : auto.startAge + 'M ~ ' + auto.endAge + 'M'}
-    </div>
-    <div class="ep-actions">
-      <button class="ep-btn" onclick="closeEditor()">キャンセル</button>
-      <button class="ep-btn primary" id="epApply">適用</button>
-    </div>
-  `;
-  pop.style.display = 'block';
-
-  let popLeft = rect.left + scrollX - pop.offsetWidth + 24;
-  if (popLeft < 8) popLeft = 8;
-  if (popLeft + pop.offsetWidth > window.innerWidth - 8) {
-    popLeft = window.innerWidth - pop.offsetWidth - 8;
-  }
-  pop.style.left = popLeft + 'px';
-  pop.style.top = (rect.bottom + scrollY + 4) + 'px';
-
-  document.getElementById('epModeAuto').onclick = () => {
-    document.getElementById('epModeAuto').classList.add('active');
-    document.getElementById('epModeManual').classList.remove('active');
-  };
-  document.getElementById('epModeManual').onclick = () => {
-    document.getElementById('epModeManual').classList.add('active');
-    document.getElementById('epModeAuto').classList.remove('active');
-  };
-
-  document.getElementById('epApply').onclick = () => {
-    const manualActive = document.getElementById('epModeManual').classList.contains('active');
-    if (manualActive) {
-      const s = parseFloat(document.getElementById('epStart').value);
-      const e = parseFloat(document.getElementById('epEnd').value);
-      if (isNaN(s) || isNaN(e) || e <= s) {
-        showToast('開始 < 終了 となる値を入力してください');
-        return;
-      }
-      setOverride(idx, s, e);
-    } else {
-      clearOverride(idx);
-    }
-    closeEditor();
-    render();
-    syncUrl();
-  };
-}
-
-function closeEditor() {
-  const pop = document.getElementById('editorPopover');
-  pop.style.display = 'none';
-  pop.innerHTML = '';
-}
-
-document.addEventListener('click', (e) => {
-  const pop = document.getElementById('editorPopover');
-  if (pop.style.display === 'block' && !pop.contains(e.target) && !e.target.closest('.edit-btn')) {
-    closeEditor();
-  }
-});
 
 function toggleBatchPanel() {
   document.getElementById('batchPanel').classList.toggle('open');
@@ -1433,7 +1512,7 @@ function readUrl() {
   const ch = params.get('ch');
   const v = params.get('v');
   const o = params.get('o');
-  if (!isNaN(age) && age >= 0 && age <= 72) currentAge = age;
+  if (!isNaN(age) && age >= MIN_AGE && age <= MAX_AGE_SLIDER) currentAge = age;
   if (pct && PCT_KEYS.includes(pct)) currentPct = pct;
   if (ch && CHANNELS.includes(ch)) currentChannel = ch;
   if (v === 'chart' || v === 'table') currentView = v;
@@ -1456,7 +1535,7 @@ function copyShareUrl() {
   const url = location.href;
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(url).then(
-      () => showToast('URLをコピーしました'),
+      () => showToast('已複製網址'),
       () => fallbackCopy(url)
     );
   } else {
@@ -1471,15 +1550,14 @@ function fallbackCopy(text) {
   ta.style.opacity = '0';
   document.body.appendChild(ta);
   ta.select();
-  try { document.execCommand('copy'); showToast('URLをコピーしました'); }
-  catch (_) { showToast('コピー失敗：' + text); }
+  try { document.execCommand('copy'); showToast('已複製網址'); }
+  catch (_) { showToast('複製失敗：' + text); }
   document.body.removeChild(ta);
 }
 
 document.getElementById('ageSlider').addEventListener('input', function() {
   currentAge = parseInt(this.value);
-  document.getElementById('ageLabel').textContent = currentAge + 'M';
-  closeEditor();
+  updateAgeLabel();
   render();
   syncUrl();
 });
@@ -1487,7 +1565,7 @@ document.getElementById('ageSlider').addEventListener('input', function() {
 // init
 readUrl();
 document.getElementById('ageSlider').value = currentAge;
-document.getElementById('ageLabel').textContent = currentAge + 'M';
+updateAgeLabel();
 PCT_KEYS.forEach(k => {
   const btn = document.getElementById('btn-' + k);
   if (btn) btn.classList.toggle('active', k === currentPct);
