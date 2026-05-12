@@ -410,16 +410,6 @@
     z-index: 2;
   }
 
-  .cutoff-line {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    width: 0;
-    border-left: 1.5px dashed var(--accent);
-    opacity: 0.55;
-    z-index: 2;
-  }
-
   .dot.past-cutoff {
     box-shadow: 0 0 0 1.5px var(--card), 0 0 0 2.5px var(--accent);
     opacity: 0.85;
@@ -717,6 +707,14 @@
     content: '●';
     color: var(--manual);
     margin-right: 4px;
+  }
+
+  .lookup-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+    margin-bottom: 4px;
+    justify-content: flex-end;
   }
 
   .lookup-table {
@@ -1443,10 +1441,6 @@ function renderChart(timeline) {
       if (br > drawnEnd + 0.1) {
         html += `<div class="bar-bg rest-span" style="left:${drawnEnd}%;width:${br - drawnEnd}%;background:${sku.color};"></div>`;
       }
-      // Cutoff marker (if within visible range)
-      if (stats[currentPct] >= minAge && stats[currentPct] <= maxAge) {
-        html += `<div class="cutoff-line" style="left:${p(stats[currentPct])}%;" title="${currentChannel} ${currentPct} = ${stats[currentPct]}M"></div>`;
-      }
       // Active dots
       msgs.forEach((m, i) => {
         const pastCutoff = m >= stats[currentPct] - EPS;
@@ -1503,7 +1497,6 @@ function renderChart(timeline) {
   html += `<div class="legend">
     <div class="legend-item"><span class="legend-dot" style="background:#E24B4A;"></span>登錄月齡</div>
     <div class="legend-item"><span class="legend-line" style="background:#85B7EB;"></span>WEB 購買中位數</div>
-    <div class="legend-item"><span class="legend-line" style="border-top:1.5px dashed var(--accent);background:transparent;"></span>WEB P70 終止線</div>
     <div class="legend-item">● 每個點＝1次訊息</div>
     <div class="legend-item"><span class="legend-band birthday"></span>🎂 生日月（跳過）</div>
     <div class="legend-item"><span class="legend-band preg"></span>👶 妊娠期</div>
@@ -1604,8 +1597,7 @@ function timelineKey(tl) {
   ).join('|');
 }
 
-function renderLookupPanel() {
-  // Group consecutive registration ages whose schedule key matches
+function buildLookupGroups() {
   const groups = [];
   let prevKey = null;
   for (let age = MIN_AGE; age <= MAX_AGE_SLIDER; age++) {
@@ -1618,12 +1610,21 @@ function renderLookupPanel() {
       prevKey = key;
     }
   }
+  return groups;
+}
+
+function renderLookupPanel() {
+  const groups = buildLookupGroups();
 
   const countEl = document.getElementById('lookupRowCount');
   countEl.textContent = groups.length + ' 區段';
   countEl.style.display = 'inline-block';
 
-  let html = `<table class="lookup-table">
+  let html = `<div class="lookup-actions">
+    <button class="action-btn" onclick="event.stopPropagation(); downloadLookupMarkdown()">下載 .md</button>
+    <button class="action-btn" onclick="event.stopPropagation(); downloadLookupCsv()">下載 .csv</button>
+  </div>
+  <table class="lookup-table">
     <thead>
       <tr>
         <th class="age-col">登錄月齡</th>
@@ -1666,6 +1667,123 @@ function renderLookupPanel() {
 
 function toggleLookupPanel() {
   document.getElementById('lookupPanel').classList.toggle('open');
+}
+
+function formatLookupCell(t, separator) {
+  let cell = `${t.startAge}~${t.endAge}M`;
+  const flags = [];
+  if (t.customized) flags.push('客製');
+  if (t.shifted) flags.push('↪延後');
+  if (t.startPastCutoff) flags.push('⚑超過P70');
+  else if (t.endPastCutoff) flags.push('⚑結束超過');
+  if (t.blocked && t.blocked.length) flags.push(`⊘${t.blocked.length}`);
+  if (flags.length) cell += ` (${flags.join(separator)})`;
+  return cell;
+}
+
+function downloadFile(filename, content, mimeType) {
+  const blob = new Blob([content], { type: mimeType + ';charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function dateStamp() {
+  const d = new Date();
+  const pad = n => ('0' + n).slice(-2);
+  return d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '_' + pad(d.getHours()) + pad(d.getMinutes());
+}
+
+function summariseOverrides() {
+  const keys = Object.keys(overrides);
+  if (keys.length === 0) return '無客製化（全部使用預設值）';
+  return keys.map(k => {
+    const idx = parseInt(k);
+    const o = overrides[idx];
+    return `${skus[idx].name} ${o.startAge}~${o.endAge}M`;
+  }).join('、');
+}
+
+function downloadLookupMarkdown() {
+  const groups = buildLookupGroups();
+  const now = new Date().toLocaleString('zh-TW');
+  let md = '';
+  md += '# ACTS｜登錄月齡 × 商品別 配信月齡 一覽表\n\n';
+  md += `- 產出時間：${now}\n`;
+  md += `- 通路：WEB（ACTS 設計対象）\n`;
+  md += `- 終止基準：WEB P70（70% 購買者已下單）\n`;
+  md += `- 配信節奏：每商品 隔週1次、最多 ${MAX_COUNT} 次、預設視窗 ${CAMPAIGN_WINDOW} 個月\n`;
+  md += `- 生日月（${BIRTHDAY_MONTHS.join('M / ')}M）自動跳過\n`;
+  md += `- 客製化設定：${summariseOverrides()}\n\n`;
+
+  md += '| 登錄月齡 | ' + skus.map(s => s.name).join(' | ') + ' |\n';
+  md += '|---|' + skus.map(() => ':---:').join('|') + '|\n';
+
+  groups.forEach(g => {
+    const ageLabel = g.ageStart === g.ageEnd
+      ? `**${g.ageStart}M**`
+      : `**${g.ageStart}M ~ ${g.ageEnd}M**`;
+    const cells = g.tl.map(t => formatLookupCell(t, ' ').replace(/\|/g, '\\|'));
+    md += `| ${ageLabel} | ${cells.join(' | ')} |\n`;
+  });
+
+  md += '\n## 註記\n';
+  md += '- ↪延後 = 因前商品結束月齡超過本商品預設開始，系統自動向後平移（寬度保持不變）\n';
+  md += '- ⚑超過P70 = 開始月齡已超過 WEB P70，大半購買者已下單，WEB 自主購買意義較弱（建議轉 T 通路）\n';
+  md += '- ⚑結束超過 = 結束月齡超過 P70，部分訊息落在 P70 之後\n';
+  md += '- ⊘N = 該商品有 N 次訊息因生日月跳過\n';
+  md += '- 客製 = 該商品使用使用者指定的預設視窗\n';
+  md += '- 連續登錄月齡產生相同排程時合併為一區段顯示\n';
+
+  downloadFile(`ACTS_配信月齡一覽_${dateStamp()}.md`, md, 'text/markdown');
+  showToast('已下載 Markdown 檔案');
+}
+
+function downloadLookupCsv() {
+  const groups = buildLookupGroups();
+  const csvEscape = s => '"' + String(s).replace(/"/g, '""') + '"';
+
+  const meta = [
+    `# ACTS 登錄月齡 × 商品別 配信月齡 一覽表`,
+    `# 產出時間: ${new Date().toLocaleString('zh-TW')}`,
+    `# 通路: WEB / 終止基準: WEB P70 / 配信節奏: 隔週1次 最多${MAX_COUNT}次 預設${CAMPAIGN_WINDOW}M`,
+    `# 生日月自動跳過: ${BIRTHDAY_MONTHS.join('M, ')}M`,
+    `# 客製化: ${summariseOverrides()}`,
+    ''
+  ];
+
+  const header = ['登錄月齡', ...skus.map(s => s.name)];
+
+  const rows = groups.map(g => {
+    const ageLabel = g.ageStart === g.ageEnd
+      ? `${g.ageStart}M`
+      : `${g.ageStart}M~${g.ageEnd}M`;
+    return [ageLabel, ...g.tl.map(t => formatLookupCell(t, ' '))];
+  });
+
+  // Extra: per-product summary
+  rows.push([]);
+  rows.push(['# 商品 P 值參考 (WEB)']);
+  rows.push(['商品', '適用下限', 'median', 'P50', 'P60', 'P70', 'P75', 'P90', 'n']);
+  skus.forEach(s => {
+    const w = s.channels.WEB;
+    rows.push([s.name, `${s.entryAge}M`, `${w.median}M`, `${w.P50}M`, `${w.P60}M`, `${w.P70}M`, `${w.P75}M`, `${w.P90}M`, w.n]);
+  });
+
+  const lines = [
+    ...meta,
+    header.map(csvEscape).join(','),
+    ...rows.map(r => r.map(csvEscape).join(','))
+  ];
+
+  // BOM for Excel UTF-8 detection
+  downloadFile(`ACTS_配信月齡一覽_${dateStamp()}.csv`, '﻿' + lines.join('\n'), 'text/csv');
+  showToast('已下載 CSV 檔案');
 }
 
 function toggleMedianPanel() {
