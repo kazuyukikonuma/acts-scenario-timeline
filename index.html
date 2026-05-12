@@ -790,6 +790,75 @@
     line-height: 1.7;
   }
 
+  .median-table {
+    font-size: 12px;
+  }
+
+  .median-table th, .median-table td {
+    padding: 8px 10px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--bg2);
+    white-space: nowrap;
+  }
+
+  .median-table th {
+    background: var(--bg2);
+    font-weight: 600;
+    color: var(--text);
+    font-size: 11px;
+  }
+
+  .median-table th.ch-WEB { color: #2F7DD1; }
+  .median-table th.ch-TM { color: #E24B4A; }
+  .median-table th.ch-KOL { color: #D4537E; }
+  .median-table th.ch-ALL { color: var(--text); }
+
+  .median-table th.text-left, .median-table td.text-left { text-align: left; }
+
+  .median-table .name-cell {
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .median-table .theme-sub {
+    display: block;
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+
+  .median-table .sku-color-bar {
+    display: inline-block;
+    width: 3px;
+    height: 18px;
+    border-radius: 2px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  .median-table .n-sub {
+    display: block;
+    font-size: 10px;
+    color: var(--text3);
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .median-table .diff-col { color: var(--text3); }
+  .median-table .diff-neg { color: var(--manual); font-weight: 600; }
+  .median-table .diff-pos { color: var(--accent); font-weight: 600; }
+  .median-table .diff-zero { color: var(--text3); }
+
+  .median-table .n-cell { color: var(--text2); font-variant-numeric: tabular-nums; }
+
+  .median-table tr.total-row td {
+    background: var(--bg2);
+    font-weight: 600;
+    color: var(--text);
+    border-top: 2px solid var(--border);
+  }
+
   .stats-table-wrap {
     background: var(--card);
     border-radius: 12px;
@@ -961,6 +1030,16 @@
     <div class="batch-chev">▶</div>
   </div>
   <div class="batch-body" id="lookupBody"></div>
+</div>
+
+<div class="batch-panel" id="medianPanel">
+  <div class="batch-header" onclick="toggleMedianPanel()">
+    <div class="batch-header-title">
+      參考資料：各商品 × 通路別 購買月齡中位數
+    </div>
+    <div class="batch-chev">▶</div>
+  </div>
+  <div class="batch-body" id="medianBody"></div>
 </div>
 
 <div id="toast" class="toast"></div>
@@ -1269,6 +1348,7 @@ function render() {
   renderChart(timeline);
   renderStatsTable(timeline);
   renderLookupPanel();
+  renderMedianPanel();
 }
 
 function renderSummary(timeline) {
@@ -1570,6 +1650,74 @@ function renderLookupPanel() {
 
 function toggleLookupPanel() {
   document.getElementById('lookupPanel').classList.toggle('open');
+}
+
+function toggleMedianPanel() {
+  document.getElementById('medianPanel').classList.toggle('open');
+}
+
+function renderMedianPanel() {
+  let html = `<table class="lookup-table median-table">
+    <thead>
+      <tr>
+        <th class="text-left" style="min-width:130px;">商品 / 主題</th>
+        <th>適用下限</th>
+        <th class="ch-WEB">WEB</th>
+        <th class="ch-TM">TM（電話）</th>
+        <th class="ch-KOL">KOL</th>
+        <th class="ch-ALL">ALL</th>
+        <th class="diff-col" title="KOL中位 − WEB中位（負値＝KOL更早）">KOL − WEB</th>
+        <th class="n-total">合計 n</th>
+      </tr>
+    </thead>
+    <tbody>`;
+
+  skus.forEach((sku) => {
+    const w = sku.channels.WEB, t = sku.channels.TM, k = sku.channels.KOL, a = sku.channels.ALL;
+    const diff = k.median - w.median;
+    const diffClass = diff < 0 ? 'diff-neg' : (diff > 0 ? 'diff-pos' : 'diff-zero');
+    const diffTxt = diff === 0 ? '±0' : (diff > 0 ? `+${diff}` : `${diff}`);
+    const highlight = (ch) => currentChannel === ch ? ' style="background:var(--highlight);font-weight:700;"' : '';
+
+    html += `<tr>
+      <td class="text-left name-cell">
+        <span class="sku-color-bar" style="background:${sku.color};"></span>${sku.name}
+        <span class="theme-sub">${sku.theme} ・ ${sku.sku}</span>
+      </td>
+      <td>${sku.entryAge}M</td>
+      <td${highlight('WEB')}>${w.median}M<span class="n-sub">n=${w.n.toLocaleString()}</span></td>
+      <td${highlight('TM')}>${t.median}M<span class="n-sub">n=${t.n.toLocaleString()}</span></td>
+      <td${highlight('KOL')}>${k.median}M<span class="n-sub">n=${k.n.toLocaleString()}</span></td>
+      <td${highlight('ALL')}>${a.median}M<span class="n-sub">n=${a.n.toLocaleString()}</span></td>
+      <td class="${diffClass}">${diffTxt}M</td>
+      <td class="n-cell">${a.n.toLocaleString()}</td>
+    </tr>`;
+  });
+
+  const totalN = {
+    WEB: skus.reduce((s, sku) => s + sku.channels.WEB.n, 0),
+    TM: skus.reduce((s, sku) => s + sku.channels.TM.n, 0),
+    KOL: skus.reduce((s, sku) => s + sku.channels.KOL.n, 0),
+    ALL: skus.reduce((s, sku) => s + sku.channels.ALL.n, 0),
+  };
+
+  html += `<tr class="total-row">
+    <td class="text-left" colspan="2"><strong>n 合計</strong></td>
+    <td>${totalN.WEB.toLocaleString()}</td>
+    <td>${totalN.TM.toLocaleString()}</td>
+    <td>${totalN.KOL.toLocaleString()}</td>
+    <td>${totalN.ALL.toLocaleString()}</td>
+    <td colspan="2"></td>
+  </tr>`;
+
+  html += `</tbody></table>
+    <div class="lookup-meta">
+      <strong>資料來源：</strong>歸戶主檔 × 訂單主檔 × 訂單明細（訂單日期 ≥ 2025-01-01）の3ファイルJOIN再集計。<br>
+      <strong>中位＝median（P50）</strong>。「KOL − WEB」欄為KOL中位減WEB中位，<span class="diff-neg" style="font-weight:700;">負値</span>はKOL通路で WEB より早期購買されることを示す（Confluence ACTS 仮説「KOLが中央値より4〜11M早く購買」の根拠）。<br>
+      上方で選擇中の通路 (<strong>${currentChannel}</strong>) 欄を黃色強調。
+    </div>`;
+
+  document.getElementById('medianBody').innerHTML = html;
 }
 
 function showToast(msg) {
