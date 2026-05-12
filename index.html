@@ -339,7 +339,6 @@
   }
 
   .bar-wrap.skipped .bar-wrap-inner { opacity: 0.45; }
-  .bar-wrap.manual .bar-wrap-inner { box-shadow: inset 0 0 0 1.5px var(--manual); }
 
   .preg-band {
     position: absolute;
@@ -474,10 +473,11 @@
     color: var(--text);
   }
 
-  .ctrl-input:read-only {
-    background: var(--bg2);
-    color: var(--text2);
-    cursor: not-allowed;
+  .ctrl-input.customized {
+    border-color: var(--manual);
+    background: #F0F6FC;
+    color: var(--text);
+    font-weight: 600;
   }
 
   .ctrl-input.invalid {
@@ -485,26 +485,23 @@
     background: #FFF0F0;
   }
 
-  .mode-btn {
-    font-size: 10px;
-    padding: 4px 9px;
+  .reset-btn {
+    font-size: 13px;
+    padding: 2px 7px;
     border-radius: 5px;
     border: 1px solid var(--border);
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 500;
     transition: all 0.12s;
-    background: var(--bg2);
+    background: var(--card);
     color: var(--text2);
-    min-width: 44px;
-    text-align: center;
+    min-width: 28px;
+    line-height: 1.4;
   }
-  .mode-btn:hover { background: var(--bg3); }
-  .mode-btn.manual {
-    background: var(--manual);
-    color: #fff;
-    border-color: var(--manual);
-  }
-  .mode-btn.manual:hover { background: #2766B4; }
+  .reset-btn:not(:disabled):hover { background: var(--bg2); color: var(--accent); border-color: var(--accent); }
+  .reset-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+  .bar-wrap.customized .bar-wrap-inner { box-shadow: inset 0 0 0 1.5px var(--manual); }
 
   .axis {
     position: relative;
@@ -773,11 +770,14 @@
     font-weight: 600;
   }
 
-  .lookup-table .lk-manual::after {
-    content: '✎';
+  .lookup-table .lk-custom {
+    box-shadow: inset 0 0 0 1.5px var(--manual);
+  }
+
+  .lookup-table .lk-shift {
     color: var(--manual);
     margin-left: 4px;
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .lookup-meta {
@@ -937,9 +937,11 @@
 
 <div id="chartView">
   <div class="chart-notice">
-    <span class="nb-icon">🎂</span><strong>生日月（11M / 23M / 35M / 47M / 59M）</strong>：此月份會配送生日祝賀訊息，ACTS 不在此月份配送商品訊息（自動跳過，手動設定亦無法在此月份產生訊息點）。
+    <span class="nb-icon">🎂</span><strong>生日月（11M / 23M / 35M / 47M / 59M）</strong>：此月份會配送生日祝賀訊息，ACTS 不在此月份配送商品訊息（自動跳過）。
     <span class="sep">｜</span>
-    <span class="nb-icon">👶</span><strong>妊娠期（-10M ~ -1M）</strong>：寶寶尚未出生的等待期，登錄後待出生後依商品適用年齡啟動配信。
+    <span class="nb-icon">👶</span><strong>妊娠期（-10M ~ -1M）</strong>：寶寶尚未出生的等待期，登錄後待出生後依商品預設視窗啟動配信。
+    <span class="sep">｜</span>
+    <span class="nb-icon">📐</span><strong>右側欄位 ＝ 預設配信視窗</strong>：可調整的開始 / 結束月齡。系統會自動依順序檢查重疊並延後（保持視窗長度），避免兩商品同時配信。
   </div>
   <div class="chart-wrap">
     <div class="chart-inner" id="chartInner"></div>
@@ -1080,47 +1082,56 @@ function buildSlots(startAge, endAge) {
   return { msgs, blocked };
 }
 
+function initialDefaults(idx) {
+  const sku = skus[idx];
+  return { startAge: sku.entryAge, endAge: sku.entryAge + CAMPAIGN_WINDOW };
+}
+
+function getDefaults(idx) {
+  return overrides[idx] || initialDefaults(idx);
+}
+
+function isCustomized(idx) {
+  return !!overrides[idx];
+}
+
 function buildTimeline(regAge, pctKey, channel, overridesMap) {
   const results = [];
   let cursor = regAge;
   skus.forEach((sku, idx) => {
     const stats = getStats(sku, channel);
     const cutoff = stats[pctKey];
-    const override = overridesMap[idx];
+    const def = overridesMap[idx] || initialDefaults(idx);
+    const customized = !!overridesMap[idx];
+    const desiredStart = def.startAge;
+    const desiredEnd = def.endAge;
+    const duration = desiredEnd - desiredStart;
+    const actualStart = Math.max(cursor, desiredStart);
+    const shifted = actualStart > desiredStart + EPS;
 
-    if (override) {
-      const startAge = round2(override.startAge);
-      const endAge = round2(override.endAge);
-      const { msgs, blocked } = buildSlots(startAge, endAge);
-      const overCutoff = startAge >= cutoff - EPS;
+    if (actualStart >= cutoff - EPS) {
+      const reason = (cursor > desiredStart)
+        ? '前商品結束後已超過' + pctKey
+        : '預設起點已超過' + pctKey;
       results.push({
-        sku, idx, stats, cutoff, skipped:false, manual:true,
-        startAge, endAge, msgs, blocked, count: msgs.length,
-        warning: msgs.length < MAX_COUNT, overCutoff
+        sku, idx, stats, cutoff, skipped: true,
+        customized, desiredStart, desiredEnd, reason
       });
-      cursor = Math.max(cursor, endAge);
       return;
     }
 
-    if (regAge >= cutoff - EPS) {
-      results.push({ sku, idx, stats, cutoff, skipped:true, manual:false, reason:'登錄時已超過'+pctKey });
-      return;
-    }
-    const startAge = round2(Math.max(cursor, sku.entryAge));
-    if (startAge >= cutoff - EPS) {
-      results.push({ sku, idx, stats, cutoff, skipped:true, manual:false, reason:'前商品結束後已超過'+pctKey });
-      return;
-    }
-    const remaining = cutoff - startAge;
-    const duration = Math.min(CAMPAIGN_WINDOW, remaining);
-    const endAge = round2(startAge + duration);
-    const { msgs, blocked } = buildSlots(startAge, endAge);
+    const actualEnd = actualStart + duration;
+    const { msgs, blocked } = buildSlots(actualStart, actualEnd);
     results.push({
-      sku, idx, stats, cutoff, skipped:false, manual:false,
-      startAge, endAge, msgs, blocked, count: msgs.length,
-      warning: msgs.length < MAX_COUNT
+      sku, idx, stats, cutoff, skipped: false,
+      customized, shifted,
+      desiredStart, desiredEnd,
+      startAge: actualStart, endAge: actualEnd,
+      msgs, blocked, count: msgs.length,
+      warning: msgs.length < MAX_COUNT,
+      overCutoff: actualEnd > cutoff + EPS
     });
-    cursor = endAge;
+    cursor = actualEnd;
   });
   return results;
 }
@@ -1176,40 +1187,26 @@ function setView(v) {
   syncUrl();
 }
 
-function setOverride(idx, startAge, endAge) {
+function setDefaults(idx, startAge, endAge) {
   const s = clamp(Math.round(startAge), MIN_AGE, 72);
   const e = clamp(Math.round(endAge), s + 1, 84);
-  overrides[idx] = { startAge:s, endAge:e };
+  const init = initialDefaults(idx);
+  if (s === init.startAge && e === init.endAge) {
+    delete overrides[idx];
+  } else {
+    overrides[idx] = { startAge: s, endAge: e };
+  }
 }
 
-function clearOverride(idx) { delete overrides[idx]; }
-
-function toggleManualMode(idx) {
-  if (overrides[idx]) {
-    clearOverride(idx);
-    render();
-    syncUrl();
-    return;
-  }
-  // auto → manual: snapshot current auto window
-  const tl = buildTimeline(currentAge, currentPct, currentChannel, {});
-  const auto = tl[idx];
-  let s, e;
-  if (auto.skipped) {
-    s = skus[idx].entryAge;
-    e = s + CAMPAIGN_WINDOW;
-  } else {
-    s = auto.startAge;
-    e = auto.endAge;
-  }
-  setOverride(idx, s, e);
+function resetDefault(idx) {
+  if (!overrides[idx]) return;
+  delete overrides[idx];
   render();
   syncUrl();
 }
 
 function onRowInputChange(input) {
   const idx = parseInt(input.dataset.idx);
-  if (!overrides[idx]) return;
   const row = input.closest('.row');
   const startInput = row.querySelector('input[data-field="startAge"]');
   const endInput = row.querySelector('input[data-field="endAge"]');
@@ -1219,21 +1216,21 @@ function onRowInputChange(input) {
   endInput.classList.remove('invalid');
   if (isNaN(s) || isNaN(e) || e <= s) {
     input.classList.add('invalid');
-    showToast('開始 < 結束 整數值，請重新輸入');
+    showToast('開始 < 結束（整數），請重新輸入');
     return;
   }
-  setOverride(idx, s, e);
+  setDefaults(idx, s, e);
   render();
   syncUrl();
 }
 
 function resetAllOverrides() {
   if (Object.keys(overrides).length === 0) return;
-  if (!confirm('全ての手動設定をクリアしますか？')) return;
+  if (!confirm('將全部商品的配信視窗重設為預設值？')) return;
   overrides = {};
   render();
   syncUrl();
-  showToast('手動設定をリセットしました');
+  showToast('已重設為預設值');
 }
 
 function render() {
@@ -1278,23 +1275,25 @@ function renderChart(timeline) {
 
   let html = '';
 
-  timeline.forEach(({ sku, idx, stats, skipped, manual, startAge, endAge, msgs, blocked, count, reason, warning, overCutoff }) => {
+  timeline.forEach(({ sku, idx, stats, skipped, customized, shifted, desiredStart, desiredEnd, startAge, endAge, msgs, blocked, count, reason, warning, overCutoff }) => {
     const labelClass = skipped ? 'row-label skipped' : 'row-label';
-    const barClass = 'bar-wrap' + (skipped ? ' skipped' : '') + (manual ? ' manual' : '');
-    const editActive = !!overrides[idx];
+    const barClass = 'bar-wrap' + (skipped ? ' skipped' : '') + (customized ? ' customized' : '');
 
     let warnTag = '';
     if (!skipped && warning) {
       warnTag = `<span class="warn-icon" title="可配信僅 ${count} 次（標準 ${MAX_COUNT} 次｜生日月跳過 ${blocked ? blocked.length : 0} 次）">⚠</span>`;
     }
-    if (manual && overCutoff) {
-      warnTag += `<span class="warn-icon" title="手動開始月齡超過 ${currentPct}（${stats[currentPct]}M）">⚑</span>`;
+    if (!skipped && shifted) {
+      warnTag += `<span class="warn-icon" title="預設起點 ${desiredStart}M 與前商品重疊，已自動延後至 ${startAge}M" style="color:var(--manual);">↪</span>`;
+    }
+    if (!skipped && overCutoff) {
+      warnTag += `<span class="warn-icon" title="配信結束 ${endAge}M 超過 ${currentPct}（${stats[currentPct]}M）">⚑</span>`;
     }
 
     // Row label
     html += `<div class="row" data-idx="${idx}">
       <div class="${labelClass}">
-        <div class="row-label-name">${warnTag}${manual ? '<span class="manual-tag">手動</span>' : ''}${sku.name}</div>
+        <div class="row-label-name">${warnTag}${customized ? '<span class="manual-tag">客製</span>' : ''}${sku.name}</div>
         <div class="row-label-theme">${sku.theme}</div>
       </div>
       <div class="${barClass}">
@@ -1349,25 +1348,20 @@ function renderChart(timeline) {
         </div>
       </div>`;
 
-    // Row controls (inline)
-    const ovr = overrides[idx];
-    const isManual = !!ovr;
-    const dispStart = isManual ? ovr.startAge : (skipped ? '' : startAge);
-    const dispEnd = isManual ? ovr.endAge : (skipped ? '' : endAge);
-    const readonlyAttr = isManual ? '' : 'readonly';
-    const placeholderStart = skipped ? '—' : '';
-    const placeholderEnd = skipped ? '—' : '';
-    html += `<div class="row-controls">
-        <input type="number" class="ctrl-input" value="${dispStart}" placeholder="${placeholderStart}"
+    // Row controls (inline) — inputs = default delivery window (system shifts to avoid overlap)
+    const inputClass = 'ctrl-input' + (customized ? ' customized' : '');
+    html += `<div class="row-controls" title="預設配信視窗（系統會自動延後以避免重疊）">
+        <input type="number" class="${inputClass}" value="${desiredStart}"
                min="${MIN_AGE}" max="84" step="1"
-               data-idx="${idx}" data-field="startAge" ${readonlyAttr}
-               onchange="onRowInputChange(this)" title="開始月齡（M｜整數）">
-        <input type="number" class="ctrl-input" value="${dispEnd}" placeholder="${placeholderEnd}"
+               data-idx="${idx}" data-field="startAge"
+               onchange="onRowInputChange(this)" title="預設開始月齡（M｜整數）">
+        <input type="number" class="${inputClass}" value="${desiredEnd}"
                min="${MIN_AGE}" max="84" step="1"
-               data-idx="${idx}" data-field="endAge" ${readonlyAttr}
-               onchange="onRowInputChange(this)" title="結束月齡（M｜整數）">
-        <button class="mode-btn ${isManual ? 'manual' : 'auto'}" onclick="toggleManualMode(${idx})"
-                title="${isManual ? '點擊切回自動' : '點擊切換為手動'}">${isManual ? '手動' : '自動'}</button>
+               data-idx="${idx}" data-field="endAge"
+               onchange="onRowInputChange(this)" title="預設結束月齡（M｜整數）">
+        <button class="reset-btn" onclick="resetDefault(${idx})"
+                ${customized ? '' : 'disabled'}
+                title="${customized ? '重設為原始預設值 (' + initialDefaults(idx).startAge + '~' + initialDefaults(idx).endAge + 'M)' : '已是預設值'}">↺</button>
       </div>
     </div>`;
   });
@@ -1392,18 +1386,19 @@ function renderChart(timeline) {
     <div class="legend-item"><span class="legend-band birthday"></span>🎂 生日月（跳過）</div>
     <div class="legend-item"><span class="legend-band preg"></span>👶 妊娠期</div>
     <div class="legend-item"><span class="warn-icon">⚠</span>訊息次數不足（&lt;${MAX_COUNT}次）</div>
-    <div class="legend-item"><span class="legend-badge" style="background:var(--manual);">手動</span>手動覆寫</div>
+    <div class="legend-item"><span class="warn-icon" style="color:var(--manual);">↪</span>因重疊自動延後</div>
+    <div class="legend-item"><span class="legend-badge" style="background:var(--manual);">客製</span>客製化預設</div>
   </div>`;
 
-  // Translated logic box (Traditional Chinese only)
+  // Logic box (Traditional Chinese)
   html += `<div class="logic-box">
     <strong>配信順序邏輯</strong>
     ① 依發展主題順序（語彙啟蒙 → 生活習慣 → 語彙知育 → 情緒人際 → 英語啟蒙 → 英語進階 → 邏輯集中 → 數感邏輯 → 就學準備）<br>
-    ② 切入月齡 ＝ 商品適用年齡下限（非WEB中位數）<br>
-    ③ 配信節奏 ＝ 每商品 隔週1次、最多${MAX_COUNT}次、活動期間最長${CAMPAIGN_WINDOW}個月<br>
-    ④ 終止基準 ＝ 所選百分位數（目前：${currentChannel} 的 ${currentPct}）　⑤ 超過終止基準的商品略過<br>
-    ⑥ 生日月（${BIRTHDAY_MONTHS.join('M / ')}M）自動跳過（祝賀訊息由別軌道配送）<br>
-    ⑦ 手動覆寫 ＝ 可手動指定任意商品的起始 / 結束月齡。手動值的結束月齡將級聯反映至後續商品的自動計算。
+    ② 各商品右側「預設配信視窗」（開始 / 結束月齡）為使用者可調整的<strong>預設值</strong>，初始為「商品適用年齡下限 ~ +${CAMPAIGN_WINDOW}個月」<br>
+    ③ 配信節奏 ＝ 每商品 隔週1次、最多${MAX_COUNT}次（依輸入的視窗長度自動計算）<br>
+    ④ 重疊調整 ＝ 若前一商品的結束月齡超過下一商品的預設開始，系統會自動延後（保持視窗長度），以「↪」標示<br>
+    ⑤ 終止基準（目前：${currentChannel} 的 ${currentPct}）：若延後後的開始月齡超過此值則該商品略過<br>
+    ⑥ 生日月（${BIRTHDAY_MONTHS.join('M / ')}M）自動跳過（祝賀訊息由別軌道配送）
   </div>`;
 
   document.getElementById('chartInner').innerHTML = html;
@@ -1433,21 +1428,21 @@ function renderStatsTable(timeline) {
     <tbody>`;
 
   timeline.forEach(t => {
-    const { sku, idx, stats, skipped, manual, startAge, endAge, count, warning, reason, blocked } = t;
+    const { sku, idx, stats, skipped, customized, shifted, startAge, endAge, count, warning, reason, blocked } = t;
 
     const pctCells = PCT_ALL.map(k => {
       const active = (k === currentPct) ? ' pct-active' : '';
       return `<td class="pct-cell${active}">${stats[k]}</td>`;
     }).join('');
 
-    const rowClass = (skipped ? 'skipped' : '') + (manual ? ' manual' : '');
+    const rowClass = (skipped ? 'skipped' : '') + (customized ? ' manual' : '');
     const startTxt = skipped ? '—' : startAge + 'M';
     const endTxt = skipped ? '—' : endAge + 'M';
     const blockedTxt = (blocked && blocked.length) ? `（跳過 ${blocked.length}）` : '';
     const countTxt = skipped ? '0' : (count + '次' + blockedTxt + (warning ? ' ⚠' : ''));
     const status = skipped
       ? `<span class="actual-skip">略過（${reason}）</span>`
-      : (manual ? '手動' : '自動');
+      : (customized ? (shifted ? '客製 ↪' : '客製') : (shifted ? '預設 ↪' : '預設'));
 
     html += `<tr class="${rowClass}">
       <td class="text-left name-cell sku-cell">
@@ -1469,8 +1464,8 @@ function renderStatsTable(timeline) {
   html += `</tbody></table>
     <div class="ch-meta">
       <strong>目前通路：${currentChannel}</strong>　|　${chNotes[currentChannel]}<br>
-      黃色欄為目前配信終止基準（<strong>${currentPct}</strong>）。可用上方按鈕切換通路 / 百分位。<br>
-      P 值來自重新匯總資料（訂單日期 ≥ 2025-01-01）。「中位」＝ P50。生日月（${BIRTHDAY_MONTHS.join('M / ')}M）自動跳過，「次數」欄會顯示跳過幾次。
+      黃色欄為配信終止基準（<strong>${currentPct}</strong>）。P 值來自重新匯總資料（訂單日期 ≥ 2025-01-01）。「中位」＝ P50。<br>
+      「配信開始 / 結束」為實際排程（已套用右側欄位的預設視窗＋重疊延後）。生日月（${BIRTHDAY_MONTHS.join('M / ')}M）自動跳過，「次數」欄會顯示跳過幾次。狀態 ↪ ＝ 因重疊自動延後。
     </div>`;
 
   document.getElementById('statsTableWrap').innerHTML = html;
@@ -1478,7 +1473,7 @@ function renderStatsTable(timeline) {
 
 function timelineKey(tl) {
   return tl.map(t =>
-    t.skipped ? 'S' : `${t.startAge}-${t.endAge}-${t.count}-${(t.blocked||[]).length}-${t.manual?1:0}`
+    t.skipped ? 'S' : `${t.startAge}-${t.endAge}-${t.count}-${(t.blocked||[]).length}-${t.customized?1:0}`
   ).join('|');
 }
 
@@ -1525,9 +1520,10 @@ function renderLookupPanel() {
         html += `<td class="lk-skip" title="${t.reason}">略過</td>`;
       } else {
         const bdTag = (t.blocked && t.blocked.length) ? `<span class="lk-bd" title="生日月跳過 ${t.blocked.length} 次">⊘${t.blocked.length}</span>` : '';
-        const cellClass = 'lk-cell' + (t.manual ? ' lk-manual' : '');
+        const shiftTag = t.shifted ? `<span class="lk-shift" title="預設 ${t.desiredStart}~${t.desiredEnd}M｜因重疊延後">↪</span>` : '';
+        const cellClass = 'lk-cell' + (t.customized ? ' lk-custom' : '');
         const bg = `${t.sku.color}1f`;
-        html += `<td class="${cellClass}" style="background:${bg};" title="${t.sku.name}｜${t.startAge}M ~ ${t.endAge}M｜${t.count}次${t.manual?'（手動）':''}">${t.startAge}~${t.endAge}M${bdTag}</td>`;
+        html += `<td class="${cellClass}" style="background:${bg};" title="${t.sku.name}｜${t.startAge}M ~ ${t.endAge}M｜${t.count}次${t.customized?'（客製預設）':''}${t.shifted?'｜重疊延後':''}">${t.startAge}~${t.endAge}M${shiftTag}${bdTag}</td>`;
       }
     });
     html += `</tr>`;
@@ -1537,7 +1533,7 @@ function renderLookupPanel() {
     <div class="lookup-meta">
       連續的登錄月齡若產生相同配信排程，會合併為一區段顯示。
       目前共 <strong>${groups.length}</strong> 個區段（通路 <strong>${currentChannel}</strong>｜終止基準固定 <strong>${currentPct}</strong>）。
-      紅色行＝目前選擇的登錄月齡。<strong>⊘N</strong> ＝ 該商品因生日月跳過的訊息次數。✎ ＝ 手動覆寫。
+      紅色行＝目前選擇的登錄月齡。<strong>⊘N</strong> ＝ 該商品因生日月跳過的訊息次數。<strong>↪</strong> ＝ 因前商品重疊自動延後。藍色外框 ＝ 客製化預設視窗。
     </div>`;
   document.getElementById('lookupBody').innerHTML = html;
 }
