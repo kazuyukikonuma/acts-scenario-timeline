@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ACTS｜LC8T 登錄月齡別配信情境時間軸</title>
+<title>LC8T｜ACTS 登錄月齡別配信情境時間軸</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap">
@@ -16,9 +16,19 @@
     --text2: #6B6760;
     --text3: #9B9890;
     --accent: #E24B4A;
+    --accent-soft: #FCEFEF;
     --blue: #85B7EB;
+    --warn: #D88A0E;
+    --manual: #2F7DD1;
     --border: #D5D1C8;
     --card: #FFFFFF;
+    --highlight: #FFF8DC;
+    --preg: #F7C9D5;
+    --birthday: #F8D34A;
+    /* radius 3-tier: small (controls), medium (cards), large (panels) */
+    --r-sm: 4px;
+    --r-md: 8px;
+    --r-lg: 12px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,13 +42,11 @@
   }
 
   .container {
-    max-width: 1080px;
+    max-width: 1280px;
     margin: 0 auto;
   }
 
-  .header {
-    margin-bottom: 32px;
-  }
+  .header { margin-bottom: 24px; }
 
   .header h1 {
     font-size: 20px;
@@ -55,7 +63,7 @@
 
   .controls {
     background: var(--card);
-    border-radius: 12px;
+    border-radius: var(--r-lg);
     padding: 20px 24px;
     margin-bottom: 20px;
     border: 1px solid var(--border);
@@ -79,34 +87,62 @@
     font-weight: 500;
   }
 
+  .age-slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    max-width: 420px;
+  }
+
   input[type="range"] {
     flex: 1;
-    max-width: 320px;
     accent-color: var(--accent);
     height: 4px;
   }
+
+  .nudge-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.12s;
+    user-select: none;
+  }
+  .nudge-btn:hover { background: var(--bg2); border-color: var(--text2); }
+  .nudge-btn:active { background: var(--bg3); }
+  .nudge-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
   .age-display {
     font-size: 18px;
     font-weight: 500;
     color: var(--text);
-    min-width: 48px;
+    min-width: 56px;
     background: var(--bg2);
     padding: 4px 10px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     text-align: center;
   }
+  .age-display.preg { background: var(--preg); color: var(--text); }
 
-  .pct-btns {
+  .btn-group {
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
   }
 
-  .pct-btn {
+  .seg-btn {
     font-size: 12px;
     padding: 5px 14px;
-    border-radius: 6px;
+    border-radius: var(--r-sm);
     cursor: pointer;
     border: 1px solid var(--border);
     background: var(--bg2);
@@ -115,18 +151,109 @@
     font-weight: 500;
   }
 
-  .pct-btn:hover { background: var(--bg3); color: var(--text); }
+  .seg-btn:hover { background: var(--bg3); color: var(--text); }
 
-  .pct-btn.active {
+  .seg-btn.active {
     background: var(--text);
     color: var(--bg);
     border-color: var(--text);
   }
 
+  .seg-btn.ch-WEB.active { background: #2F7DD1; border-color: #2F7DD1; }
+  .seg-btn.ch-TM.active { background: #E24B4A; border-color: #E24B4A; }
+  .seg-btn.ch-KOL.active { background: #D4537E; border-color: #D4537E; }
+  .seg-btn.ch-ALL.active { background: #1A1814; border-color: #1A1814; }
+
   .pct-note {
     font-size: 11px;
     color: var(--text3);
     margin-left: 4px;
+  }
+
+  .action-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-left: auto;
+  }
+
+  .action-btn {
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text2);
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+
+  .action-btn:hover { background: var(--bg2); color: var(--text); }
+
+  .action-btn.danger {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .action-btn.danger:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  .action-btn.primary {
+    background: var(--manual);
+    color: #fff;
+    border-color: var(--manual);
+  }
+  .action-btn.primary:hover { background: #2766B4; color: #fff; }
+
+  .move-ctrl {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex-shrink: 0;
+  }
+  .move-btn {
+    width: 18px;
+    height: 14px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text2);
+    cursor: pointer;
+    font-size: 8px;
+    padding: 0;
+    line-height: 1;
+    border-radius: var(--r-sm);
+    transition: all 0.1s;
+  }
+  .move-btn:not(:disabled):hover { background: var(--manual); color: #fff; border-color: var(--manual); }
+  .move-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab {
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+  }
+
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: var(--text);
+    border-bottom-color: var(--text);
+    font-weight: 600;
   }
 
   .summary-cards {
@@ -139,7 +266,7 @@
   .card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: var(--r-md);
     padding: 12px 18px;
     min-width: 90px;
   }
@@ -167,17 +294,29 @@
   .card.highlight .card-label { color: rgba(255,255,255,0.6); }
   .card.highlight .card-value { color: #fff; }
 
+  .chart-notice {
+    background: #FFF7DD;
+    border: 1px solid #E8D87B;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    font-size: 11px;
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .chart-notice .nb-icon { font-size: 13px; margin-right: 4px; }
+  .chart-notice .sep { color: var(--text3); margin: 0 8px; }
+
   .chart-wrap {
     background: var(--card);
-    border-radius: 12px;
+    border-radius: var(--r-lg);
     padding: 20px 24px 16px;
     border: 1px solid var(--border);
     overflow-x: auto;
+    position: relative;
   }
 
-  .chart-inner {
-    min-width: 560px;
-  }
+  .chart-inner { min-width: 800px; }
 
   .row {
     display: flex;
@@ -187,35 +326,109 @@
   }
 
   .row-label {
-    width: 96px;
+    width: 110px;
     flex-shrink: 0;
     text-align: right;
   }
 
   .row-label-name {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
   }
 
   .row-label-theme {
-    font-size: 10px;
+    font-size: 10.5px;
     color: var(--text3);
   }
 
   .row-label.skipped .row-label-name { opacity: 0.35; }
   .row-label.skipped .row-label-theme { opacity: 0.3; }
 
+  .manual-tag {
+    font-size: 9px;
+    background: var(--manual);
+    color: #fff;
+    padding: 1px 5px;
+    border-radius: var(--r-sm);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .warn-icon {
+    color: var(--warn);
+    font-size: 12px;
+    cursor: help;
+  }
+
   .bar-wrap {
     flex: 1;
     height: 36px;
     position: relative;
     background: var(--bg2);
-    border-radius: 5px;
-    overflow: hidden;
+    border-radius: var(--r-sm);
+    overflow: visible;
+    min-width: 320px;
   }
 
-  .bar-wrap.skipped { opacity: 0.25; }
+  .bar-wrap-inner {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: var(--r-sm);
+  }
+
+  .bar-wrap.skipped .bar-wrap-inner { opacity: 0.45; }
+
+  .preg-band {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      rgba(247,201,213,0.30) 0px,
+      rgba(247,201,213,0.30) 4px,
+      rgba(247,201,213,0.55) 4px,
+      rgba(247,201,213,0.55) 8px
+    );
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* 妊娠期に被せる配信月齡リスト：4 回分を 09/09/10/10 形式で 1 行表示 */
+  .dot-list {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    color: var(--text);
+    font-weight: 600;
+    background: rgba(255,255,255,0.88);
+    padding: 2px 3px;
+    border-radius: var(--r-sm);
+    z-index: 2;
+    pointer-events: auto;
+    cursor: help;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    line-height: 1.2;
+  }
+
+  .birthday-band {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: rgba(248, 211, 74, 0.20);
+    z-index: 0;
+    pointer-events: auto;
+    cursor: help;
+  }
 
   .bar-bg {
     position: absolute;
@@ -223,7 +436,11 @@
     height: 26px;
     border-radius: 4px;
     pointer-events: none;
+    z-index: 1;
   }
+
+  .bar-bg.msg-span { opacity: 0.30; }
+  .bar-bg.rest-span { opacity: 0.10; }
 
   .dot {
     position: absolute;
@@ -232,12 +449,21 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    z-index: 2;
+    z-index: 3;
     transition: transform 0.1s;
     cursor: default;
+    box-shadow: 0 0 0 1.5px var(--card);
   }
 
   .dot:hover { transform: translate(-50%, -50%) scale(1.5); }
+
+  .dot.blocked {
+    background: transparent !important;
+    border: 1.5px dashed rgba(0,0,0,0.35);
+    box-shadow: none;
+    width: 10px;
+    height: 10px;
+  }
 
   .median-line {
     position: absolute;
@@ -245,8 +471,52 @@
     height: 100%;
     width: 1.5px;
     background: var(--blue);
-    opacity: 0.7;
-    z-index: 1;
+    opacity: 0.5;
+    z-index: 2;
+  }
+
+  .config-line {
+    position: absolute;
+    top: -4px;
+    height: calc(100% + 8px);
+    width: 0;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .config-line.start {
+    border-left: 2px solid var(--manual);
+    opacity: 0.75;
+  }
+  .config-line.end {
+    border-left: 2px dashed var(--accent);
+    opacity: 0.65;
+  }
+  .config-line .config-tag {
+    position: absolute;
+    top: -14px;
+    left: 2px;
+    font-size: 9px;
+    font-weight: 700;
+    background: var(--card);
+    padding: 0 3px;
+    border-radius: 2px;
+    white-space: nowrap;
+    line-height: 1.3;
+  }
+  .config-line.start .config-tag { color: var(--manual); }
+  .config-line.end .config-tag { color: var(--accent); }
+
+  .dot.past-cutoff {
+    box-shadow: 0 0 0 1.5px var(--card), 0 0 0 2px var(--accent);
+    opacity: 0.85;
+  }
+
+  .bar-wrap.past-cutoff .bar-wrap-inner {
+    background: repeating-linear-gradient(
+      135deg,
+      transparent 0 6px,
+      rgba(226,75,74,0.06) 6px 12px
+    );
   }
 
   .cursor-line {
@@ -255,8 +525,8 @@
     height: 100%;
     width: 2px;
     background: var(--accent);
-    opacity: 0.8;
-    z-index: 3;
+    opacity: 0.85;
+    z-index: 4;
     transform: translateX(-50%);
     transition: left 0.1s;
   }
@@ -264,12 +534,22 @@
   .bar-label {
     position: absolute;
     top: 2px;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 500;
     padding-left: 4px;
     white-space: nowrap;
-    z-index: 4;
+    z-index: 5;
     pointer-events: none;
+  }
+
+  .bar-warn {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    font-size: 11px;
+    z-index: 5;
+    color: var(--warn);
+    cursor: help;
   }
 
   .skip-label {
@@ -280,20 +560,114 @@
     padding-left: 10px;
     font-size: 10px;
     color: var(--text3);
+    z-index: 3;
   }
+
+  .row-controls {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .ctrl-input {
+    width: 32px;
+    font-size: 12px;
+    padding: 3px 3px;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    text-align: center;
+    font-family: inherit;
+    background: var(--card);
+    color: var(--text);
+    -moz-appearance: textfield;
+  }
+  .ctrl-input::-webkit-inner-spin-button,
+  .ctrl-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .ctrl-input.customized {
+    border-color: var(--manual);
+    background: #F0F6FC;
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .ctrl-input.invalid {
+    border-color: var(--accent);
+    background: #FFF0F0;
+  }
+
+  .input-stepper {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .step-btn {
+    width: 16px;
+    height: 22px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 9px;
+    padding: 0;
+    transition: all 0.1s;
+    line-height: 1;
+    user-select: none;
+  }
+  .step-btn.left { border-radius: var(--r-sm) 0 0 var(--r-sm); border-right: 0; }
+  .step-btn.right { border-radius: 0 var(--r-sm) var(--r-sm) 0; border-left: 0; }
+  .step-btn:hover { background: var(--manual); color: #fff; border-color: var(--manual); }
+  .step-btn:active { background: #2766B4; }
+  .input-stepper.customized .step-btn { border-color: var(--manual); }
+
+  .reset-btn {
+    font-size: 12px;
+    padding: 2px 5px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.12s;
+    background: var(--card);
+    color: var(--text2);
+    min-width: 22px;
+    height: 22px;
+    line-height: 1;
+    margin-left: 4px;
+  }
+  .reset-btn:not(:disabled):hover { background: var(--bg2); color: var(--accent); border-color: var(--accent); }
+  .reset-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+  /* customized state is shown only on the right-side input/stepper to avoid visual noise */
 
   .axis {
     position: relative;
-    height: 24px;
-    margin-left: 106px;
+    height: 26px;
+    margin-left: 120px;
+    margin-right: 174px;
     margin-top: 4px;
   }
 
   .axis-tick {
     position: absolute;
     transform: translateX(-50%);
-    font-size: 10px;
+    font-size: 11px;
     color: var(--text3);
+    top: 0;
+  }
+
+  .axis-bd {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 10.5px;
+    color: #C9990C;
+    top: 12px;
+    font-weight: 600;
+    white-space: nowrap;
   }
 
   .legend {
@@ -301,35 +675,46 @@
     gap: 16px;
     margin-top: 14px;
     flex-wrap: wrap;
-    padding-left: 106px;
+    padding-left: 120px;
   }
 
   .legend-item {
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text2);
   }
 
-  .legend-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-  }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+  .legend-line { width: 14px; height: 2px; border-radius: 1px; }
 
-  .legend-line {
+  .legend-band {
     width: 14px;
-    height: 2px;
-    border-radius: 1px;
+    height: 14px;
+    border-radius: var(--r-sm);
+  }
+  .legend-band.preg {
+    background: repeating-linear-gradient(45deg,
+      rgba(247,201,213,0.30) 0 4px,
+      rgba(247,201,213,0.55) 4px 8px);
+  }
+  .legend-band.birthday { background: rgba(248,211,74,0.40); }
+
+  .legend-badge {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: var(--r-sm);
+    font-weight: 600;
+    color: #fff;
   }
 
   .logic-box {
     margin-top: 16px;
     padding: 12px 16px;
     background: var(--bg2);
-    border-radius: 8px;
-    font-size: 11px;
+    border-radius: var(--r-md);
+    font-size: 12px;
     color: var(--text2);
     line-height: 1.9;
     border-left: 3px solid var(--text3);
@@ -348,32 +733,495 @@
     color: var(--text3);
     text-align: right;
   }
+
+  .batch-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    margin-top: 20px;
+    overflow: hidden;
+  }
+
+  .batch-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .batch-header:hover { background: var(--bg2); }
+
+  .batch-header-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .batch-header-count {
+    font-size: 10px;
+    background: var(--manual);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: var(--r-sm);
+    font-weight: 600;
+  }
+
+  .batch-chev {
+    font-size: 12px;
+    color: var(--text2);
+    transition: transform 0.15s;
+  }
+
+  .batch-panel.open .batch-chev { transform: rotate(90deg); }
+
+  .batch-body {
+    display: none;
+    padding: 0 20px 16px;
+    border-top: 1px solid var(--border);
+    overflow-x: auto;
+  }
+
+  .batch-panel.open .batch-body { display: block; }
+
+  .info-panel .batch-body {
+    padding: 4px 24px 20px;
+  }
+
+  .info-section {
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid var(--bg2);
+  }
+  .info-section:first-child {
+    margin-top: 8px;
+    border-top: 0;
+  }
+  .info-section .info-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .info-section p {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.7;
+    margin: 3px 0;
+  }
+  .info-section p strong { color: var(--text); }
+
+  .batch-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    font-size: 11px;
+  }
+
+  .batch-table th {
+    text-align: left;
+    color: var(--text2);
+    font-weight: 500;
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--border);
+    font-size: 10px;
+  }
+
+  .batch-table td {
+    padding: 6px;
+    border-bottom: 1px solid var(--bg2);
+    vertical-align: middle;
+  }
+
+  .batch-table input[type="number"] {
+    width: 64px;
+    font-size: 11px;
+    padding: 3px 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: inherit;
+  }
+
+  .batch-table .auto-value { color: var(--text3); font-size: 10px; }
+  .batch-table .sku-cell { font-weight: 500; color: var(--text); }
+  .batch-table .theme-cell { color: var(--text3); font-size: 10px; }
+
+  .batch-table .row-reset {
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 10px;
+  }
+
+  .batch-table .row-reset:hover { text-decoration: underline; }
+
+  .batch-table tr.manual td.sku-cell::before {
+    content: '●';
+    color: var(--manual);
+    margin-right: 4px;
+  }
+
+  .lookup-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+    margin-bottom: 4px;
+    justify-content: flex-end;
+  }
+
+  .lookup-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12px;
+    margin-top: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lookup-table th, .lookup-table td {
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--bg2);
+    padding: 5px 8px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .lookup-table thead th {
+    background: var(--bg2);
+    font-weight: 600;
+    font-size: 10px;
+    color: var(--text);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .lookup-table thead th .theme-sub {
+    display: block;
+    font-size: 9px;
+    color: var(--text3);
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .lookup-table .age-col {
+    position: sticky;
+    left: 0;
+    background: var(--card);
+    font-weight: 600;
+    text-align: right;
+    z-index: 1;
+    min-width: 80px;
+    border-right: 1px solid var(--border);
+  }
+
+  .lookup-table thead th.age-col { z-index: 3; background: var(--bg2); }
+
+  .lookup-table tr.current td { background: var(--highlight); }
+  .lookup-table tr.current td.age-col {
+    background: var(--accent);
+    color: #fff;
+  }
+  .lookup-table tr.preg td.age-col { color: #C5447A; }
+  .lookup-table tr.preg.current td.age-col { color: #fff; background: var(--accent); }
+
+  .lookup-table td.lk-skip {
+    color: var(--text3);
+    font-size: 10px;
+    opacity: 0.5;
+  }
+
+  .lookup-table td.lk-cell {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .lookup-table .lk-bd {
+    color: var(--warn);
+    margin-left: 4px;
+    font-size: 9px;
+    font-weight: 600;
+  }
+
+  .lookup-table .lk-custom {
+    box-shadow: inset 0 0 0 1.5px var(--manual);
+  }
+
+  .lookup-table .lk-shift {
+    color: var(--manual);
+    margin-left: 4px;
+    font-size: 11px;
+  }
+
+  .lookup-table .lk-past {
+    color: var(--accent);
+    margin-left: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .lookup-table .lk-past-end {
+    color: var(--warn);
+    margin-left: 4px;
+    font-size: 11px;
+  }
+
+  .lookup-table td.lk-pastcut {
+    background-image: repeating-linear-gradient(135deg, transparent 0 4px, rgba(226,75,74,0.10) 4px 8px);
+  }
+
+  .lookup-meta {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: var(--bg2);
+    border-radius: var(--r-md);
+    line-height: 1.7;
+  }
+
+  .median-table {
+    font-size: 12px;
+  }
+
+  .median-table th, .median-table td {
+    padding: 8px 10px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--bg2);
+    white-space: nowrap;
+  }
+
+  .median-table th {
+    background: var(--bg2);
+    font-weight: 600;
+    color: var(--text);
+    font-size: 11px;
+  }
+
+  .median-table th.ch-WEB { color: #2F7DD1; background: #E8F1FA; }
+  .median-table th.ch-TM { color: #E24B4A; }
+  .median-table th.ch-KOL { color: #D4537E; }
+  .median-table th.ch-ALL { color: var(--text); }
+  .median-table td.cell-web { background: #F4F9FE; font-weight: 600; }
+
+  .median-table th.text-left, .median-table td.text-left { text-align: left; }
+
+  .median-table .name-cell {
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .median-table .theme-sub {
+    display: block;
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+
+  .median-table .sku-color-bar {
+    display: inline-block;
+    width: 3px;
+    height: 18px;
+    border-radius: 2px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  .median-table .n-sub {
+    display: block;
+    font-size: 10px;
+    color: var(--text3);
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .median-table .diff-col { color: var(--text3); }
+  .median-table .diff-neg { color: var(--manual); font-weight: 600; }
+  .median-table .diff-pos { color: var(--accent); font-weight: 600; }
+  .median-table .diff-zero { color: var(--text3); }
+
+  .median-table .n-cell { color: var(--text2); font-variant-numeric: tabular-nums; }
+
+  .median-table tr.total-row td {
+    background: var(--bg2);
+    font-weight: 600;
+    color: var(--text);
+    border-top: 2px solid var(--border);
+  }
+
+  .stats-table-wrap {
+    background: var(--card);
+    border-radius: var(--r-lg);
+    padding: 20px 24px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+  }
+
+  .stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    min-width: 920px;
+  }
+
+  .stats-table thead th {
+    background: var(--bg2);
+    text-align: right;
+    color: var(--text2);
+    font-weight: 500;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+  }
+
+  .stats-table thead th.text-left { text-align: left; }
+  .stats-table thead th.pct-col { color: var(--text3); }
+  .stats-table thead th.pct-active {
+    background: var(--text);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .stats-table tbody td {
+    text-align: right;
+    padding: 8px;
+    border-bottom: 1px solid var(--bg2);
+    white-space: nowrap;
+  }
+
+  .stats-table tbody td.text-left { text-align: left; }
+  .stats-table tbody td.pct-cell { color: var(--text2); }
+
+  .stats-table tbody td.pct-active {
+    background: var(--highlight);
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .stats-table tbody tr.skipped td { opacity: 0.4; }
+  .stats-table tbody tr.manual td.sku-cell::before {
+    content: '●';
+    color: var(--manual);
+    margin-right: 4px;
+  }
+
+  .stats-table .sku-color-bar {
+    display: inline-block;
+    width: 3px;
+    height: 22px;
+    border-radius: 2px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  .stats-table .name-cell { font-weight: 500; color: var(--text); }
+  .stats-table .theme-sub { font-size: 10px; color: var(--text3); display: block; }
+  .stats-table .actual-cell { font-size: 11px; color: var(--text); }
+  .stats-table .actual-skip { color: var(--text3); font-size: 10px; }
+
+  .stats-table .n-cell { color: var(--text2); font-variant-numeric: tabular-nums; }
+
+  .ch-meta {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--bg2);
+    border-radius: var(--r-md);
+    line-height: 1.7;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: var(--bg);
+    padding: 8px 16px;
+    border-radius: var(--r-sm);
+    font-size: 12px;
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+
+  .toast.show { opacity: 1; }
 </style>
 </head>
 <body>
 <div class="container">
 
 <div class="header">
-  <h1>ACTS｜LC8T 登錄月齡別配信情境時間軸</h1>
-  <p>依發展主題順序配信。切入月齡以商品適用年齡下限為基準。調整登錄月齡與配信終止基準，確認各商品的配信情境。</p>
+  <h1>LC8T｜ACTS 登錄月齡別配信情境時間軸</h1>
+</div>
+
+<div class="batch-panel info-panel" id="infoPanel">
+  <div class="batch-header" onclick="toggleInfoPanel()">
+    <div class="batch-header-title">ℹ 使用說明 / 設計概念</div>
+    <div class="batch-chev">▶</div>
+  </div>
+  <div class="batch-body">
+    <div class="info-section">
+      <div class="info-title">📋 工具目的</div>
+      <p>ACTS 配信情境模擬器：以 BCL 登錄月齡為起點，依發展主題順序排程 9 商品的訊息配信，目標是促進 <strong>WEB 自主購買</strong>。</p>
+      <p>預設配置 ＝ 9M 起每 3M 一組的 2M 視窗（9-11、12-14、15-17、…、33-35），生日月間隔自然形成緩衝。</p>
+    </div>
+
+    <div class="info-section">
+      <div class="info-title">🎂 生日月（11M / 23M / 35M / 47M / 59M）</div>
+      <p>祝賀訊息軌道使用此月份。ACTS 的 dot 若落在生日月會自動推到下一隔週枠 ⇒ campaign 自動跨月延伸（如 10M 開始時，10M-11M(BM)-12M 跨三個月）。</p>
+    </div>
+
+    <div class="info-section">
+      <div class="info-title">👶 妊娠期（-10M ~ -1M）</div>
+      <p>寶寶尚未出生的等待期。</p>
+      <p>此區域同時用來顯示<strong>各商品 4 次配信的實際月齡</strong>，格式 ＝ <code>第1次/第2次/第3次/第4次</code>（2 位整數，例：<code>09/09/10/10</code>）。Hover 顯示精確月齡（含 0.5M）。</p>
+    </div>
+
+    <div class="info-section">
+      <div class="info-title">📐 右側兩欄</div>
+      <p>・<strong>左 ＝ 配信希望開始月齡</strong>：系統會延後避免重疊。</p>
+      <p>・<strong>右 ＝ 配信上限月齡</strong>：超過此月齡則此商品略過（避免 5 歲還在賣初級商品）。</p>
+      <p>・<strong>◀▶</strong>：各獨立 ±1M。</p>
+    </div>
+
+    <div class="info-section">
+      <div class="info-title">⚙ 重設為預設排程</div>
+      <p>清除所有客製化、回到預設 3M 週期排程（9-11、12-14、15-17、…、33-35）。</p>
+    </div>
+
+    <div class="info-section">
+      <div class="info-title">📊 參考資料</div>
+      <p>其他通路（TM / KOL）的購買月齡分佈僅作為參考資料置於頁面最下方。</p>
+    </div>
+  </div>
 </div>
 
 <div class="controls">
   <div class="control-row">
     <span class="control-label">登錄月齡</span>
-    <input type="range" min="0" max="72" value="10" id="ageSlider" step="1">
+    <div class="age-slider-wrap">
+      <button class="nudge-btn" id="ageDec" onclick="adjustAge(-1)" title="-1M">◀</button>
+      <input type="range" min="-10" max="72" value="10" id="ageSlider" step="1">
+      <button class="nudge-btn" id="ageInc" onclick="adjustAge(1)" title="+1M">▶</button>
+    </div>
     <span class="age-display" id="ageLabel">10M</span>
   </div>
   <div class="control-row">
-    <span class="control-label">配信終止基準</span>
-    <div class="pct-btns">
-      <button class="pct-btn" id="btn-P50" onclick="setPct('P50')">P50</button>
-      <button class="pct-btn" id="btn-P60" onclick="setPct('P60')">P60</button>
-      <button class="pct-btn active" id="btn-P70" onclick="setPct('P70')">P70</button>
-      <button class="pct-btn" id="btn-P75" onclick="setPct('P75')">P75</button>
-      <button class="pct-btn" id="btn-P90" onclick="setPct('P90')">P90</button>
+    <div class="action-row">
+      <button class="action-btn primary" onclick="autoOptimize()" title="清除全部客製化、回到預設 3M 週期排程（9-11、12-14、…、33-35）。">⚙ 重設為預設排程</button>
+      <button class="action-btn" onclick="copyShareUrl()">複製網址</button>
+      <button class="action-btn danger" onclick="resetAllOverrides()">全部重設</button>
     </div>
-    <span class="pct-note" id="pctNote">→ 涵蓋70%的購買者</span>
   </div>
 </div>
 
@@ -383,143 +1231,942 @@
   <div class="chart-inner" id="chartInner"></div>
 </div>
 
+<div class="batch-panel" id="lookupPanel">
+  <div class="batch-header" onclick="toggleLookupPanel()">
+    <div class="batch-header-title">
+      登錄月齡 × 商品別 配信月齡 一覽表
+      <span class="batch-header-count" id="lookupRowCount" style="display:none;">0</span>
+    </div>
+    <div class="batch-chev">▶</div>
+  </div>
+  <div class="batch-body" id="lookupBody"></div>
+</div>
+
+<div class="batch-panel" id="medianPanel">
+  <div class="batch-header" onclick="toggleMedianPanel()">
+    <div class="batch-header-title">
+      參考資料：各商品 × 通路別 購買月齡中位數
+    </div>
+    <div class="batch-chev">▶</div>
+  </div>
+  <div class="batch-body" id="medianBody"></div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<div class="footer">LC8T｜ACTS 配信設計 v2.6 ｜ Benesse Taiwan ｜ 最後更新：2026-05-12 19:55 UTC</div>
+
+</div>
+
 <script>
+// 再集計データ（訂單日期 >= 2025-01-01）
+// 商品色：發展主題で5系統に整理（語彙=緑、生活情緒=橙、英語=赤系、邏輯數學=青紫、就學=teal）
 const skus = [
-  { name: '點讀圖鑑',    theme: '語彙啟蒙', entryAge: 6,  median: 17, P50: 17, P60: 19, P70: 23, P75: 26, P90: 45, price: 2399, color: '#1D9E75' },
-  { name: '好習慣套組',  theme: '生活習慣', entryAge: 12, median: 18, P50: 18, P60: 21, P70: 23, P75: 25, P90: 46, price: 4299, color: '#3266AD' },
-  { name: '語彙智育套組',theme: '語彙知育', entryAge: 12, median: 23, P50: 23, P60: 28, P70: 32, P75: 35, P90: 59, price: 4900, color: '#7F77DD' },
-  { name: '好情緒EQ套組',theme: '情緒人際', entryAge: 30, median: 33, P50: 33, P60: 36, P70: 39, P75: 41, P90: 55, price: 2199, color: '#EF9F27' },
-  { name: '英語Plus初階',theme: '英語啟蒙', entryAge: 12, median: 27, P50: 27, P60: 30, P70: 34, P75: 36, P90: 47, price: 4800, color: '#D4537E' },
-  { name: '英語進階版',  theme: '英語進階', entryAge: 36, median: 35, P50: 35, P60: 38, P70: 44, P75: 47, P90: 60, price: 4500, color: '#639922' },
-  { name: '點讀大冒險',  theme: '邏輯集中', entryAge: 36, median: 40, P50: 40, P60: 43, P70: 45, P75: 46, P90: 57, price: 2999, color: '#0F6E56' },
-  { name: '數學套組',    theme: '數感邏輯', entryAge: 42, median: 45, P50: 45, P60: 49, P70: 52, P75: 54, P90: 64, price: 3200, color: '#854F0B' },
-  { name: '注音拼音套組',theme: '就學準備', entryAge: 54, median: 50, P50: 50, P60: 53, P70: 57, P75: 59, P90: 68, price: 3200, color: '#993556' },
+  { sku:'20250FE00', name:'點讀圖鑑',     theme:'語彙啟蒙', entryAge:6,  price:2399, color:'#4FAD80',
+    channels:{
+      WEB:{n:324,  median:17, P25:13, P50:17, P60:19, P70:23, P75:25, P90:45},
+      TM: {n:307,  median:17, P25:13, P50:17, P60:19, P70:22, P75:25, P90:40},
+      KOL:{n:315,  median:19, P25:15, P50:19, P60:22, P70:26, P75:30, P90:49},
+      ALL:{n:946,  median:18, P25:14, P50:18, P60:20, P70:24, P75:26, P90:45}}},
+  { sku:'20240FA00', name:'好習慣套組',   theme:'生活習慣', entryAge:12, price:4299, color:'#E0A23C',
+    channels:{
+      WEB:{n:258,  median:19, P25:14, P50:19, P60:22, P70:24, P75:27, P90:55},
+      TM: {n:590,  median:16, P25:12, P50:16, P60:18, P70:20, P75:22, P90:29},
+      KOL:{n:287,  median:18, P25:13, P50:18, P60:19, P70:21, P75:24, P90:28},
+      ALL:{n:1135, median:17, P25:12, P50:17, P60:19, P70:22, P75:23, P90:33}}},
+  { sku:'20250FD00', name:'語彙智育套組', theme:'語彙知育', entryAge:12, price:4900, color:'#2A7A56',
+    channels:{
+      WEB:{n:270,  median:23, P25:17, P50:23, P60:27, P70:31, P75:35, P90:59},
+      TM: {n:464,  median:23, P25:15, P50:23, P60:25, P70:28, P75:30, P90:39},
+      KOL:{n:245,  median:22, P25:16, P50:22, P60:25, P70:28, P75:30, P90:47},
+      ALL:{n:979,  median:23, P25:16, P50:23, P60:25, P70:29, P75:31, P90:47}}},
+  { sku:'20250FA00', name:'好情緒EQ套組', theme:'情緒人際', entryAge:30, price:2199, color:'#B17725',
+    channels:{
+      WEB:{n:832,  median:33, P25:25, P50:33, P60:36, P70:39, P75:41, P90:55},
+      TM: {n:1608, median:36, P25:28, P50:36, P60:36, P70:39, P75:42, P90:49},
+      KOL:{n:576,  median:30, P25:21, P50:30, P60:32, P70:35, P75:36, P90:43},
+      ALL:{n:3016, median:34, P25:25, P50:34, P60:36, P70:38, P75:40, P90:49}}},
+  { sku:'20230MY00', name:'英語Plus初階', theme:'英語啟蒙', entryAge:12, price:4800, color:'#DB5F8E',
+    channels:{
+      WEB:{n:332,  median:30, P25:22, P50:30, P60:35, P70:38, P75:40, P90:55},
+      TM: {n:893,  median:31, P25:22, P50:31, P60:35, P70:36, P75:38, P90:49},
+      KOL:{n:272,  median:23, P25:17, P50:23, P60:27, P70:30, P75:31, P90:46},
+      ALL:{n:1497, median:29, P25:20, P50:29, P60:33, P70:36, P75:38, P90:49}}},
+  { sku:'20220MY00', name:'英語進階版',   theme:'英語進階', entryAge:36, price:4500, color:'#9F3A66',
+    channels:{
+      WEB:{n:117,  median:40, P25:32, P50:40, P60:46, P70:50, P75:51, P90:62},
+      TM: {n:584,  median:38, P25:29, P50:38, P60:43, P70:48, P75:48, P90:60},
+      KOL:{n:99,   median:33, P25:21, P50:33, P60:36, P70:41, P75:44, P90:54},
+      ALL:{n:800,  median:38, P25:29, P50:38, P60:43, P70:48, P75:48, P90:60}}},
+  { sku:'20250FF00', name:'點讀大冒險',   theme:'邏輯集中', entryAge:36, price:2999, color:'#5C68C2',
+    channels:{
+      WEB:{n:210,  median:40, P25:33, P50:40, P60:43, P70:45, P75:46, P90:57},
+      TM: {n:213,  median:42, P25:33, P50:42, P60:44, P70:47, P75:48, P90:56},
+      KOL:{n:159,  median:36, P25:28, P50:36, P60:39, P70:42, P75:43, P90:51},
+      ALL:{n:582,  median:40, P25:32, P50:40, P60:42, P70:45, P75:47, P90:55}}},
+  { sku:'20250FG00', name:'數學套組',     theme:'數感邏輯', entryAge:42, price:3200, color:'#2E3B85',
+    channels:{
+      WEB:{n:243,  median:45, P25:38, P50:45, P60:49, P70:52, P75:54, P90:64},
+      TM: {n:266,  median:45, P25:36, P50:45, P60:48, P70:53, P75:55, P90:60},
+      KOL:{n:345,  median:42, P25:33, P50:42, P60:46, P70:48, P75:50, P90:55},
+      ALL:{n:854,  median:44, P25:35, P50:44, P60:47, P70:50, P75:52, P90:59}}},
+  { sku:'20240FM00', name:'注音拼音套組', theme:'就學準備', entryAge:54, price:3200, color:'#4C8AAA',
+    channels:{
+      WEB:{n:374,  median:51, P25:40, P50:51, P60:55, P70:58, P75:61, P90:70},
+      TM: {n:1154, median:48, P25:36, P50:48, P60:48, P70:53, P75:55, P90:60},
+      KOL:{n:178,  median:41, P25:26, P50:41, P60:46, P70:49, P75:52, P90:62},
+      ALL:{n:1706, median:48, P25:35, P50:48, P60:49, P70:54, P75:57, P90:64}}},
 ];
 
-const pctNotes = {
-  P50: '涵蓋50%的購買者',
-  P60: '涵蓋60%的購買者',
-  P70: '涵蓋70%的購買者',
-  P75: '涵蓋75%的購買者',
-  P90: '涵蓋90%的購買者'
-};
+const INTERVAL = 0.5;
+const MAX_COUNT = 4;
+const CAMPAIGN_WINDOW = 2;
+const EPS = 1e-9;
+const PCT_KEYS = ['P50','P60','P70','P75','P90'];
+const PCT_ALL = ['P25','P50','P60','P70','P75','P90'];
+const CHANNELS = ['WEB','TM','KOL','ALL'];
 
-let currentPct = 'P70';
-let currentAge = 10;
+const MIN_AGE = -10;            // 妊娠期下限
+const MAX_AGE_SLIDER = 72;
+const BIRTHDAY_MONTHS = [11, 23, 35, 47, 59];
 
-function setPct(p) {
-  currentPct = p;
-  ['P50','P60','P70','P75','P90'].forEach(k => {
-    const btn = document.getElementById('btn-' + k);
-    btn.classList.toggle('active', k === p);
-  });
-  document.getElementById('pctNote').textContent = '→ ' + pctNotes[p];
-  render(currentAge);
+function isBirthdayMonth(m) {
+  return BIRTHDAY_MONTHS.includes(Math.floor(m + EPS));
 }
 
-function buildTimeline(regAge, pctKey) {
+const pctNotes = {
+  P50:'涵蓋50%的購買者', P60:'涵蓋60%的購買者', P70:'涵蓋70%的購買者',
+  P75:'涵蓋75%的購買者', P90:'涵蓋90%的購買者'
+};
+const chNotes = {
+  WEB:'公式EC自主購買者（n合計の中央値ベース）',
+  TM:'電話營業による購買者（n合計の中央値ベース）',
+  KOL:'KOL團購経由購買者（早期購買が多い傾向）',
+  ALL:'全通路合算',
+};
+
+const currentPct = 'P70';
+const currentChannel = 'WEB';
+let currentAge = 10;
+let overrides = {};
+let order = skus.map((_, i) => i);  // display order (permutation of indices)
+
+function round2(v) { return Math.round(v * 100) / 100; }
+function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+
+function getStats(sku, channel) {
+  return sku.channels[channel] || sku.channels.ALL;
+}
+
+// dots を隔週生成。生日月の枠は配信せず、次の隔週枠に押し出す（campaign 自動伸長）。
+function buildSlots(startAge) {
+  const msgs = [];
+  const stretched = [];   // 生日月で押し出された月齢（視覚化用）
+  let t = round2(startAge);
+  let iter = 0;
+  while (msgs.length < MAX_COUNT && iter < 30) {
+    iter++;
+    if (isBirthdayMonth(t)) {
+      stretched.push(round2(t));
+    } else {
+      msgs.push(round2(t));
+    }
+    t = round2(t + INTERVAL);
+  }
+  return { msgs, blocked: stretched };
+}
+
+// 初期デフォルト：3M サイクル（9M起点）の開始月齡 + 配信上限 ＝ 開始 +12M
+//   ・「開始月齡」 ＝ 配信希望開始月齡（システムが前商品終了後に必要なら自動延後）
+//   ・「結束月齡」 ＝ 配信上限（actualStart > 上限 なら略過、上限 ＝ 開始 +12M で
+//     「登錄から 12M 以内の會員に届く」意味）
+const INITIAL_WINDOWS = [
+  [9,  21],   // 點讀圖鑑
+  [12, 24],   // 好習慣套組
+  [15, 27],   // 語彙智育套組
+  [18, 30],   // 好情緒EQ套組
+  [21, 33],   // 英語Plus初階
+  [24, 36],   // 英語進階版
+  [27, 39],   // 點讀大冒險
+  [30, 42],   // 數學套組
+  [33, 45],   // 注音拼音套組
+];
+
+function initialDefaults(idx) {
+  const [s, e] = INITIAL_WINDOWS[idx];
+  return { startAge: s, endAge: e };
+}
+
+function getDefaults(idx) {
+  return overrides[idx] || initialDefaults(idx);
+}
+
+function isCustomized(idx) {
+  return !!overrides[idx];
+}
+
+function buildTimeline(regAge, pctKey, channel, overridesMap) {
   const results = [];
   let cursor = regAge;
-  skus.forEach(sku => {
-    const cutoff = sku[pctKey];
-    if (regAge >= cutoff) { results.push({ sku, skipped: true, reason: '登錄時已超過' + pctKey }); return; }
-    const startAge = Math.max(cursor, sku.entryAge);
-    if (startAge >= cutoff) { results.push({ sku, skipped: true, reason: '前商品結束後已超過' + pctKey }); return; }
-    const remaining = cutoff - startAge;
-    const interval = 0.5; // 隔週 = 0.5ヶ月
-    const maxCount = 4;
-    const count = Math.min(maxCount, Math.max(1, Math.floor(remaining / interval) + 1));
-    const duration = Math.min(2, remaining); // 最大2ヶ月の配信ウィンドウ
-    const msgs = Array.from({length: count}, (_, i) => +(startAge + interval * i).toFixed(2));
-    results.push({ sku, skipped: false, startAge, endAge: startAge + duration, msgs, count });
-    cursor = startAge + duration;
+  order.forEach((skuIdx, displayIdx) => {
+    const sku = skus[skuIdx];
+    const idx = skuIdx;
+    const stats = getStats(sku, channel);
+    const cutoff = stats[pctKey];
+    const def = overridesMap[idx] || initialDefaults(idx);
+    const customized = !!overridesMap[idx];
+    const desiredStart = def.startAge;
+    const maxAge = def.endAge;  // 配信終了月齡（上限）
+    const requestedStart = Math.max(cursor, desiredStart);
+
+    // 上限ゲート：実配信開始 が 上限 を超えていれば略過
+    if (requestedStart > maxAge + EPS) {
+      results.push({
+        sku, idx, displayIdx, stats, cutoff,
+        skipped: true, customized,
+        desiredStart, desiredEnd: maxAge,
+        reason: '已超過配信上限 ' + maxAge + 'M'
+      });
+      return;
+    }
+
+    const { msgs, blocked } = buildSlots(requestedStart);
+    const firstMsg = msgs.length > 0 ? msgs[0] : requestedStart;
+    const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : requestedStart;
+    const barEnd = round2(lastMsg + INTERVAL);
+    const shifted = firstMsg > desiredStart + EPS;
+    const stretched = msgs.length >= 2 && (lastMsg - firstMsg) > (INTERVAL * 3) + EPS;
+
+    const startPastCutoff = firstMsg >= cutoff - EPS;
+    const endPastCutoff = barEnd > cutoff + EPS;
+
+    results.push({
+      sku, idx, displayIdx, stats, cutoff,
+      skipped: false, customized, shifted, stretched,
+      desiredStart, desiredEnd: maxAge,
+      startAge: firstMsg, endAge: barEnd,
+      msgs, blocked, count: msgs.length,
+      warning: msgs.length < MAX_COUNT,
+      startPastCutoff, endPastCutoff,
+      overCutoff: endPastCutoff
+    });
+    cursor = barEnd;
   });
   return results;
 }
 
-function render(regAge) {
-  const timeline = buildTimeline(regAge, currentPct);
-  const active = timeline.filter(t => !t.skipped);
-  const maxAge = active.length > 0 ? Math.max(72, active[active.length - 1].endAge + 4) : 72;
+function adjustAge(delta) {
+  const next = clamp(currentAge + delta, MIN_AGE, MAX_AGE_SLIDER);
+  if (next === currentAge) return;
+  currentAge = next;
+  const slider = document.getElementById('ageSlider');
+  slider.value = currentAge;
+  updateAgeLabel();
+  render();
+  syncUrl();
+}
 
-  function p(v) { return Math.min(100, Math.max(0, (v / maxAge) * 100)); }
+function updateAgeLabel() {
+  const lbl = document.getElementById('ageLabel');
+  lbl.textContent = currentAge + 'M';
+  lbl.classList.toggle('preg', currentAge < 0);
+  document.getElementById('ageDec').disabled = currentAge <= MIN_AGE;
+  document.getElementById('ageInc').disabled = currentAge >= MAX_AGE_SLIDER;
+}
 
-  let html = '';
+// setPct / setChannel / setView removed: P70, WEB, single chart view fixed by design.
 
-  timeline.forEach(({ sku, skipped, startAge, endAge, msgs, count, reason }) => {
-    const labelClass = skipped ? 'row-label skipped' : 'row-label';
-    html += `<div class="row">
-      <div class="${labelClass}">
-        <div class="row-label-name">${sku.name}</div>
-        <div class="row-label-theme">${sku.theme}</div>
-      </div>
-      <div class="bar-wrap${skipped ? ' skipped' : ''}">`;
+function toggleInfoPanel() {
+  document.getElementById('infoPanel').classList.toggle('open');
+}
 
-    if (skipped) {
-      html += `<div class="skip-label">略過（${reason}）</div>`;
-    } else {
-      const bl = p(startAge), br = p(endAge);
-      html += `<div class="bar-bg" style="left:${bl}%;width:${Math.max(br-bl,0.5)}%;background:${sku.color};opacity:0.15;"></div>`;
-      msgs.forEach((m, i) => {
-        html += `<div class="dot" style="left:${p(m)}%;background:${sku.color};" title="${m.toFixed(1)}M（第${i+1}次）NT$${sku.price.toLocaleString()}"></div>`;
-      });
-      html += `<div class="median-line" style="left:${p(sku.median)}%;" title="WEB中位數 ${sku.median}M"></div>`;
-      html += `<div class="bar-label" style="left:${bl}%;color:${sku.color};">${Math.round(startAge)}M起 ${count}次 NT$${sku.price.toLocaleString()}</div>`;
-    }
-
-    html += `<div class="cursor-line" style="left:${p(regAge)}%;"></div>`;
-    html += `</div></div>`;
-  });
-
-  const tickStep = maxAge > 70 ? 12 : 6;
-  html += `<div class="axis">`;
-  for (let m = 0; m <= maxAge; m += tickStep) {
-    html += `<div class="axis-tick" style="left:${p(m)}%">${m}M</div>`;
+function setDefaults(idx, startAge, endAge) {
+  const s = clamp(Math.round(startAge), MIN_AGE, 72);
+  const e = clamp(Math.round(endAge), s + 1, 84);
+  const init = initialDefaults(idx);
+  if (s === init.startAge && e === init.endAge) {
+    delete overrides[idx];
+  } else {
+    overrides[idx] = { startAge: s, endAge: e };
   }
-  html += `</div>`;
+}
 
-  html += `<div class="legend">
-    <div class="legend-item"><span class="legend-dot" style="background:#E24B4A;"></span>登錄月齡</div>
-    <div class="legend-item"><span class="legend-line" style="background:#85B7EB;"></span>WEB購買中位數</div>
-    <div class="legend-item">● 每個點＝1次訊息</div>
-  </div>`;
+function resetDefault(idx) {
+  if (!overrides[idx]) return;
+  delete overrides[idx];
+  render();
+  syncUrl();
+}
 
-  html += `<div class="logic-box">
-    <strong>配信順序ロジック</strong>
-    ① 發展主題順（語彙啟蒙 → 生活習慣 → 語彙知育 → 情緒人際 → 英語啟蒙 → 英語進階 → 邏輯集中 → 數感邏輯 → 就學準備）<br>
-    ② 切入月齡 ＝ 商品適用年齡下限（非WEB中位數）<br>
-    ③ 配信節奏 ＝ 每商品最多2個月・隔週1次・最多4次<br>
-    ④ 終止基準 ＝ 選擇的百分位數 &nbsp;⑤ 超過終止基準的商品略過
-  </div>`;
+// 開始（配信希望開始）と 上限（配信終了月齡）は独立して編集する
+function stepInput(idx, field, delta) {
+  const before = getDefaults(idx);
+  let newStart = before.startAge;
+  let newEnd = before.endAge;
+  if (field === 'startAge') newStart += delta;
+  else newEnd += delta;
+  if (newStart < MIN_AGE) newStart = MIN_AGE;
+  if (newEnd > 84) newEnd = 84;
+  if (newEnd <= newStart) return;  // 不変
+  setDefaults(idx, newStart, newEnd);
+  render();
+  syncUrl();
+}
 
-  document.getElementById('chartInner').innerHTML = html;
+function onRowInputChange(input) {
+  const idx = parseInt(input.dataset.idx);
+  const row = input.closest('.row');
+  const startInput = row.querySelector('input[data-field="startAge"]');
+  const endInput = row.querySelector('input[data-field="endAge"]');
+  startInput.classList.remove('invalid');
+  endInput.classList.remove('invalid');
 
-  const totalMsgs = active.reduce((s, t) => s + t.count, 0);
-  const lastEnd = active.length > 0 ? active[active.length - 1].endAge : regAge;
-  const duration = (lastEnd - regAge).toFixed(1);
-  const skipCount = timeline.filter(t => t.skipped).length;
-  const totalLTV = active.reduce((s, t) => s + t.sku.price, 0);
+  const newStart = Math.round(parseFloat(startInput.value));
+  const newEnd = Math.round(parseFloat(endInput.value));
+  if (isNaN(newStart) || isNaN(newEnd)) {
+    input.classList.add('invalid');
+    showToast('請輸入整數');
+    return;
+  }
+  if (newEnd <= newStart) {
+    input.classList.add('invalid');
+    showToast('上限（右）必須大於開始（左）');
+    return;
+  }
+  setDefaults(idx, newStart, newEnd);
+  render();
+  syncUrl();
+}
+
+function resetAllOverrides() {
+  const noOverrides = Object.keys(overrides).length === 0;
+  const defaultOrder = order.every((v, i) => v === i);
+  if (noOverrides && defaultOrder) return;
+  if (!confirm('將全部商品的配信視窗、排序重設為預設？')) return;
+  overrides = {};
+  order = skus.map((_, i) => i);
+  render();
+  syncUrl();
+  showToast('已重設為預設值');
+}
+
+function moveProduct(displayIdx, delta) {
+  const target = displayIdx + delta;
+  if (target < 0 || target >= order.length) return;
+  [order[displayIdx], order[target]] = [order[target], order[displayIdx]];
+  render();
+  syncUrl();
+}
+
+// Birthday-aware "clean" start:
+// dots at S, S+0.5, S+1, S+1.5 → months floor(S) and floor(S+1)
+// Tainted integer starts = {b-1, b | b ∈ BIRTHDAY_MONTHS}
+const TAINTED_STARTS = new Set(BIRTHDAY_MONTHS.flatMap(b => [b - 1, b]));
+
+function isCleanStart(S) {
+  return !TAINTED_STARTS.has(S);
+}
+
+function nextCleanStart(minS) {
+  let s = Math.ceil(minS);
+  while (!isCleanStart(s)) s++;
+  return s;
+}
+
+function autoOptimize() {
+  // 客製化を全クリア → 初期 3M サイクル配置に戻す
+  const changedCount = Object.keys(overrides).length;
+  overrides = {};
+  render();
+  syncUrl();
+  if (changedCount === 0) {
+    showToast('目前已是預設排程，無客製化');
+  } else {
+    showToast(`已清除 ${changedCount} 個客製化，回到 3M 週期預設排程`);
+  }
+}
+
+function render() {
+  const timeline = buildTimeline(currentAge, currentPct, currentChannel, overrides);
+  renderSummary(timeline);
+  renderChart(timeline);
+  renderLookupPanel();
+  renderMedianPanel();
+}
+
+function renderSummary(timeline) {
+  const totalMsgs = timeline.reduce((s, t) => s + t.count, 0);
+  const lastEnd = timeline.length > 0 ? timeline[timeline.length - 1].endAge : currentAge;
+  const duration = (lastEnd - currentAge).toFixed(1);
+  const totalLTV = timeline.reduce((s, t) => s + (t.skipped ? 0 : t.sku.price), 0);
 
   document.getElementById('summaryCards').innerHTML = `
     <div class="card"><div class="card-label">總訊息次數</div><div class="card-value">${totalMsgs}次</div></div>
     <div class="card"><div class="card-label">配信期間</div><div class="card-value">${duration}個月</div></div>
     <div class="card"><div class="card-label">完成月齡</div><div class="card-value">${Math.round(lastEnd)}M</div></div>
-    <div class="card"><div class="card-label">略過商品</div><div class="card-value">${skipCount}件</div></div>
     <div class="card highlight"><div class="card-label">最大LTV（配信対象）</div><div class="card-value">NT$${totalLTV.toLocaleString()}</div></div>
   `;
 }
 
+function renderChart(timeline) {
+  const active = timeline.filter(t => !t.skipped);
+  const minAge = MIN_AGE;
+  const dataMax = active.length > 0 ? Math.max(72, Math.ceil(active[active.length - 1].endAge) + 4) : 72;
+  const maxAge = dataMax;
+  const span = maxAge - minAge;
+
+  function p(v) { return clamp(((v - minAge) / span) * 100, 0, 100); }
+
+  let html = '';
+
+  timeline.forEach(({ sku, idx, displayIdx, stats, skipped, customized, shifted, stretched, desiredStart, desiredEnd, startAge, endAge, msgs, blocked, count, warning, reason, startPastCutoff, endPastCutoff }) => {
+    const labelClass = skipped ? 'row-label skipped' : 'row-label';
+    const barClass = 'bar-wrap' + (skipped ? ' skipped' : '') + (!skipped && startPastCutoff ? ' past-cutoff' : '');
+
+    let warnTag = '';
+    if (!skipped && warning) {
+      warnTag += `<span class="warn-icon" title="僅 ${count} 次（標準 ${MAX_COUNT} 次）">⚠</span>`;
+    }
+    if (!skipped && shifted) {
+      warnTag += `<span class="warn-icon" title="預設開始 ${desiredStart}M 與前商品重疊（或落在生日月），已自動延後至 ${startAge}M" style="color:var(--manual);">↪</span>`;
+    }
+    if (!skipped && stretched) {
+      warnTag += `<span class="warn-icon" title="配信中段含生日月，campaign 自動跨月延伸（${endAge - startAge}M 跨度）" style="color:#7C5DC0;">⤴</span>`;
+    }
+    if (!skipped && startPastCutoff) {
+      warnTag += `<span class="warn-icon" title="開始 ${startAge}M 已超過 WEB ${currentPct}（${stats[currentPct]}M）：大半購買者已下單" style="color:var(--accent);">⚑</span>`;
+    } else if (!skipped && endPastCutoff) {
+      warnTag += `<span class="warn-icon" title="結束 ${endAge}M 超過 WEB ${currentPct}（${stats[currentPct]}M）">⚑</span>`;
+    }
+
+    // Row label + move controls
+    const upDisabled = displayIdx === 0 ? 'disabled' : '';
+    const downDisabled = displayIdx === order.length - 1 ? 'disabled' : '';
+    html += `<div class="row" data-idx="${idx}">
+      <div class="move-ctrl">
+        <button class="move-btn" onclick="moveProduct(${displayIdx}, -1)" ${upDisabled} title="向上移動">▲</button>
+        <button class="move-btn" onclick="moveProduct(${displayIdx}, 1)" ${downDisabled} title="向下移動">▼</button>
+      </div>
+      <div class="${labelClass}">
+        <div class="row-label-name">${warnTag}${sku.name}</div>
+        <div class="row-label-theme">${sku.theme}</div>
+      </div>
+      <div class="${barClass}">
+        <div class="bar-wrap-inner">`;
+
+    // Pregnancy zone band (always shown)
+    const pregL = p(MIN_AGE), pregR = p(0);
+    if (pregR > pregL + 0.1) {
+      html += `<div class="preg-band" style="left:${pregL}%;width:${pregR - pregL}%;" title="妊娠期 ${MIN_AGE}M ~ -1M"></div>`;
+    }
+
+    // Birthday month bands
+    BIRTHDAY_MONTHS.forEach(b => {
+      const bl = p(b), br = p(b + 1);
+      if (br > bl + 0.05) {
+        html += `<div class="birthday-band" style="left:${bl}%;width:${br - bl}%;" title="生日月 ${b}M：祝賀訊息配信日"></div>`;
+      }
+    });
+
+    if (skipped) {
+      html += `<div class="skip-label" title="${reason}">略過（${reason}）</div>`;
+    } else {
+      const bl = p(startAge), br = p(endAge);
+      const msgAll = (msgs.length > 0 || (blocked && blocked.length > 0))
+        ? [...msgs, ...(blocked || [])]
+        : [];
+      const lastMsg = msgAll.length > 0 ? Math.max(...msgAll) : startAge;
+      const msgSpanEnd = p(lastMsg);
+      const drawnEnd = Math.max(msgSpanEnd, bl + 0.3);
+
+      html += `<div class="bar-bg msg-span" style="left:${bl}%;width:${Math.max(drawnEnd - bl, 0.5)}%;background:${sku.color};"></div>`;
+      if (br > drawnEnd + 0.1) {
+        html += `<div class="bar-bg rest-span" style="left:${drawnEnd}%;width:${br - drawnEnd}%;background:${sku.color};"></div>`;
+      }
+      // Active dots
+      msgs.forEach((m, i) => {
+        const pastCutoff = m >= stats[currentPct] - EPS;
+        const cls = pastCutoff ? 'dot past-cutoff' : 'dot';
+        html += `<div class="${cls}" style="left:${p(m)}%;background:${sku.color};" title="${m.toFixed(1)}M（第${i+1}次）NT$${sku.price.toLocaleString()}${pastCutoff?' ⚑ 超過 '+currentPct:''}"></div>`;
+      });
+      // Blocked dots (dashed outline)
+      (blocked || []).forEach(m => {
+        html += `<div class="dot blocked" style="left:${p(m)}%;" title="${m.toFixed(1)}M：生日月跳過"></div>`;
+      });
+      html += `<div class="median-line" style="left:${p(stats.median)}%;" title="${currentChannel} 中位數 ${stats.median}M"></div>`;
+      const labelTxt = `${startAge}M起 ${count}次 NT$${sku.price.toLocaleString()}`;
+      html += `<div class="bar-label" style="left:${bl}%;color:${sku.color};">${labelTxt}</div>`;
+      if (warning) {
+        html += `<div class="bar-warn" title="僅 ${count} 次（標準 ${MAX_COUNT}）">⚠</div>`;
+      }
+      // 妊娠期エリアに 4 回分の配信月齡を 09/09/10/10 形式で表示
+      const pregL = p(MIN_AGE);
+      const pregR = p(0);
+      if (pregR > pregL + 1 && msgs.length > 0) {
+        const floorPad = v => String(Math.floor(v)).padStart(2, '0');
+        const txt = msgs.slice(0, MAX_COUNT).map(floorPad).join('/');
+        const tip = msgs.map((v, i) => `第${i+1}次=${v}M`).join('、');
+        html += `<div class="dot-list" style="left:${pregL}%;width:${pregR - pregL}%;" title="配信月齡｜${tip}">${txt}</div>`;
+      }
+    }
+
+    html += `<div class="cursor-line" style="left:${p(currentAge)}%;"></div>
+        </div>`;
+    // 設定の開始 / 上限月齡 縱バー（bar-wrap-inner の外側に配置、label をはみ出させる）
+    if (!skipped) {
+      if (desiredStart >= minAge && desiredStart <= maxAge) {
+        html += `<div class="config-line start" style="left:${p(desiredStart)}%;" title="設定開始月齡 ${desiredStart}M"><span class="config-tag">${desiredStart}</span></div>`;
+      }
+      if (desiredEnd >= minAge && desiredEnd <= maxAge) {
+        html += `<div class="config-line end" style="left:${p(desiredEnd)}%;" title="配信上限月齡 ${desiredEnd}M（超過則略過）"><span class="config-tag">${desiredEnd}</span></div>`;
+      }
+    }
+    html += `</div>`;
+
+    // Row controls (inline) — inputs = default delivery window (system shifts to avoid overlap)
+    const inputClass = 'ctrl-input' + (customized ? ' customized' : '');
+    const stepperClass = 'input-stepper' + (customized ? ' customized' : '');
+    html += `<div class="row-controls" title="左 ＝ 配信希望開始月齡（系統會自動延後避免重疊）｜右 ＝ 配信上限（超過此月齡則略過）｜◀▶ 各獨立 ±1M">
+        <div class="${stepperClass}">
+          <button class="step-btn left" onclick="stepInput(${idx}, 'startAge', -1)" title="開始 -1M">◀</button>
+          <input type="number" class="${inputClass}" value="${desiredStart}"
+                 min="${MIN_AGE}" max="84" step="1"
+                 data-idx="${idx}" data-field="startAge"
+                 onchange="onRowInputChange(this)" title="配信希望開始月齡">
+          <button class="step-btn right" onclick="stepInput(${idx}, 'startAge', 1)" title="開始 +1M">▶</button>
+        </div>
+        <div class="${stepperClass}" style="margin-left:6px;">
+          <button class="step-btn left" onclick="stepInput(${idx}, 'endAge', -1)" title="上限 -1M">◀</button>
+          <input type="number" class="${inputClass}" value="${desiredEnd}"
+                 min="${MIN_AGE}" max="84" step="1"
+                 data-idx="${idx}" data-field="endAge"
+                 onchange="onRowInputChange(this)" title="配信上限月齡（超過則略過）">
+          <button class="step-btn right" onclick="stepInput(${idx}, 'endAge', 1)" title="上限 +1M">▶</button>
+        </div>
+        <button class="reset-btn" onclick="resetDefault(${idx})"
+                ${customized ? '' : 'disabled'}
+                title="${customized ? '重設為原始預設值 (' + initialDefaults(idx).startAge + '~' + initialDefaults(idx).endAge + 'M)' : '已是預設值'}">↺</button>
+      </div>
+    </div>`;
+  });
+
+  // Axis
+  const tickStep = span > 60 ? 12 : 6;
+  const tickStart = Math.ceil(minAge / tickStep) * tickStep;
+  html += `<div class="axis">`;
+  for (let m = tickStart; m <= maxAge; m += tickStep) {
+    html += `<div class="axis-tick" style="left:${p(m)}%">${m}M</div>`;
+  }
+  BIRTHDAY_MONTHS.forEach(b => {
+    html += `<div class="axis-bd" style="left:${p(b + 0.5)}%" title="生日月">🎂${b}M</div>`;
+  });
+  html += `</div>`;
+
+  // Legend
+  html += `<div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:#E24B4A;"></span>登錄月齡</div>
+    <div class="legend-item"><span class="legend-line" style="background:#85B7EB;"></span>WEB 購買中位數</div>
+    <div class="legend-item"><span class="legend-line" style="background:var(--manual);"></span>設定開始月齡</div>
+    <div class="legend-item"><span class="legend-line" style="border-top:2px dashed var(--accent);background:transparent;"></span>配信上限月齡</div>
+    <div class="legend-item">● 每個點＝1次訊息</div>
+    <div class="legend-item"><span class="legend-band birthday"></span>🎂 生日月（跳過）</div>
+    <div class="legend-item"><span class="legend-band preg"></span>👶 妊娠期</div>
+    <div class="legend-item"><span class="warn-icon">⚠</span>訊息次數不足（&lt;${MAX_COUNT}次）</div>
+    <div class="legend-item"><span class="warn-icon" style="color:var(--manual);">↪</span>因重疊或生日月自動延後</div>
+    <div class="legend-item"><span class="warn-icon" style="color:#7C5DC0;">⤴</span>跨生日月延伸</div>
+    <div class="legend-item"><span class="warn-icon" style="color:var(--accent);">⚑</span>已超過 WEB P70</div>
+    <div class="legend-item"><span class="legend-line" style="background:var(--manual);"></span>右側欄位藍色＝客製化預設</div>
+  </div>`;
+
+  // Logic box (Traditional Chinese)
+  html += `<div class="logic-box">
+    <strong>配信順序邏輯</strong>
+    ① 依發展主題順序（語彙啟蒙 → 生活習慣 → 語彙知育 → 情緒人際 → 英語啟蒙 → 英語進階 → 邏輯集中 → 數感邏輯 → 就學準備）<br>
+    ② 預設配置 ＝ 9M 起、每 3M 一組的 2M 視窗（9-11、12-14、15-17、…、33-35）。商品 9 個全部排在 9~35M 區段內<br>
+    ③ 右側「開始月齡」 ＝ 配信希望開始月齡。系統會自動延後避免與前商品重疊（以「↪」標示）<br>
+    ④ 右側「配信上限月齡」 ＝ 此月齡之後不再配信本商品。如登錄月齡（或前商品結束）已超過上限，此商品<strong>略過</strong>（例：5 歲登錄者不會再收到 P1 點讀圖鑑）<br>
+    ⑤ 配信節奏 ＝ 每商品 隔週1次、最多 ${MAX_COUNT} 次。Dot 若落在生日月（${BIRTHDAY_MONTHS.join(' / ')}M）會自動推到下一隔週枠，campaign 自動跨月延伸（以「<span style="color:#7C5DC0;">⤴</span>」標示）<br>
+    ⑥ WEB P70 警示 ＝ 70% 的 WEB 自主購買者在此月齡前已下單。開始月齡超過此值會以「<span style="color:var(--accent);">⚑</span>」標示，提示 WEB 自主購買意義較弱（建議後續轉 T 通路）
+  </div>`;
+
+  document.getElementById('chartInner').innerHTML = html;
+}
+
+
+function timelineKey(tl) {
+  return tl.map(t =>
+    `${t.startAge}-${t.endAge}-${t.count}-${(t.blocked||[]).length}-${t.customized?1:0}-${t.startPastCutoff?1:0}`
+  ).join('|');
+}
+
+function buildLookupGroups() {
+  const groups = [];
+  let prevKey = null;
+  for (let age = MIN_AGE; age <= MAX_AGE_SLIDER; age++) {
+    const tl = buildTimeline(age, currentPct, currentChannel, overrides);
+    const key = timelineKey(tl);
+    if (key === prevKey) {
+      groups[groups.length - 1].ageEnd = age;
+    } else {
+      groups.push({ ageStart: age, ageEnd: age, tl });
+      prevKey = key;
+    }
+  }
+  return groups;
+}
+
+function renderLookupPanel() {
+  const groups = buildLookupGroups();
+
+  const countEl = document.getElementById('lookupRowCount');
+  countEl.textContent = groups.length + ' 區段';
+  countEl.style.display = 'inline-block';
+
+  let html = `<div class="lookup-actions">
+    <button class="action-btn" onclick="event.stopPropagation(); downloadLookupMarkdown()">下載 .md</button>
+    <button class="action-btn" onclick="event.stopPropagation(); downloadLookupCsv()">下載 .csv</button>
+  </div>
+  <table class="lookup-table">
+    <thead>
+      <tr>
+        <th class="age-col">登錄月齡</th>
+        ${order.map(i => { const s = skus[i]; return `<th title="${s.theme} ・ ${s.sku}" style="border-bottom:2px solid ${s.color};">${s.name}<span class="theme-sub">${s.theme}</span></th>`; }).join('')}
+      </tr>
+    </thead>
+    <tbody>`;
+
+  groups.forEach(({ageStart, ageEnd, tl}) => {
+    const ageLabel = ageStart === ageEnd
+      ? `${ageStart}M`
+      : `${ageStart}M ~ ${ageEnd}M`;
+    const isCurrent = currentAge >= ageStart && currentAge <= ageEnd;
+    const isPreg = ageEnd < 0;
+    const rowClass = (isCurrent ? 'current ' : '') + (isPreg ? 'preg' : '');
+
+    html += `<tr class="${rowClass}">
+      <td class="age-col">${ageLabel}</td>`;
+    tl.forEach(t => {
+      const bdTag = (t.blocked && t.blocked.length) ? `<span class="lk-bd" title="生日月跳過 ${t.blocked.length} 次">⊘${t.blocked.length}</span>` : '';
+      const shiftTag = t.shifted ? `<span class="lk-shift" title="預設 ${t.desiredStart}~${t.desiredEnd}M｜因重疊延後">↪</span>` : '';
+      const pastTag = t.startPastCutoff
+        ? `<span class="lk-past" title="開始已超過 ${currentPct}（${t.stats[currentPct]}M）">⚑</span>`
+        : (t.endPastCutoff ? `<span class="lk-past-end" title="結束超過 ${currentPct}（${t.stats[currentPct]}M）">⚑</span>` : '');
+      const cellClass = 'lk-cell' + (t.customized ? ' lk-custom' : '') + (t.startPastCutoff ? ' lk-pastcut' : '');
+      const bg = `${t.sku.color}1f`;
+      html += `<td class="${cellClass}" style="background:${bg};" title="${t.sku.name}｜${t.startAge}M ~ ${t.endAge}M｜${t.count}次${t.customized?'（客製預設）':''}${t.shifted?'｜重疊延後':''}${t.startPastCutoff?'｜開始已超過'+currentPct:''}">${t.startAge}~${t.endAge}M${shiftTag}${pastTag}${bdTag}</td>`;
+    });
+    html += `</tr>`;
+  });
+
+  html += `</tbody></table>
+    <div class="lookup-meta">
+      連續的登錄月齡若產生相同配信排程，會合併為一區段顯示。目前共 <strong>${groups.length}</strong> 個區段。
+      紅色行＝目前選擇的登錄月齡。<strong>⊘N</strong> ＝ 該商品因生日月跳過的訊息次數。<strong>↪</strong> ＝ 因前商品重疊自動延後。
+      <span style="color:var(--accent);">⚑</span> ＝ 開始已超過 WEB P70（紅色斜線背景）。藍色外框 ＝ 客製化預設視窗。
+    </div>`;
+  document.getElementById('lookupBody').innerHTML = html;
+}
+
+function toggleLookupPanel() {
+  document.getElementById('lookupPanel').classList.toggle('open');
+}
+
+function formatLookupCell(t, separator) {
+  let cell = `${t.startAge}~${t.endAge}M`;
+  const flags = [];
+  if (t.customized) flags.push('客製');
+  if (t.shifted) flags.push('↪延後');
+  if (t.startPastCutoff) flags.push('⚑超過P70');
+  else if (t.endPastCutoff) flags.push('⚑結束超過');
+  if (t.blocked && t.blocked.length) flags.push(`⊘${t.blocked.length}`);
+  if (flags.length) cell += ` (${flags.join(separator)})`;
+  return cell;
+}
+
+function downloadFile(filename, content, mimeType) {
+  const blob = new Blob([content], { type: mimeType + ';charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function dateStamp() {
+  const d = new Date();
+  const pad = n => ('0' + n).slice(-2);
+  return d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '_' + pad(d.getHours()) + pad(d.getMinutes());
+}
+
+function summariseOverrides() {
+  const keys = Object.keys(overrides);
+  if (keys.length === 0) return '無客製化（全部使用預設值）';
+  return keys.map(k => {
+    const idx = parseInt(k);
+    const o = overrides[idx];
+    return `${skus[idx].name} ${o.startAge}~${o.endAge}M`;
+  }).join('、');
+}
+
+function summariseOrder() {
+  if (order.every((v, i) => v === i)) return '預設順序';
+  return order.map(i => skus[i].name).join(' → ');
+}
+
+function downloadLookupMarkdown() {
+  const groups = buildLookupGroups();
+  const now = new Date().toLocaleString('zh-TW');
+  let md = '';
+  md += '# ACTS｜登錄月齡 × 商品別 配信月齡 一覽表\n\n';
+  md += `- 產出時間：${now}\n`;
+  md += `- 通路：WEB（ACTS 設計対象）\n`;
+  md += `- 終止基準：WEB P70（70% 購買者已下單）\n`;
+  md += `- 配信節奏：每商品 隔週1次、最多 ${MAX_COUNT} 次、預設視窗 ${CAMPAIGN_WINDOW} 個月\n`;
+  md += `- 生日月（${BIRTHDAY_MONTHS.join('M / ')}M）自動跳過\n`;
+  md += `- 排序：${summariseOrder()}\n`;
+  md += `- 客製化設定：${summariseOverrides()}\n\n`;
+
+  md += '| 登錄月齡 | ' + order.map(i => skus[i].name).join(' | ') + ' |\n';
+  md += '|---|' + order.map(() => ':---:').join('|') + '|\n';
+
+  groups.forEach(g => {
+    const ageLabel = g.ageStart === g.ageEnd
+      ? `**${g.ageStart}M**`
+      : `**${g.ageStart}M ~ ${g.ageEnd}M**`;
+    const cells = g.tl.map(t => formatLookupCell(t, ' ').replace(/\|/g, '\\|'));
+    md += `| ${ageLabel} | ${cells.join(' | ')} |\n`;
+  });
+
+  md += '\n## 註記\n';
+  md += '- ↪延後 = 因前商品結束月齡超過本商品預設開始，系統自動向後平移（寬度保持不變）\n';
+  md += '- ⚑超過P70 = 開始月齡已超過 WEB P70，大半購買者已下單，WEB 自主購買意義較弱（建議轉 T 通路）\n';
+  md += '- ⚑結束超過 = 結束月齡超過 P70，部分訊息落在 P70 之後\n';
+  md += '- ⊘N = 該商品有 N 次訊息因生日月跳過\n';
+  md += '- 客製 = 該商品使用使用者指定的預設視窗\n';
+  md += '- 連續登錄月齡產生相同排程時合併為一區段顯示\n';
+
+  downloadFile(`ACTS_配信月齡一覽_${dateStamp()}.md`, md, 'text/markdown');
+  showToast('已下載 Markdown 檔案');
+}
+
+function downloadLookupCsv() {
+  const groups = buildLookupGroups();
+  const csvEscape = s => '"' + String(s).replace(/"/g, '""') + '"';
+
+  const meta = [
+    `# ACTS 登錄月齡 × 商品別 配信月齡 一覽表`,
+    `# 產出時間: ${new Date().toLocaleString('zh-TW')}`,
+    `# 通路: WEB / 終止基準: WEB P70 / 配信節奏: 隔週1次 最多${MAX_COUNT}次 預設${CAMPAIGN_WINDOW}M`,
+    `# 生日月自動跳過: ${BIRTHDAY_MONTHS.join('M, ')}M`,
+    `# 排序: ${summariseOrder()}`,
+    `# 客製化: ${summariseOverrides()}`,
+    ''
+  ];
+
+  const header = ['登錄月齡', ...order.map(i => skus[i].name)];
+
+  const rows = groups.map(g => {
+    const ageLabel = g.ageStart === g.ageEnd
+      ? `${g.ageStart}M`
+      : `${g.ageStart}M~${g.ageEnd}M`;
+    return [ageLabel, ...g.tl.map(t => formatLookupCell(t, ' '))];
+  });
+
+  // Extra: per-product summary
+  rows.push([]);
+  rows.push(['# 商品 P 值參考 (WEB)']);
+  rows.push(['商品', '適用下限', 'median', 'P50', 'P60', 'P70', 'P75', 'P90', 'n']);
+  skus.forEach(s => {
+    const w = s.channels.WEB;
+    rows.push([s.name, `${s.entryAge}M`, `${w.median}M`, `${w.P50}M`, `${w.P60}M`, `${w.P70}M`, `${w.P75}M`, `${w.P90}M`, w.n]);
+  });
+
+  const lines = [
+    ...meta,
+    header.map(csvEscape).join(','),
+    ...rows.map(r => r.map(csvEscape).join(','))
+  ];
+
+  // BOM for Excel UTF-8 detection
+  downloadFile(`ACTS_配信月齡一覽_${dateStamp()}.csv`, '﻿' + lines.join('\n'), 'text/csv');
+  showToast('已下載 CSV 檔案');
+}
+
+function toggleMedianPanel() {
+  document.getElementById('medianPanel').classList.toggle('open');
+}
+
+function renderMedianPanel() {
+  let html = `<table class="lookup-table median-table">
+    <thead>
+      <tr>
+        <th class="text-left" style="min-width:130px;">商品 / 主題</th>
+        <th>適用下限</th>
+        <th class="ch-WEB">WEB</th>
+        <th class="ch-TM">TM（電話）</th>
+        <th class="ch-KOL">KOL</th>
+        <th class="ch-ALL">ALL</th>
+        <th class="diff-col" title="KOL中位 − WEB中位（負値＝KOL更早）">KOL − WEB</th>
+        <th class="n-total">合計 n</th>
+      </tr>
+    </thead>
+    <tbody>`;
+
+  order.forEach((skuIdx) => {
+    const sku = skus[skuIdx];
+    const w = sku.channels.WEB, t = sku.channels.TM, k = sku.channels.KOL, a = sku.channels.ALL;
+    const diff = k.median - w.median;
+    const diffClass = diff < 0 ? 'diff-neg' : (diff > 0 ? 'diff-pos' : 'diff-zero');
+    const diffTxt = diff === 0 ? '±0' : (diff > 0 ? `+${diff}` : `${diff}`);
+
+    html += `<tr>
+      <td class="text-left name-cell">
+        <span class="sku-color-bar" style="background:${sku.color};"></span>${sku.name}
+        <span class="theme-sub">${sku.theme} ・ ${sku.sku}</span>
+      </td>
+      <td>${sku.entryAge}M</td>
+      <td class="cell-web">${w.median}M<span class="n-sub">n=${w.n.toLocaleString()}</span></td>
+      <td>${t.median}M<span class="n-sub">n=${t.n.toLocaleString()}</span></td>
+      <td>${k.median}M<span class="n-sub">n=${k.n.toLocaleString()}</span></td>
+      <td>${a.median}M<span class="n-sub">n=${a.n.toLocaleString()}</span></td>
+      <td class="${diffClass}">${diffTxt}M</td>
+      <td class="n-cell">${a.n.toLocaleString()}</td>
+    </tr>`;
+  });
+
+  const totalN = {
+    WEB: skus.reduce((s, sku) => s + sku.channels.WEB.n, 0),
+    TM: skus.reduce((s, sku) => s + sku.channels.TM.n, 0),
+    KOL: skus.reduce((s, sku) => s + sku.channels.KOL.n, 0),
+    ALL: skus.reduce((s, sku) => s + sku.channels.ALL.n, 0),
+  };
+
+  html += `<tr class="total-row">
+    <td class="text-left" colspan="2"><strong>n 合計</strong></td>
+    <td>${totalN.WEB.toLocaleString()}</td>
+    <td>${totalN.TM.toLocaleString()}</td>
+    <td>${totalN.KOL.toLocaleString()}</td>
+    <td>${totalN.ALL.toLocaleString()}</td>
+    <td colspan="2"></td>
+  </tr>`;
+
+  html += `</tbody></table>
+    <div class="lookup-meta">
+      <strong>資料來源：</strong>歸戶主檔 × 訂單主檔 × 訂單明細（訂單日期 ≥ 2025-01-01）の3ファイル JOIN 再集計。<br>
+      <strong>中位＝median（P50）</strong>。<strong>WEB 欄</strong>（薄藍背景）= ACTS 設計対象通路。「KOL − WEB」欄為 KOL 中位減 WEB 中位，<span class="diff-neg" style="font-weight:700;">負値</span>＝ KOL 通路で WEB より早期購買（Confluence ACTS 仮説「KOL が中央値より 4〜11M 早く購買」の実データ根拠）。<br>
+      この表は<strong>設計の参考資料</strong>であり、ACTS 配信ロジックの cutoff は WEB P70 で固定です。
+    </div>`;
+
+  document.getElementById('medianBody').innerHTML = html;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function encodeOverrides() {
+  return Object.entries(overrides)
+    .map(([k, v]) => `${k}:${v.startAge}-${v.endAge}`)
+    .join(',');
+}
+
+function decodeOverrides(str) {
+  const result = {};
+  if (!str) return result;
+  str.split(',').forEach(entry => {
+    const m = entry.match(/^(\d+):(-?\d+(?:\.\d+)?)-(-?\d+(?:\.\d+)?)$/);
+    if (!m) return;
+    const idx = parseInt(m[1]);
+    const s = parseFloat(m[2]);
+    const e = parseFloat(m[3]);
+    if (idx >= 0 && idx < skus.length && !isNaN(s) && !isNaN(e) && e > s) {
+      result[idx] = { startAge:round2(s), endAge:round2(e) };
+    }
+  });
+  return result;
+}
+
+function encodeOrder() {
+  if (order.every((v, i) => v === i)) return '';
+  return order.join(',');
+}
+
+function decodeOrder(str) {
+  if (!str) return null;
+  const parts = str.split(',').map(Number);
+  if (parts.length !== skus.length) return null;
+  if (parts.some(isNaN)) return null;
+  if (new Set(parts).size !== parts.length) return null;
+  if (parts.some(p => p < 0 || p >= skus.length)) return null;
+  return parts;
+}
+
+function readUrl() {
+  const params = new URLSearchParams(location.search);
+  const age = parseInt(params.get('age'));
+  const o = params.get('o');
+  const ord = params.get('order');
+  if (!isNaN(age) && age >= MIN_AGE && age <= MAX_AGE_SLIDER) currentAge = age;
+  if (o) overrides = decodeOverrides(o);
+  const decodedOrder = decodeOrder(ord);
+  if (decodedOrder) order = decodedOrder;
+}
+
+function syncUrl() {
+  const params = new URLSearchParams();
+  params.set('age', currentAge);
+  const oStr = encodeOverrides();
+  if (oStr) params.set('o', oStr);
+  const ordStr = encodeOrder();
+  if (ordStr) params.set('order', ordStr);
+  history.replaceState(null, '', location.pathname + '?' + params.toString());
+}
+
+function copyShareUrl() {
+  syncUrl();
+  const url = location.href;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(
+      () => showToast('已複製網址'),
+      () => fallbackCopy(url)
+    );
+  } else {
+    fallbackCopy(url);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showToast('已複製網址'); }
+  catch (_) { showToast('複製失敗：' + text); }
+  document.body.removeChild(ta);
+}
+
 document.getElementById('ageSlider').addEventListener('input', function() {
   currentAge = parseInt(this.value);
-  document.getElementById('ageLabel').textContent = currentAge + 'M';
-  render(currentAge);
+  updateAgeLabel();
+  render();
+  syncUrl();
 });
 
-render(10);
+// init
+readUrl();
+document.getElementById('ageSlider').value = currentAge;
+updateAgeLabel();
+render();
 </script>
 
-<div class="footer">ACTS｜LC8T 配信設計 v1.1（隔週・最多4次・2個月）｜ Benesse Taiwan ｜ 2026-05-06</div>
-
-</div>
 </body>
 </html>
